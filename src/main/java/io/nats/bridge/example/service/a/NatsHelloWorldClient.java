@@ -20,7 +20,7 @@ public class NatsHelloWorldClient {
 
             int count = 0;
             while (true) {
-                Thread.sleep(10);
+                Thread.sleep(1);
                 if (stop.get()) {
                     messageBus.close();
                     break;

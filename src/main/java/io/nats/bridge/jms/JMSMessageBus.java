@@ -60,7 +60,7 @@ public class JMSMessageBus implements MessageBus {
 
     @Override
     public void request(final Message message, final Consumer<Message> replyCallback) {
-        javax.jms.Message jmsMessage = convertToJMSMessage(message);
+        final javax.jms.Message jmsMessage = convertToJMSMessage(message);
         try {
 
             //TODO to get this to be more generic as part of builder pass a createDestination Function<Session, Destination> that calls session.createTemporaryQueue() or session.createTemporaryTopic()
@@ -108,20 +108,21 @@ public class JMSMessageBus implements MessageBus {
     }
 
     //TODO pass this a Function<JMSMessage, Message> as part of the builder
-    private Message convertToBusMessage(final javax.jms.Message message) {
-        if (message instanceof TextMessage) {
+    private Message convertToBusMessage(final javax.jms.Message jmsMessage) {
+        if (jmsMessage instanceof TextMessage) {
             try {
-                final Destination jmsReplyTo = message.getJMSReplyTo();
+                final Destination jmsReplyTo = jmsMessage.getJMSReplyTo();
                 if (jmsReplyTo != null) {
-                    return new StringMessage(((TextMessage) message).getText()) {
+                    return new StringMessage(((TextMessage) jmsMessage).getText()) {
                         @Override
                         public void reply(final Message reply) {
                             final StringMessage stringMessage = (StringMessage) reply;
                             try {
                                 final Session session = connection.createSession();
                                 final MessageProducer replyProducer = session.createProducer(jmsReplyTo);
-                                final TextMessage message = session.createTextMessage(stringMessage.getBody());
-                                replyProducer.send(message);
+                                final TextMessage jmsReplyMessage = session.createTextMessage(stringMessage.getBody());
+                                jmsReplyMessage.setJMSCorrelationID(jmsReplyMessage.getJMSCorrelationID());
+                                replyProducer.send(jmsReplyMessage);
                                 //TODO close these BOTH nicer.
                                 replyProducer.close();
                                 session.close();
@@ -131,12 +132,12 @@ public class JMSMessageBus implements MessageBus {
                         }
                     };
                 } else {
-                    return new StringMessage(((TextMessage) message).getText());
+                    return new StringMessage(((TextMessage) jmsMessage).getText());
                 }
             } catch (Exception ex) {
                 throw new JMSMessageBusException("Unable to create JMS text message", ex);
             }
-        } else if (message == null){
+        } else if (jmsMessage == null){
             return null;
         }else {
             throw new JMSMessageBusException("Unexpected message type");

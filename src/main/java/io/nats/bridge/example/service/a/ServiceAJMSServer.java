@@ -26,12 +26,15 @@ public class ServiceAJMSServer {
                 }
                 final Optional<Message> receive = messageBus.receive();
                 receive.ifPresent(message -> {
+
                     StringMessage stringMessage = (StringMessage) message;
+                    System.out.println("Handle message " + stringMessage.getBody());
                     message.reply(new StringMessage("Hello " + stringMessage.getBody()));
                 });
 
                 if (!receive.isPresent()) {
-                    Thread.sleep(1);
+                    Thread.sleep(10);
+                    System.out.println("No messages");
                 }
             }
 

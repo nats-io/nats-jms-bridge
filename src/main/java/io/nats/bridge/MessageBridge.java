@@ -18,6 +18,9 @@ public class MessageBridge implements Closeable {
     public void process() {
         final Optional<Message> receiveMessageFromSourceOption = sourceBus.receive();
         receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
+            if (receiveMessageFromSource instanceof StringMessage) {
+                System.out.println(((StringMessage) receiveMessageFromSource).getBody());
+            }
             destinationBus.request(receiveMessageFromSource, replyFromDestination -> {
                 receiveMessageFromSource.reply(replyFromDestination);
             });
