@@ -4,7 +4,10 @@ package io.nats.bridge.jms.support;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.jms.JMSMessageBus;
 
-import javax.jms.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;

@@ -23,7 +23,7 @@ public class JMSMain {
 
             while (true) {
                 Thread.sleep(1000);
-                if (stop.get()){
+                if (stop.get()) {
                     messageBus.close();
                     break;
                 }

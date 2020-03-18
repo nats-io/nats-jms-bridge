@@ -12,13 +12,15 @@ import java.util.function.Consumer;
  */
 public interface MessageBus extends Closeable {
 
-    /** Publish a message.
+    /**
+     * Publish a message.
      *
      * @param message message bus message.
      */
     void publish(Message message);
 
-    /** Publish a string message
+    /**
+     * Publish a string message
      *
      * @param message string message
      */
@@ -28,15 +30,17 @@ public interface MessageBus extends Closeable {
 
     /**
      * Perform a request/reply over nats or JMS.
-     * @param message message to send
+     *
+     * @param message       message to send
      * @param replyCallback callback.
      */
     void request(final Message message, Consumer<Message> replyCallback);
 
     /**
      * Perform a request/reply with strings
+     *
      * @param message message string
-     * @param reply callback for reply string
+     * @param reply   callback for reply string
      */
     default void request(final String message, final Consumer<String> reply) {
         request(new StringMessage(message), replyMessage -> reply.accept(((StringMessage) replyMessage).getBody()));
@@ -44,6 +48,7 @@ public interface MessageBus extends Closeable {
 
     /**
      * Receives a message. The optional is none if the message is not received.
+     *
      * @return a possible message.
      */
     Optional<Message> receive();

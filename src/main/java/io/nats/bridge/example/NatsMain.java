@@ -1,9 +1,7 @@
 package io.nats.bridge.example;
 
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.jms.support.JMSMessageBusBuilder;
 import io.nats.bridge.nats.NatsMessageBus;
-import io.nats.client.Connection;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 

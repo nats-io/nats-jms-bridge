@@ -83,7 +83,7 @@ public class NatsMessageBus implements MessageBus {
                 // Also, we might be using JSON to send a message with headers. see https://github.com/nats-io/nats-jms-mq-bridge/issues/20
                 final String messageBody = new String(message.getData(), StandardCharsets.UTF_8);
                 return Optional.of(new StringMessage(messageBody));
-            }else {
+            } else {
                 return Optional.empty();
             }
         } catch (InterruptedException e) {

@@ -21,6 +21,12 @@ public class JMSMessageBus implements MessageBus {
     private MessageConsumer consumer;
 
 
+    public JMSMessageBus(final Destination destination, final Session session, final Connection connection) {
+        this.destination = destination;
+        this.session = session;
+        this.connection = connection;
+    }
+
     private MessageProducer producer() {
         if (producer == null) {
             try {
@@ -41,12 +47,6 @@ public class JMSMessageBus implements MessageBus {
             }
         }
         return consumer;
-    }
-
-    public JMSMessageBus(final Destination destination, final Session session, final Connection connection) {
-        this.destination = destination;
-        this.session = session;
-        this.connection = connection;
     }
 
     @Override
