@@ -25,3 +25,5 @@ hs_err_pid*
 build/
 .gradle/
 .idea/
+out.md
+markdown.scala
