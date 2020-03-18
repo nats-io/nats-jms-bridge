@@ -64,15 +64,30 @@ public class JMSMessageBus implements MessageBus {
         try {
 
             //TODO to get this to be more generic as part of builder pass a createDestination Function<Session, Destination> that calls session.createTemporaryQueue() or session.createTemporaryTopic()
+
+            final Session session = connection.createSession(); //TODO we need to do this bc we are not using a reactor. goes faster when we don't create a session, but our log fills up.
             final Destination responseDestination = session.createTemporaryQueue();
             jmsMessage.setJMSReplyTo(responseDestination);
             producer().send(jmsMessage);
             final MessageConsumer consumer = session.createConsumer(responseDestination);
-            //TODO set correlation id
-            //TODO track messages that don't come back, like outstanding messages
+            // TODO set correlation id
+            // TODO track messages that don't come back, like outstanding messages
             // You may want to put this into a linktransfer queue and poll it in a managed thread, so you can keep the stats in one place
             // Also, you will need to track how long it took and do a timeout exception and count if it took too long
-            consumer.setMessageListener(replyMessage -> replyCallback.accept(convertToBusMessage(replyMessage)));
+            consumer.setMessageListener(replyMessage -> {
+                replyCallback.accept(convertToBusMessage(replyMessage));
+
+
+
+            });
+
+//            /** Clean these up nicer. */
+//            try {
+//                consumer.close();
+//                session.close();
+//            } catch (JMSException e) {
+//                e.printStackTrace();
+//            }
 
         } catch (JMSException e) {
             throw new JMSMessageBusException("unable to send JMS request", e);
@@ -96,11 +111,34 @@ public class JMSMessageBus implements MessageBus {
     private Message convertToBusMessage(final javax.jms.Message message) {
         if (message instanceof TextMessage) {
             try {
-                return new StringMessage(((TextMessage) message).getText());
+                final Destination jmsReplyTo = message.getJMSReplyTo();
+                if (jmsReplyTo != null) {
+                    return new StringMessage(((TextMessage) message).getText()) {
+                        @Override
+                        public void reply(final Message reply) {
+                            final StringMessage stringMessage = (StringMessage) reply;
+                            try {
+                                final Session session = connection.createSession();
+                                final MessageProducer replyProducer = session.createProducer(jmsReplyTo);
+                                final TextMessage message = session.createTextMessage(stringMessage.getBody());
+                                replyProducer.send(message);
+                                //TODO close these BOTH nicer.
+                                replyProducer.close();
+                                session.close();
+                            } catch (Exception ex) {
+                                throw new JMSMessageBusException("Unable to send to JMS reply", ex);
+                            }
+                        }
+                    };
+                } else {
+                    return new StringMessage(((TextMessage) message).getText());
+                }
             } catch (Exception ex) {
                 throw new JMSMessageBusException("Unable to create JMS text message", ex);
             }
-        } else {
+        } else if (message == null){
+            return null;
+        }else {
             throw new JMSMessageBusException("Unexpected message type");
         }
     }
@@ -111,7 +149,7 @@ public class JMSMessageBus implements MessageBus {
     public Optional<Message> receive() {
 
         try {
-            return Optional.of(convertToBusMessage(consumer.receiveNoWait()));
+            return Optional.ofNullable(convertToBusMessage(consumer().receiveNoWait()));
         } catch (JMSException e) {
             throw new JMSMessageBusException("Error receiving message", e);
         }

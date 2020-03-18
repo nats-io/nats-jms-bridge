@@ -10,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class NatsMessageBus implements MessageBus {
@@ -17,17 +19,23 @@ public class NatsMessageBus implements MessageBus {
     private final Connection connection;
     private final String subject;
     private final Subscription subscription;
+    private final ExecutorService pool;
+
+
+    //TODO create NatsMessageBusBuilder.
 
     public NatsMessageBus(final String subject, final Connection connection) {
         this.connection = connection;
         this.subject = subject;
         this.subscription = connection.subscribe(subject);
+        this.pool = Executors.newFixedThreadPool(25);
     }
 
     public NatsMessageBus(final String subject, final Connection connection, final String queueGroup) {
         this.connection = connection;
         this.subject = subject;
         this.subscription = connection.subscribe(subject, queueGroup);
+        this.pool = Executors.newFixedThreadPool(25);
     }
 
 
@@ -60,16 +68,18 @@ public class NatsMessageBus implements MessageBus {
         // or https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/CompletableFuture.html#completeAsync-java.util.function.Supplier-java.util.concurrent.Executor-
         // both of the above came out in Java 9
 
-        //TODO temp hack
-        new Thread(() -> {
-            try {
-                final io.nats.client.Message replyMessage = future.get();
-                replyCallback.accept(new StringMessage(new String(replyMessage.getData(), StandardCharsets.UTF_8)));
-            } catch (Exception e) {
-                //TODO log and track metrics instead.
-                e.printStackTrace();
+        pool.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final io.nats.client.Message replyMessage = future.get();
+                    replyCallback.accept(new StringMessage(new String(replyMessage.getData(), StandardCharsets.UTF_8)));
+                } catch (Exception e) {
+                    //TODO log and track metrics instead.
+                    e.printStackTrace();
+                }
             }
-        }).start();
+        });
 
 
     }
@@ -81,8 +91,23 @@ public class NatsMessageBus implements MessageBus {
             if (message != null) {
                 //TODO for now, just always send a StringMessage. Later create a Function<NatMessage, BridgeMessage> and we may need builder like JMS.
                 // Also, we might be using JSON to send a message with headers. see https://github.com/nats-io/nats-jms-mq-bridge/issues/20
-                final String messageBody = new String(message.getData(), StandardCharsets.UTF_8);
-                return Optional.of(new StringMessage(messageBody));
+                final String  replyTo = message.getReplyTo();
+
+                if (replyTo != null) {
+                    final String messageBody = new String(message.getData(), StandardCharsets.UTF_8);
+                    return Optional.of(new StringMessage(messageBody) {
+                        @Override
+                        public void reply(final Message reply) {
+                            final StringMessage stringMessage = (StringMessage) reply;
+                            connection.publish(replyTo, stringMessage.getBody().getBytes(StandardCharsets.UTF_8));
+                        }
+                    });
+                } else {
+                    final String messageBody = new String(message.getData(), StandardCharsets.UTF_8);
+                    return Optional.of(new StringMessage(messageBody));
+                }
+
+
             } else {
                 return Optional.empty();
             }
