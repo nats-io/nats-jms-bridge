@@ -68,16 +68,13 @@ public class NatsMessageBus implements MessageBus {
         // or https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/CompletableFuture.html#completeAsync-java.util.function.Supplier-java.util.concurrent.Executor-
         // both of the above came out in Java 9
 
-        pool.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final io.nats.client.Message replyMessage = future.get();
-                    replyCallback.accept(new StringMessage(new String(replyMessage.getData(), StandardCharsets.UTF_8)));
-                } catch (Exception e) {
-                    //TODO log and track metrics instead.
-                    e.printStackTrace();
-                }
+        pool.submit(() -> {
+            try {
+                final io.nats.client.Message replyMessage = future.get();
+                replyCallback.accept(new StringMessage(new String(replyMessage.getData(), StandardCharsets.UTF_8)));
+            } catch (Exception e) {
+                //TODO log and track metrics instead.
+                e.printStackTrace();
             }
         });
 
@@ -119,9 +116,11 @@ public class NatsMessageBus implements MessageBus {
     @Override
     public void close() {
         try {
+            CompletableFuture<Boolean> drain = connection.drain(Duration.ofSeconds(10);
+            drain.get();
             connection.close();
-        } catch (InterruptedException e) {
-            throw new NatsMessageBusException("Can't close nats connection " + subject, e);
+        } catch (Exception e) {
+            throw new NatsMessageBusException("Can't drain and close nats connection " + subject, e);
         }
     }
 }
