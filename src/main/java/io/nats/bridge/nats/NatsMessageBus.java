@@ -123,4 +123,9 @@ public class NatsMessageBus implements MessageBus {
             throw new NatsMessageBusException("Can't drain and close nats connection " + subject, e);
         }
     }
+
+    @Override
+    public void process() {
+
+    }
 }

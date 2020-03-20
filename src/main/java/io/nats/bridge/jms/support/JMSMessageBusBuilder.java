@@ -14,6 +14,7 @@ package io.nats.bridge.jms.support;
 
 
 import io.nats.bridge.MessageBus;
+import io.nats.bridge.TimeSource;
 import io.nats.bridge.jms.JMSMessageBus;
 
 import javax.jms.Connection;
@@ -40,7 +41,19 @@ public class JMSMessageBusBuilder {
     private String userNameConnection;
     private String passwordConnection;
     private Context context;
+    private TimeSource timeSource;
 
+    public TimeSource getTimeSource() {
+        if (timeSource == null) {
+            timeSource = System::currentTimeMillis;
+        }
+        return timeSource;
+    }
+
+    public JMSMessageBusBuilder withTimeSource(TimeSource timeSource) {
+        this.timeSource = timeSource;
+        return this;
+    }
 
     public String getUserNameConnection() {
         return userNameConnection;
@@ -212,7 +225,7 @@ public class JMSMessageBusBuilder {
     }
 
     public MessageBus build() {
-        return new JMSMessageBus(getDestination(), getSession(), getConnection());
+        return new JMSMessageBus(getDestination(), getSession(), getConnection(), getTimeSource());
     }
 
 }

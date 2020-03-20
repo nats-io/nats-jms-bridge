@@ -38,6 +38,8 @@ public class MessageBridge implements Closeable {
                 receiveMessageFromSource.reply(replyFromDestination);
             });
         });
+        sourceBus.process();
+        destinationBus.process();
     }
 
 

@@ -68,5 +68,7 @@ public interface MessageBus extends Closeable {
 
     void close();
 
+    void process();
+
 
 }
