@@ -10,10 +10,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package io.nats.bridge.jms.support;
 
-public class JMSMessageBusBuilderException extends RuntimeException {
-    public JMSMessageBusBuilderException(String message, Throwable cause) {
+package io.nats.bridge.nats;
+
+public class NatsMessageBusException extends RuntimeException {
+    public NatsMessageBusException(String message) {
+        super(message);
+    }
+
+    public NatsMessageBusException(String message, Throwable cause) {
         super(message, cause);
     }
 }
