@@ -116,7 +116,7 @@ public class NatsMessageBus implements MessageBus {
     @Override
     public void close() {
         try {
-            CompletableFuture<Boolean> drain = connection.drain(Duration.ofSeconds(10);
+            CompletableFuture<Boolean> drain = connection.drain(Duration.ofSeconds(10));
             drain.get();
             connection.close();
         } catch (Exception e) {
