@@ -16,15 +16,20 @@ package io.nats.bridge.jms.support;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.TimeSource;
 import io.nats.bridge.jms.JMSMessageBus;
+import io.nats.bridge.jms.JMSMessageBusException;
+import io.nats.bridge.metrics.Metrics;
+import io.nats.bridge.metrics.MetricsDisplay;
+import io.nats.bridge.metrics.MetricsProcessor;
+import io.nats.bridge.metrics.Output;
+import io.nats.bridge.metrics.implementation.MetricsImpl;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.Session;
+import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.time.Duration;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class JMSMessageBusBuilder {
 
@@ -42,6 +47,107 @@ public class JMSMessageBusBuilder {
     private String passwordConnection;
     private Context context;
     private TimeSource timeSource;
+    private Destination responseDestination;
+    private MessageConsumer responseConsumer;
+    private Metrics metrics;
+
+    private Supplier<MessageProducer> producerSupplier;
+    private Supplier<MessageConsumer> consumerSupplier;
+
+    private MetricsProcessor metricsProcessor;
+
+    public MetricsProcessor getMetricsProcessor() {
+        if (metricsProcessor == null) {
+            metricsProcessor = new MetricsDisplay(new Output() {
+            }, getMetrics(), 10, Duration.ofSeconds(10), System::currentTimeMillis);
+        }
+        return metricsProcessor;
+    }
+
+    public JMSMessageBusBuilder withMetricsProcessor(MetricsProcessor metricsProcessor) {
+        this.metricsProcessor = metricsProcessor;
+        return this;
+    }
+
+    public Supplier<MessageProducer> getProducerSupplier() {
+        if (producerSupplier == null) {
+            producerSupplier = () -> {
+                try {
+                    return  getSession().createProducer(getDestination());
+                } catch (Exception ex) {
+                    throw new JMSMessageBusException("unable to create producer", ex);
+                }
+            };
+        }
+        return producerSupplier;
+    }
+
+    public void withProducerSupplier(final Supplier<MessageProducer> producerSupplier) {
+        this.producerSupplier = producerSupplier;
+    }
+
+
+    public Supplier<MessageConsumer> getConsumerSupplier() {
+
+        if (consumerSupplier == null) {
+            consumerSupplier =  () -> {
+                try {
+                    return getSession().createConsumer(getDestination());
+                } catch (Exception ex) {
+                    throw new JMSMessageBusException("unable to create consumer", ex);
+                }
+            };
+        }
+        return consumerSupplier;
+    }
+
+    public void withConsumerSupplier(final Supplier<MessageConsumer> consumerSupplier) {
+        this.consumerSupplier = consumerSupplier;
+    }
+
+    public Metrics getMetrics() {
+        if (metrics == null) {
+            metrics = new MetricsImpl(System::currentTimeMillis);
+        }
+        return metrics;
+    }
+
+    public JMSMessageBusBuilder withMetrics(final Metrics metrics) {
+        this.metrics = metrics;
+        return this;
+    }
+
+    public Destination getResponseDestination() {
+        if (responseDestination == null) {
+            try {
+                responseDestination = getSession().createTemporaryQueue();
+            } catch (JMSException ex) {
+                throw new JMSMessageBusBuilderException("Unable to create JMS response queue " + getUserNameConnection(), ex);
+            }
+        }
+        return responseDestination;
+    }
+
+    public JMSMessageBusBuilder withResponseDestination(Destination responseDestination) {
+        this.responseDestination = responseDestination;
+        return this;
+    }
+
+    public MessageConsumer getResponseConsumer() {
+        if (responseConsumer == null) {
+            try {
+                responseConsumer = getSession().createConsumer(getResponseDestination());
+            } catch (JMSException ex) {
+                throw new JMSMessageBusBuilderException("Unable to create JMS response consumer " + getUserNameConnection(), ex);
+            }
+        }
+        return responseConsumer;
+    }
+
+    public JMSMessageBusBuilder withResponseConsumer(MessageConsumer responseConsumer) {
+        this.responseConsumer = responseConsumer;
+        return this;
+    }
 
     public TimeSource getTimeSource() {
         if (timeSource == null) {
@@ -94,8 +200,9 @@ public class JMSMessageBusBuilder {
         return connectionCreator;
     }
 
-    public void setConnectionCreator(Function<ConnectionFactory, Connection> connectionCreator) {
+    public JMSMessageBusBuilder withConnectionCreator(Function<ConnectionFactory, Connection> connectionCreator) {
         this.connectionCreator = connectionCreator;
+        return this;
     }
 
     public int getAcknowledgeSessionMode() {
@@ -225,7 +332,10 @@ public class JMSMessageBusBuilder {
     }
 
     public MessageBus build() {
-        return new JMSMessageBus(getDestination(), getSession(), getConnection(), getTimeSource());
+        return new JMSMessageBus(getDestination(), getSession(), getConnection(), getResponseDestination(),
+                getResponseConsumer(), getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(), getMetricsProcessor());
     }
+
+
 
 }
