@@ -84,7 +84,7 @@ public class NatsMessageBus implements MessageBus {
     @Override
     public Optional<Message> receive() {
         try {
-            io.nats.client.Message message = subscription.nextMessage(Duration.ZERO);
+            io.nats.client.Message message = subscription.nextMessage(Duration.ofMillis(1));
             if (message != null) {
                 //TODO for now, just always send a StringMessage. Later create a Function<NatMessage, BridgeMessage> and we may need builder like JMS.
                 // Also, we might be using JSON to send a message with headers. see https://github.com/nats-io/nats-jms-mq-bridge/issues/20

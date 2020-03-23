@@ -118,6 +118,11 @@ public class JMSMessageBus implements MessageBus {
         //TODO to get this to be more generic as part of builder pass a createDestination Function<Session, Destination> that calls session.createTemporaryQueue() or session.createTemporaryTopic()
         final javax.jms.Message jmsMessage = convertToJMSMessage(message);
 
+
+        if (message instanceof StringMessage) {
+            System.out.println("REQUEST BODY " + ((StringMessage) message).getBody());
+        }
+
         try {
 
             final String correlationID = UUID.randomUUID().toString();
@@ -192,7 +197,7 @@ public class JMSMessageBus implements MessageBus {
                         public void reply(final Message reply) {
                             final StringMessage stringMessage = (StringMessage) reply;
                             try {
-                                enqueueReply(stringMessage, jmsMessage.getJMSCorrelationID(), destination);
+                                enqueueReply(stringMessage, jmsMessage.getJMSCorrelationID(), jmsReplyTo);
                             } catch (Exception ex) {
                                 throw new JMSMessageBusException("Unable to send to JMS reply", ex);
                             }
@@ -243,8 +248,11 @@ public class JMSMessageBus implements MessageBus {
 
                 if (message != null) {
                     final String correlationID = message.getJMSCorrelationID();
+
+                    System.out.printf("Process JMS Message Consumer %s %s \n", correlationID, ((TextMessage)message).getText());
                     Optional<JMSRequestResponse> jmsRequestResponse = Optional.ofNullable(requestResponseMap.get(correlationID));
                     final javax.jms.Message msg = message;
+
 
                     jmsRequestResponse.ifPresent(requestResponse -> {
                         requestResponse.getReplyCallback().accept(convertToBusMessage(msg));
@@ -259,9 +267,15 @@ public class JMSMessageBus implements MessageBus {
                 reply = jmsReplyQueue.poll();
                 if (reply != null) {
 
+                    final String messageBody = reply.getReply().getBody();
+                    final String correlationId =  reply.getCorrelationID();
                     final MessageProducer replyProducer = session.createProducer(reply.getJmsReplyTo());
-                    final TextMessage jmsReplyMessage = session.createTextMessage(reply.getReply().getBody());
-                    jmsReplyMessage.setJMSCorrelationID(reply.getCorrelationID());
+                    final TextMessage jmsReplyMessage = session.createTextMessage(messageBody);
+
+                    System.out.printf("%s %s %s\n", messageBody, correlationId, replyProducer.getDestination().toString());
+                    jmsReplyMessage.setJMSCorrelationID(correlationId);
+
+
                     replyProducer.send(jmsReplyMessage);
                     // TODO close these BOTH nicer.
                     replyProducer.close();

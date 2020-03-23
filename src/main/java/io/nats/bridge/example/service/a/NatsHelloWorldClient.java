@@ -29,7 +29,7 @@ public class NatsHelloWorldClient {
         try {
             final AtomicBoolean stop = new AtomicBoolean(false);
             final MessageBus messageBus = ServiceAUtil.getMessageBusNats();
-            final List<String> names = Arrays.asList("Rick", "Tom", "Chris", "Paul");
+            final List<String> names = Arrays.asList("Rick", "Tom", "Chris", "Paul", "Noah", "Lucas");
             Runtime.getRuntime().addShutdownHook(new Thread(() -> stop.set(true)));
 
             int count = 0;

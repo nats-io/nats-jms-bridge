@@ -35,6 +35,7 @@ public class BridgeManagerProtoMain {
 
             while (true) {
                 if (stop.get()) break;
+                Thread.sleep(10);
                 messageBridge.process();
             }
             messageBridge.close();
