@@ -119,9 +119,7 @@ public class JMSMessageBus implements MessageBus {
         final javax.jms.Message jmsMessage = convertToJMSMessage(message);
 
 
-        if (message instanceof StringMessage) {
-            System.out.println("REQUEST BODY " + ((StringMessage) message).getBody());
-        }
+
 
         try {
 
@@ -131,7 +129,10 @@ public class JMSMessageBus implements MessageBus {
             producer().send(jmsMessage);
 
 
-            System.out.println("CORRELATION ID: " + correlationID);
+            if (message instanceof StringMessage) {
+                System.out.println("REQUEST BODY " + ((StringMessage) message).getBody());
+            }
+            System.out.printf("CORRELATION ID: %s %s\n", correlationID, responseDestination.toString());
             requestResponseMap.put(correlationID, new JMSRequestResponse(correlationID, replyCallback, timeSource.getTime()));
 
         } catch (JMSException e) {
@@ -272,7 +273,7 @@ public class JMSMessageBus implements MessageBus {
                     final MessageProducer replyProducer = session.createProducer(reply.getJmsReplyTo());
                     final TextMessage jmsReplyMessage = session.createTextMessage(messageBody);
 
-                    System.out.printf("%s %s %s\n", messageBody, correlationId, replyProducer.getDestination().toString());
+                    System.out.printf("Reply handler - %s %s %s\n", messageBody, correlationId, replyProducer.getDestination().toString());
                     jmsReplyMessage.setJMSCorrelationID(correlationId);
 
 
