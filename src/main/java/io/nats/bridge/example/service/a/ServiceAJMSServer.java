@@ -45,10 +45,9 @@ public class ServiceAJMSServer {
                     message.reply(new StringMessage("Hello " + stringMessage.getBody()));
                 });
 
-                if (!receive.isPresent()) {
-                    Thread.sleep(10);
-                    System.out.println("No messages");
-                }
+
+                Thread.sleep(10);
+                messageBus.process();
             }
 
         } catch (Exception ex) {

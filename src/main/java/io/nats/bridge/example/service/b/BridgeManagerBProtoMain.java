@@ -11,22 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package io.nats.bridge.example.service.a;
+package io.nats.bridge.example.service.b;
 
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
+import io.nats.bridge.example.service.a.ServiceAUtil;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
 //TODO turn this into a test.
 // See https://github.com/nats-io/nats-jms-mq-bridge/issues/16
-public class BridgeManagerProtoMain {
+public class BridgeManagerBProtoMain {
 
     public static void main(String... args) {
         try {
-            final MessageBus messageBusSource = ServiceAUtil.getMessageBusNats();
-            final MessageBus messageBusDestination = ServiceAUtil.getMessageBusJms();
+            final MessageBus messageBusSource = ServiceBUtil.getMessageBusJms();
+            final MessageBus messageBusDestination = ServiceBUtil.getMessageBusNats();
             final MessageBridge messageBridge = new MessageBridge(messageBusSource, messageBusDestination);
 
             final AtomicBoolean stop = new AtomicBoolean(false);

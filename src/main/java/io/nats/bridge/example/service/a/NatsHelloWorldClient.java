@@ -18,6 +18,7 @@ import io.nats.bridge.MessageBus;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 
 //TODO turn this into a test.
@@ -28,7 +29,7 @@ public class NatsHelloWorldClient {
         try {
             final AtomicBoolean stop = new AtomicBoolean(false);
             final MessageBus messageBus = ServiceAUtil.getMessageBusNats();
-            final List<String> names = Arrays.asList("Rick", "Tom", "Chris", "Paul");
+            final List<String> names = Arrays.asList("Rick", "Tom", "Chris", "Paul", "Noah", "Lucas");
             Runtime.getRuntime().addShutdownHook(new Thread(() -> stop.set(true)));
 
             int count = 0;
@@ -39,8 +40,12 @@ public class NatsHelloWorldClient {
                     break;
                 }
                 final int index = count;
-                names.forEach(name -> messageBus.request(name + index, System.out::println));
+                names.forEach(name -> {
+                    System.out.println("Sending: " + name + index);
+                    messageBus.request(name + index, s -> System.out.println("Received: " + s));
+                });
                 count++;
+                Thread.sleep(1000);
             }
 
         } catch (Exception ex) {

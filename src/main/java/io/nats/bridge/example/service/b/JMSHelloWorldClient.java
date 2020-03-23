@@ -11,38 +11,46 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package io.nats.bridge.example.service.a;
+package io.nats.bridge.example.service.b;
 
-import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
+import io.nats.bridge.example.service.a.ServiceAUtil;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
 //TODO turn this into a test.
 // See https://github.com/nats-io/nats-jms-mq-bridge/issues/16
-public class BridgeManagerProtoMain {
+public class JMSHelloWorldClient {
 
     public static void main(String... args) {
         try {
-            final MessageBus messageBusSource = ServiceAUtil.getMessageBusNats();
-            final MessageBus messageBusDestination = ServiceAUtil.getMessageBusJms();
-            final MessageBridge messageBridge = new MessageBridge(messageBusSource, messageBusDestination);
-
             final AtomicBoolean stop = new AtomicBoolean(false);
-
+            final MessageBus messageBus = ServiceBUtil.getMessageBusJms();
+            final List<String> names = Arrays.asList("Rick", "Tom", "Chris", "Paul", "Noah", "Lucas");
             Runtime.getRuntime().addShutdownHook(new Thread(() -> stop.set(true)));
 
+            int count = 0;
             while (true) {
-                if (stop.get()) break;
-                Thread.sleep(10);
-                messageBridge.process();
+                Thread.sleep(1);
+                if (stop.get()) {
+                    messageBus.close();
+                    break;
+                }
+                final int index = count;
+                names.forEach(name -> {
+                    System.out.println("Sending: " + name + index);
+                    messageBus.request(name + index, s -> System.out.println("Received: " + s));
+                });
+                count++;
+                Thread.sleep(1000);
+                messageBus.process();
             }
-            messageBridge.close();
 
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
-
 }
