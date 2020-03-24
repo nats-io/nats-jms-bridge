@@ -45,7 +45,7 @@ public class JMSHelloWorldClient {
                     messageBus.request(name + index, s -> System.out.println("Received: " + s));
                 });
                 count++;
-                Thread.sleep(1000);
+                Thread.sleep(100);
                 messageBus.process();
             }
 
