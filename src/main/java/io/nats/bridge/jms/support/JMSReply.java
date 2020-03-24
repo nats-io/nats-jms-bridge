@@ -8,6 +8,7 @@ public class JMSReply {
     private final StringMessage reply;
     private final String correlationID;
     private final Destination jmsReplyTo;
+    private final long sentTime;
 
     public StringMessage getReply() {
         return reply;
@@ -21,7 +22,12 @@ public class JMSReply {
         return jmsReplyTo;
     }
 
-    public JMSReply(final StringMessage reply, final String correlationID, final Destination jmsReplyTo) {
+    public long getSentTime() {
+        return sentTime;
+    }
+
+    public JMSReply(long sentTime, final StringMessage reply, final String correlationID, final Destination jmsReplyTo) {
+        this.sentTime = sentTime;
         this.reply = reply;
         this.correlationID = correlationID;
         this.jmsReplyTo = jmsReplyTo;

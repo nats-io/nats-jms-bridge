@@ -24,14 +24,14 @@ import java.util.UUID;
 
 public class ServiceBUtil {
     static MessageBus getMessageBusJms() {
-        final String queueName = "dynamicQueues/BQueue";
+        final String queueName = "dynamicQueues/B1Queue";
         final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName);
         final MessageBus messageBus = jmsMessageBusBuilder.build();
         return messageBus;
     }
 
     static MessageBus getMessageBusNats() throws IOException, InterruptedException {
-        final String subject = "b-subject";
+        final String subject = "b1-subject";
 
         final Options options = new Options.Builder().
                 server("nats://localhost:4222").
