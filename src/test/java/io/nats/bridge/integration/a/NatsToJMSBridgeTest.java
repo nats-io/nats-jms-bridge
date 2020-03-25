@@ -1,4 +1,4 @@
-package io.nats.bridge.example.service.a;
+package io.nats.bridge.integration.a;
 
 import io.nats.bridge.Message;
 import io.nats.bridge.MessageBridge;

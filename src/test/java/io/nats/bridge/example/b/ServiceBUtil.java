@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package io.nats.bridge.example.service.b;
+package io.nats.bridge.example.b;
 
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.jms.support.JMSMessageBusBuilder;
@@ -22,16 +22,16 @@ import io.nats.client.Options;
 import java.io.IOException;
 import java.util.UUID;
 
-public class ServiceBTestUtil {
+public class ServiceBUtil {
     static MessageBus getMessageBusJms() {
-        final String queueName = "dynamicQueues/B1QueueTest-2";
+        final String queueName = "dynamicQueues/B1Queue1";
         final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName);
         final MessageBus messageBus = jmsMessageBusBuilder.build();
         return messageBus;
     }
 
     static MessageBus getMessageBusNats() throws IOException, InterruptedException {
-        final String subject = "b1-subject-test-2";
+        final String subject = "b1-subject1";
 
         final Options options = new Options.Builder().
                 server("nats://localhost:4222").

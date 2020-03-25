@@ -11,42 +11,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package io.nats.bridge.example.service.a;
+package io.nats.bridge.example.b;
 
-import io.nats.bridge.Message;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.StringMessage;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
 //TODO turn this into a test.
-public class ServiceAJMSServer {
+// See https://github.com/nats-io/nats-jms-mq-bridge/issues/16
+public class JMSHelloWorldClient {
 
     public static void main(String... args) {
         try {
-
             final AtomicBoolean stop = new AtomicBoolean(false);
-            final MessageBus messageBus = ServiceAUtil.getMessageBusJms();
-
+            final MessageBus messageBus = ServiceBUtil.getMessageBusJms();
+            final List<String> names = Arrays.asList("Rick", "Tom", "Chris", "Paul", "Noah", "Lucas");
             Runtime.getRuntime().addShutdownHook(new Thread(() -> stop.set(true)));
 
+            int count = 0;
             while (true) {
+                Thread.sleep(1);
                 if (stop.get()) {
                     messageBus.close();
                     break;
                 }
-                final Optional<Message> receive = messageBus.receive();
-                receive.ifPresent(message -> {
-
-                    StringMessage stringMessage = (StringMessage) message;
-                    System.out.println("Handle message " + stringMessage.getBody());
-                    message.reply(new StringMessage("Hello " + stringMessage.getBody()));
+                final int index = count;
+                names.forEach(name -> {
+                    System.out.println("Sending: " + name + index);
+                    messageBus.request(name + index, s -> System.out.println("Received: " + s));
                 });
-
-
-                Thread.sleep(10);
+                count++;
+                Thread.sleep(100);
                 messageBus.process();
             }
 

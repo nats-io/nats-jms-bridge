@@ -3,7 +3,7 @@ package io.nats.bridge.metrics;
 import io.nats.bridge.TimeSource;
 
 import java.time.Duration;
-import java.util.function.Consumer;
+
 
 public class MetricsDisplay implements MetricsProcessor {
 
