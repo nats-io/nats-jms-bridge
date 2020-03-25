@@ -28,4 +28,7 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile group: 'io.nats', name: 'jnats', version: '2.6.6'
     compile group: 'org.apache.activemq', name: 'artemis-jms-client-all', version: '2.11.0'
+    testCompile group: 'org.apache.activemq', name: 'artemis-server', version: '2.11.0'
+
+    testImplementation 'junit:junit:4.12'
 }
