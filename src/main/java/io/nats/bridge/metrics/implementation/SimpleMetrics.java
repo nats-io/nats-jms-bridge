@@ -10,14 +10,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class MetricsImpl implements Metrics {
+public class SimpleMetrics implements Metrics {
 
     private final TimeSource timeSource;
     private final CopyOnWriteArrayList<Gauge> gauges = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<Counter> counters = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<TimeTracker> timers = new CopyOnWriteArrayList<>();
 
-    public MetricsImpl(TimeSource timeSource) {
+    public SimpleMetrics(TimeSource timeSource) {
         this.timeSource = timeSource;
     }
 

@@ -36,7 +36,7 @@ public class NatsMain {
                     noReconnect(). // Disable reconnect attempts
                     build();
 
-            final MessageBus messageBus = new NatsMessageBus("test", Nats.connect(options));
+            final MessageBus messageBus = new NatsMessageBus("test", Nats.connect(options), "exampleGroup");
 
 
             while (true) {

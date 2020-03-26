@@ -24,12 +24,6 @@ public class NatsMessageBus implements MessageBus {
 
     //TODO create NatsMessageBusBuilder.
 
-    public NatsMessageBus(final String subject, final Connection connection) {
-        this.connection = connection;
-        this.subject = subject;
-        this.subscription = connection.subscribe(subject);
-        this.pool = Executors.newFixedThreadPool(25);
-    }
 
     public NatsMessageBus(final String subject, final Connection connection, final String queueGroup) {
         this.connection = connection;

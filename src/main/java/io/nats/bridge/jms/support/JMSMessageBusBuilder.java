@@ -21,7 +21,7 @@ import io.nats.bridge.metrics.Metrics;
 import io.nats.bridge.metrics.MetricsDisplay;
 import io.nats.bridge.metrics.MetricsProcessor;
 import io.nats.bridge.metrics.Output;
-import io.nats.bridge.metrics.implementation.MetricsImpl;
+import io.nats.bridge.metrics.implementation.SimpleMetrics;
 
 import javax.jms.*;
 import javax.naming.Context;
@@ -107,7 +107,7 @@ public class JMSMessageBusBuilder {
 
     public Metrics getMetrics() {
         if (metrics == null) {
-            metrics = new MetricsImpl(System::currentTimeMillis);
+            metrics = new SimpleMetrics(System::currentTimeMillis);
         }
         return metrics;
     }
