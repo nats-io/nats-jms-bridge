@@ -144,7 +144,7 @@ public class JMSMessageBusBuilder {
         return responseConsumer;
     }
 
-    public JMSMessageBusBuilder withResponseConsumer(MessageConsumer responseConsumer) {
+    public JMSMessageBusBuilder withResponseConsumer(final MessageConsumer responseConsumer) {
         this.responseConsumer = responseConsumer;
         return this;
     }
@@ -326,7 +326,7 @@ public class JMSMessageBusBuilder {
         return sessionCreator;
     }
 
-    public JMSMessageBusBuilder withSessionCreator(Function<Connection, Session> sessionCreator) {
+    public JMSMessageBusBuilder withSessionCreator(final Function<Connection, Session> sessionCreator) {
         this.sessionCreator = sessionCreator;
         return this;
     }
