@@ -27,7 +27,7 @@ public class BridgeManagerBProtoMain {
         try {
             final MessageBus messageBusSource = ServiceBUtil.getMessageBusJms();
             final MessageBus messageBusDestination = ServiceBUtil.getMessageBusNats();
-            final MessageBridge messageBridge = new MessageBridge(messageBusSource, messageBusDestination);
+            final MessageBridge messageBridge = new MessageBridge(messageBusSource, messageBusDestination, true);
 
             final AtomicBoolean stop = new AtomicBoolean(false);
 

@@ -17,24 +17,30 @@ package io.nats.bridge;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class MessageBridge implements Closeable {
 
     private final MessageBus sourceBus;
     private final MessageBus destinationBus;
+    private final boolean requestReply;
 
-    public MessageBridge(final MessageBus sourceBus, final MessageBus destinationBus) {
+    public MessageBridge(final MessageBus sourceBus, final MessageBus destinationBus, boolean requestReply) {
         this.sourceBus = sourceBus;
         this.destinationBus = destinationBus;
+        this.requestReply = requestReply;
     }
 
     public void process() {
         final Optional<Message> receiveMessageFromSourceOption = sourceBus.receive();
-        receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
-            destinationBus.request(receiveMessageFromSource, replyFromDestination -> {
-                receiveMessageFromSource.reply(replyFromDestination);
-            });
-        });
+
+        if (requestReply) {
+            receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource ->
+                    destinationBus.request(receiveMessageFromSource, receiveMessageFromSource::reply));
+        } else {
+            receiveMessageFromSourceOption.ifPresent(destinationBus::publish);
+        }
+
         sourceBus.process();
         destinationBus.process();
     }

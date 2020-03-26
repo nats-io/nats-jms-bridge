@@ -1,14 +1,12 @@
 package io.nats.bridge.integration.b;
 
-import io.nats.bridge.Message;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.StringMessage;
+import io.nats.bridge.integration.TestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,15 +28,15 @@ public class JmsToNatsBridgeTest {
 
     @Before
     public void setUp() throws Exception {
-        clientMessageBus = ServiceBTestUtil.getMessageBusJms();
-        serverMessageBus = ServiceBTestUtil.getMessageBusNats();
+        clientMessageBus = TestUtils.getMessageBusNats("B");
+        serverMessageBus = TestUtils.getMessageBusJms("B");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSource = ServiceBTestUtil.getMessageBusJms();
-        bridgeMessageBusDestination = ServiceBTestUtil.getMessageBusNats();
-        messageBridge = new MessageBridge(bridgeMessageBusSource, bridgeMessageBusDestination);
+        bridgeMessageBusSource = TestUtils.getMessageBusNats("B");
+        bridgeMessageBusDestination = TestUtils.getMessageBusJms("B");
+        messageBridge = new MessageBridge(bridgeMessageBusSource, bridgeMessageBusDestination, true);
 
     }
 
@@ -82,65 +80,14 @@ public class JmsToNatsBridgeTest {
     }
 
     private void runBridgeLoop() {
-
-        final Thread thread = new Thread(() -> {
-
-            try {
-                while (!stop.get()) {
-                    Thread.sleep(10);
-                    messageBridge.process();
-                }
-                messageBridge.close();
-                bridgeStopped.countDown();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-
-        });
-
-
-        thread.start();
+        TestUtils.runBridgeLoop(messageBridge, stop, bridgeStopped);
     }
 
     private void stopServerAndBridgeLoops() throws Exception{
-        stop.set(true);
-        serverStopped.await(1, TimeUnit.SECONDS);
-        bridgeStopped.await(1, TimeUnit.SECONDS);
+        TestUtils.stopServerAndBridgeLoops(stop, serverStopped, bridgeStopped);
     }
 
     private void runServerLoop() {
-
-        final Thread thread = new Thread(() -> {
-            while (true) {
-                if (stop.get()) {
-                    serverMessageBus.close();
-                    break;
-                }
-                final Optional<Message> receive = serverMessageBus.receive();
-                receive.ifPresent(message -> {
-
-                    StringMessage stringMessage = (StringMessage) message;
-                    System.out.println("Handle message " + stringMessage.getBody());
-                    message.reply(new StringMessage("Hello " + stringMessage.getBody()));
-                });
-
-
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                serverMessageBus.process();
-            }
-
-            serverStopped.countDown();
-
-
-
-        });
-
-        thread.start();
-
+        TestUtils.runServerLoop(stop, serverMessageBus, serverStopped);
     }
 }
