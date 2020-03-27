@@ -28,12 +28,12 @@ public class ExceptionHandler {
     }
 
     public void tryWithRethrow(final RunnableWithException runnable, final Counter errorCounter,
-                               final Function<Exception, Exception> exceptionCreator) {
+                               final Function<Exception, RuntimeException> exceptionCreator) {
         try {
             runnable.run();
         } catch (final Exception ex) {
             errorCounter.increment();
-            exceptionCreator.apply(ex);
+            throw exceptionCreator.apply(ex);
         }
     }
 

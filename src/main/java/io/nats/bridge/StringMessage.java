@@ -22,10 +22,8 @@ public class StringMessage implements Message {
     }
 
 
-    //TODO implement.
     @Override
     public void reply(final Message reply) {
-
     }
 
     public String getBody() {
