@@ -1,4 +1,4 @@
-package io.nats.bridge.integration.a;
+package io.nats.bridge.integration.b;
 
 import io.nats.bridge.Message;
 import io.nats.bridge.MessageBridge;
@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 
-public class OneWayMessagesTest {
+public class JMSToNatsOneWayMessagesTest {
 
     private final AtomicBoolean stop = new AtomicBoolean(false);
     private final AtomicReference<String> responseFromServer = new AtomicReference<>();
@@ -36,19 +36,19 @@ public class OneWayMessagesTest {
     @Before
     public void setUp() throws Exception {
 
-        final String busName = "MessagesOnlyA";
-        final String responseName = "RESPONSEA";
-        clientMessageBus = TestUtils.getMessageBusNats(busName);
-        serverMessageBus = TestUtils.getMessageBusJms(busName);
+        final String busName = "MessagesOnlyB";
+        final String responseName = "RESPONSEB";
+        clientMessageBus = TestUtils.getMessageBusJms(busName);
+        serverMessageBus = TestUtils.getMessageBusNats(busName);
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSource = TestUtils.getMessageBusNats(busName);
-        bridgeMessageBusDestination = TestUtils.getMessageBusJms(busName);
+        bridgeMessageBusSource = TestUtils.getMessageBusJms(busName);
+        bridgeMessageBusDestination = TestUtils.getMessageBusNats(busName);
 
-        responseBusServer = TestUtils.getMessageBusJms(responseName);
-        responseBusClient = TestUtils.getMessageBusJms(responseName);
+        responseBusServer = TestUtils.getMessageBusNats(responseName);
+        responseBusClient = TestUtils.getMessageBusNats(responseName);
         messageBridge = new MessageBridge(bridgeMessageBusSource, bridgeMessageBusDestination, false);
 
     }

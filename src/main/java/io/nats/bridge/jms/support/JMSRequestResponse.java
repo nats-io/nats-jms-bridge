@@ -5,13 +5,10 @@ import io.nats.bridge.Message;
 import java.util.function.Consumer;
 
 public class JMSRequestResponse {
-    private final String jmsCorrelationID;
     private final Consumer<Message> replyCallback;
     private final long sentTime;
 
-    public String getJmsCorrelationID() {
-        return jmsCorrelationID;
-    }
+
 
     public Consumer<Message> getReplyCallback() {
         return replyCallback;
@@ -21,8 +18,7 @@ public class JMSRequestResponse {
         return sentTime;
     }
 
-    public JMSRequestResponse(final String jmsCorrelationID, final Consumer<Message> replyCallback, final long sentTime) {
-        this.jmsCorrelationID = jmsCorrelationID;
+    public JMSRequestResponse(final Consumer<Message> replyCallback, final long sentTime) {
         this.replyCallback = replyCallback;
         this.sentTime = sentTime;
     }

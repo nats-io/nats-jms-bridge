@@ -22,6 +22,8 @@ import io.nats.bridge.metrics.MetricsDisplay;
 import io.nats.bridge.metrics.MetricsProcessor;
 import io.nats.bridge.metrics.Output;
 import io.nats.bridge.metrics.implementation.SimpleMetrics;
+import io.nats.bridge.util.ExceptionHandler;
+import io.nats.bridge.util.SupplierWithException;
 
 import javax.jms.*;
 import javax.naming.Context;
@@ -56,6 +58,9 @@ public class JMSMessageBusBuilder {
 
     private MetricsProcessor metricsProcessor;
 
+    private final ExceptionHandler exceptionHandler = new ExceptionHandler();
+    private final ExceptionHandler tryHandler = new ExceptionHandler();
+
     public MetricsProcessor getMetricsProcessor() {
         if (metricsProcessor == null) {
             metricsProcessor = new MetricsDisplay(new Output() {
@@ -71,13 +76,8 @@ public class JMSMessageBusBuilder {
 
     public Supplier<MessageProducer> getProducerSupplier() {
         if (producerSupplier == null) {
-            producerSupplier = () -> {
-                try {
-                    return  getSession().createProducer(getDestination());
-                } catch (Exception ex) {
-                    throw new JMSMessageBusException("unable to create producer", ex);
-                }
-            };
+            producerSupplier = () -> tryHandler.tryReturnOrRethrow(() -> getSession().createProducer(getDestination()),
+                    e -> new JMSMessageBusException("unable to create producer", e));
         }
         return producerSupplier;
     }
@@ -90,13 +90,8 @@ public class JMSMessageBusBuilder {
     public Supplier<MessageConsumer> getConsumerSupplier() {
 
         if (consumerSupplier == null) {
-            consumerSupplier =  () -> {
-                try {
-                    return getSession().createConsumer(getDestination());
-                } catch (Exception ex) {
-                    throw new JMSMessageBusException("unable to create consumer", ex);
-                }
-            };
+            consumerSupplier = () -> tryHandler.tryReturnOrRethrow(() -> getSession().createConsumer(getDestination()),
+                    e -> new JMSMessageBusException("unable to create consumer", e));
         }
         return consumerSupplier;
     }
@@ -119,11 +114,8 @@ public class JMSMessageBusBuilder {
 
     public Destination getResponseDestination() {
         if (responseDestination == null) {
-            try {
-                responseDestination = getSession().createTemporaryQueue();
-            } catch (JMSException ex) {
-                throw new JMSMessageBusBuilderException("Unable to create JMS response queue " + getUserNameConnection(), ex);
-            }
+            responseDestination = exceptionHandler.tryReturnOrRethrow(() -> responseDestination = getSession().createTemporaryQueue(),
+                    e -> new JMSMessageBusBuilderException("Unable to create JMS response queue " + getUserNameConnection(), e));
         }
         return responseDestination;
     }
@@ -135,11 +127,8 @@ public class JMSMessageBusBuilder {
 
     public MessageConsumer getResponseConsumer() {
         if (responseConsumer == null) {
-            try {
-                responseConsumer = getSession().createConsumer(getResponseDestination());
-            } catch (JMSException ex) {
-                throw new JMSMessageBusBuilderException("Unable to create JMS response consumer " + getUserNameConnection(), ex);
-            }
+            responseConsumer = exceptionHandler.tryReturnOrRethrow(() -> getSession().createConsumer(getResponseDestination()),
+                    e -> new JMSMessageBusBuilderException("Unable to create JMS response consumer " + getUserNameConnection(), e));
         }
         return responseConsumer;
     }
@@ -181,21 +170,16 @@ public class JMSMessageBusBuilder {
 
     public Function<ConnectionFactory, Connection> getConnectionCreator() {
         if (connectionCreator == null) {
-            connectionCreator = connectionFactory -> {
-                try {
-                    Connection connection;
-                    if (getUserNameConnection() == null || getPasswordConnection() == null) {
-                        connection = connectionFactory.createConnection();
-                    } else {
-                        connection = connectionFactory.createConnection(getUserNameConnection(), getPasswordConnection());
-                    }
-                    connection.start();
-                    return connection;
-                } catch (Exception ex) {
-                    throw new JMSMessageBusBuilderException("Unable to create JMS connection " + getUserNameConnection(), ex);
+            connectionCreator = connectionFactory -> tryHandler.tryReturnOrRethrow(() -> {
+                Connection connection;
+                if (getUserNameConnection() == null || getPasswordConnection() == null) {
+                    connection = connectionFactory.createConnection();
+                } else {
+                    connection = connectionFactory.createConnection(getUserNameConnection(), getPasswordConnection());
                 }
-            };
-
+                connection.start();
+                return connection;
+            }, e -> new JMSMessageBusBuilderException("Unable to create JMS connection " + getUserNameConnection(), e));
         }
         return connectionCreator;
     }
@@ -225,11 +209,8 @@ public class JMSMessageBusBuilder {
 
     public Context getContext() {
         if (context == null) {
-            try {
-                context = new InitialContext();
-            } catch (NamingException e) {
-                throw new JMSMessageBusBuilderException("Unable to create JNDI context", e);
-            }
+            context = exceptionHandler.tryReturnOrRethrow((SupplierWithException<Context>) InitialContext::new,
+                    (e) -> new JMSMessageBusBuilderException("Unable to create JNDI context", e));
         }
         return context;
     }
@@ -241,11 +222,8 @@ public class JMSMessageBusBuilder {
 
     public ConnectionFactory getConnectionFactory() {
         if (connectionFactory == null) {
-            try {
-                connectionFactory = (ConnectionFactory) getContext().lookup(getConnectionFactoryName());
-            } catch (Exception e) {
-                throw new JMSMessageBusBuilderException("Unable to lookup connection factory " + getConnectionFactoryName(), e);
-            }
+            connectionFactory = exceptionHandler.tryReturnOrRethrow(() -> (ConnectionFactory) getContext().lookup(getConnectionFactoryName()),
+                    e -> new JMSMessageBusBuilderException("Unable to lookup connection factory " + getConnectionFactoryName(), e));
         }
         return connectionFactory;
     }
@@ -257,11 +235,8 @@ public class JMSMessageBusBuilder {
 
     public Destination getDestination() {
         if (destination == null) {
-            try {
-                destination = (Destination) getContext().lookup(getDestinationName());
-            } catch (Exception e) {
-                throw new JMSMessageBusBuilderException("Unable to lookup destination " + getDestinationName(), e);
-            }
+            destination = exceptionHandler.tryReturnOrRethrow(() -> (Destination) getContext().lookup(getDestinationName()),
+                    e -> new JMSMessageBusBuilderException("Unable to lookup destination " + getDestinationName(), e));
         }
         return destination;
     }
@@ -315,13 +290,9 @@ public class JMSMessageBusBuilder {
 
     public Function<Connection, Session> getSessionCreator() {
         if (sessionCreator == null) {
-            sessionCreator = connection -> {
-                try {
-                    return connection.createSession(isTransactionalSession(), getAcknowledgeSessionMode());
-                } catch (Exception ex) {
-                    throw new JMSMessageBusBuilderException("Unable to create session", ex);
-                }
-            };
+            sessionCreator = connection -> tryHandler.tryReturnOrRethrow(() ->
+                    connection.createSession(isTransactionalSession(), getAcknowledgeSessionMode()),
+                    e -> new JMSMessageBusBuilderException("Unable to create session", e));
         }
         return sessionCreator;
     }
@@ -333,9 +304,8 @@ public class JMSMessageBusBuilder {
 
     public MessageBus build() {
         return new JMSMessageBus(getDestination(), getSession(), getConnection(), getResponseDestination(),
-                getResponseConsumer(), getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(), getMetricsProcessor());
+                getResponseConsumer(), getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(), getMetricsProcessor(), tryHandler);
     }
-
 
 
 }

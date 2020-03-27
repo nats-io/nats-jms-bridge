@@ -16,6 +16,7 @@ package io.nats.bridge.example.a;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.jms.support.JMSMessageBusBuilder;
 import io.nats.bridge.nats.NatsMessageBus;
+import io.nats.bridge.util.ExceptionHandler;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 
@@ -37,6 +38,6 @@ public class ServiceAUtil {
                 server("nats://localhost:4222").
                 noReconnect(). // Disable reconnect attempts
                 build();
-        return new NatsMessageBus(subject, Nats.connect(options), "queueGroup" + UUID.randomUUID().toString() + System.currentTimeMillis());
+        return new NatsMessageBus(subject, Nats.connect(options), "queueGroup" + UUID.randomUUID().toString() + System.currentTimeMillis(), new ExceptionHandler());
     }
 }
