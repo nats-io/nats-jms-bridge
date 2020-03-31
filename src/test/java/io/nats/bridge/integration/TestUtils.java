@@ -22,6 +22,7 @@ import io.nats.bridge.nats.NatsMessageBus;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.client.Nats;
 import io.nats.client.Options;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -44,7 +45,7 @@ public class TestUtils {
                 server("nats://localhost:4222").
                 noReconnect(). // Disable reconnect attempts
                 build();
-        return new NatsMessageBus(subject, Nats.connect(options), "queueGroup" + UUID.randomUUID().toString() + System.currentTimeMillis(), new ExceptionHandler());
+        return new NatsMessageBus(subject, Nats.connect(options), "queueGroup" + UUID.randomUUID().toString() + System.currentTimeMillis(), new ExceptionHandler(LoggerFactory.getLogger("test")));
     }
 
 

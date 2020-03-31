@@ -23,6 +23,8 @@ import io.nats.client.Options;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.slf4j.LoggerFactory;
+
 public class ServiceAUtil {
     static MessageBus getMessageBusJms() {
         final String queueName = "dynamicQueues/A1Queue";
@@ -38,6 +40,6 @@ public class ServiceAUtil {
                 server("nats://localhost:4222").
                 noReconnect(). // Disable reconnect attempts
                 build();
-        return new NatsMessageBus(subject, Nats.connect(options), "queueGroup" + UUID.randomUUID().toString() + System.currentTimeMillis(), new ExceptionHandler());
+        return new NatsMessageBus(subject, Nats.connect(options), "queueGroup" + UUID.randomUUID().toString() + System.currentTimeMillis(), new ExceptionHandler(LoggerFactory.getLogger(ServiceAUtil.class)));
     }
 }

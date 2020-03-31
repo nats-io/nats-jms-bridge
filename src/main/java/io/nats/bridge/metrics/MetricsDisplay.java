@@ -30,7 +30,7 @@ public class MetricsDisplay implements MetricsProcessor {
         index++;
         if (index % every == 0) {
             long currentTime = timeSource.getTime();
-            long duration =  currentTime - lastTime;
+            long duration = currentTime - lastTime;
 
             if (duration > everyDuration.toMillis()) {
                 lastTime = currentTime;

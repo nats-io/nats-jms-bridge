@@ -8,13 +8,14 @@ import io.nats.bridge.metrics.Metrics;
 import io.nats.bridge.metrics.implementation.SimpleMetrics;
 import io.nats.bridge.nats.NatsMessageBusException;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class ExceptionHandlerTest {
 
-    final ExceptionHandler exceptionHandler = new ExceptionHandler();
+    final ExceptionHandler exceptionHandler = new ExceptionHandler(LoggerFactory.getLogger(ExceptionHandlerTest.class));
 
 
     @Test

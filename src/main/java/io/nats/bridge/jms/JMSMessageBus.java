@@ -24,6 +24,7 @@ import io.nats.bridge.metrics.MetricsProcessor;
 import io.nats.bridge.metrics.TimeTracker;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.bridge.util.FunctionWithException;
+import org.slf4j.Logger;
 
 import javax.jms.*;
 import java.util.HashMap;
@@ -63,6 +64,7 @@ public class JMSMessageBus implements MessageBus {
     private final Supplier<MessageConsumer> consumerSupplier;
     private final MetricsProcessor metricsProcessor;
     private final ExceptionHandler tryHandler;
+    private final Logger logger;
     private MessageProducer producer;
     private MessageConsumer consumer;
     private java.util.Queue<JMSReply> jmsReplyQueue = new LinkedTransferQueue<>();
@@ -73,7 +75,7 @@ public class JMSMessageBus implements MessageBus {
                          final Supplier<MessageProducer> producerSupplier,
                          final Supplier<MessageConsumer> consumerSupplier,
                          final MetricsProcessor metricsProcessor,
-                         final ExceptionHandler tryHandler) {
+                         final ExceptionHandler tryHandler, Logger logger) {
         this.destination = destination;
         this.session = session;
         this.connection = connection;
@@ -104,6 +106,7 @@ public class JMSMessageBus implements MessageBus {
 
         this.consumerSupplier = consumerSupplier;
         this.metricsProcessor = metricsProcessor;
+        this.logger = logger;
     }
 
     private MessageProducer producer() {
@@ -121,8 +124,9 @@ public class JMSMessageBus implements MessageBus {
     }
 
     @Override
-    public void publish(Message message) {
+    public void publish(final Message message) {
 
+        if (logger.isInfoEnabled()) logger.info("publish called " + message);
         tryHandler.tryWithErrorCount(() -> {
             producer().send(convertToJMSMessage(message));
             countPublish.increment();
@@ -133,6 +137,9 @@ public class JMSMessageBus implements MessageBus {
 
     @Override
     public void request(final Message message, final Consumer<Message> replyCallback) {
+
+        if (logger.isInfoEnabled()) logger.info("request called " + message);
+
         //TODO to get this to be more generic as part of builder pass a createDestination Function<Session, Destination> that calls session.createTemporaryQueue() or session.createTemporaryTopic()
         final javax.jms.Message jmsMessage = convertToJMSMessage(message);
 
@@ -143,9 +150,10 @@ public class JMSMessageBus implements MessageBus {
             jmsMessage.setJMSCorrelationID(correlationID);
             producer().send(jmsMessage);
             if (message instanceof StringMessage) {
-                System.out.println("REQUEST BODY " + ((StringMessage) message).getBody());
+                if (logger.isDebugEnabled()) logger.debug("REQUEST BODY " + ((StringMessage) message).getBody());
             }
-            System.out.printf("CORRELATION ID: %s %s\n", correlationID, responseDestination.toString());
+            if (logger.isDebugEnabled())
+                logger.debug(String.format("CORRELATION ID: %s %s\n", correlationID, responseDestination.toString()));
             requestResponseMap.put(correlationID, new JMSRequestResponse(replyCallback, timeSource.getTime()));
             countRequest.increment();
         }, countRequestErrors, e -> new JMSMessageBusException("unable to send JMS request", e));
@@ -242,7 +250,8 @@ public class JMSMessageBus implements MessageBus {
                 if (message != null) {
                     final String correlationID = message.getJMSCorrelationID();
 
-                    System.out.printf("Process JMS Message Consumer %s %s \n", correlationID, ((TextMessage) message).getText());
+                    if (logger.isDebugEnabled())
+                        logger.debug(String.format("Process JMS Message Consumer %s %s \n", correlationID, ((TextMessage) message).getText()));
                     final Optional<JMSRequestResponse> jmsRequestResponse = Optional.ofNullable(requestResponseMap.get(correlationID));
 
                     final javax.jms.Message msg = message;
@@ -290,7 +299,8 @@ public class JMSMessageBus implements MessageBus {
                     final TextMessage jmsReplyMessage = session.createTextMessage(messageBody);
                     timerReceiveReply.recordTiming(timeSource.getTime() - reply.getSentTime());
                     countReceivedReply.increment();
-                    System.out.printf("Reply handler - %s %s %s\n", messageBody, correlationId, replyProducer.getDestination().toString());
+                    if (logger.isDebugEnabled())
+                        logger.debug(String.format("Reply handler - %s %s %s\n", messageBody, correlationId, replyProducer.getDestination().toString()));
                     jmsReplyMessage.setJMSCorrelationID(correlationId);
                     replyProducer.send(jmsReplyMessage);
                     replyProducer.close();

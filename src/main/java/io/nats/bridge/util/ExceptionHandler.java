@@ -1,18 +1,23 @@
 package io.nats.bridge.util;
 
 import io.nats.bridge.metrics.Counter;
+import org.slf4j.Logger;
 
 import java.util.function.Function;
 
-
-
 public class ExceptionHandler {
+
+    private final Logger logger;
+
+    public ExceptionHandler(Logger logger) {
+        this.logger = logger;
+    }
+
     public void tryWithLog(final RunnableWithException runnable, final String errorMessage) {
         try {
             runnable.run();
         } catch (final Exception ex) {
-            ex.printStackTrace();
-            System.out.println(errorMessage);
+            logger.error(errorMessage, ex);
         }
     }
 
@@ -21,9 +26,7 @@ public class ExceptionHandler {
             runnable.run();
         } catch (final Exception ex) {
             errorCounter.increment();
-            //TODO add logging
-            ex.printStackTrace();
-            System.out.println(errorMessage);
+            logger.error(errorMessage, ex);
         }
     }
 
@@ -46,8 +49,8 @@ public class ExceptionHandler {
         }
     }
 
-    public <T,R> R tryFunctionOrRethrow(final T arg, final FunctionWithException<T, R> function,
-                                    final Function<Exception, RuntimeException> exceptionCreator) {
+    public <T, R> R tryFunctionOrRethrow(final T arg, final FunctionWithException<T, R> function,
+                                         final Function<Exception, RuntimeException> exceptionCreator) {
         try {
             return function.apply(arg);
         } catch (final Exception ex) {

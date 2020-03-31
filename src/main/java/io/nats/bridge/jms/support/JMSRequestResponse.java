@@ -9,6 +9,10 @@ public class JMSRequestResponse {
     private final long sentTime;
 
 
+    public JMSRequestResponse(final Consumer<Message> replyCallback, final long sentTime) {
+        this.replyCallback = replyCallback;
+        this.sentTime = sentTime;
+    }
 
     public Consumer<Message> getReplyCallback() {
         return replyCallback;
@@ -16,11 +20,6 @@ public class JMSRequestResponse {
 
     public long getSentTime() {
         return sentTime;
-    }
-
-    public JMSRequestResponse(final Consumer<Message> replyCallback, final long sentTime) {
-        this.replyCallback = replyCallback;
-        this.sentTime = sentTime;
     }
 
 }

@@ -24,22 +24,22 @@ public class SimpleMetrics implements Metrics {
     @Override
     public Gauge createGauge(final String name) {
 
-         final Gauge gauge = new SimpleGauge(name);
-         gauges.add(gauge);
-         return gauge;
+        final Gauge gauge = new SimpleGauge(name);
+        gauges.add(gauge);
+        return gauge;
     }
 
     @Override
     public Counter createCounter(final String name) {
 
-        final Counter counter =new SimpleCounter(name);
+        final Counter counter = new SimpleCounter(name);
         counters.add(counter);
         return counter;
     }
 
     @Override
     public TimeTracker createTimeTracker(final String name) {
-        final TimeTracker tt =  new SimpleTimeTracker(name,timeSource);
+        final TimeTracker tt = new SimpleTimeTracker(name, timeSource);
         timers.add(tt);
         return tt;
     }

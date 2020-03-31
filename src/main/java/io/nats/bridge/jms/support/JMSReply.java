@@ -10,6 +10,13 @@ public class JMSReply {
     private final Destination jmsReplyTo;
     private final long sentTime;
 
+    public JMSReply(long sentTime, final StringMessage reply, final String correlationID, final Destination jmsReplyTo) {
+        this.sentTime = sentTime;
+        this.reply = reply;
+        this.correlationID = correlationID;
+        this.jmsReplyTo = jmsReplyTo;
+    }
+
     public StringMessage getReply() {
         return reply;
     }
@@ -24,12 +31,5 @@ public class JMSReply {
 
     public long getSentTime() {
         return sentTime;
-    }
-
-    public JMSReply(long sentTime, final StringMessage reply, final String correlationID, final Destination jmsReplyTo) {
-        this.sentTime = sentTime;
-        this.reply = reply;
-        this.correlationID = correlationID;
-        this.jmsReplyTo = jmsReplyTo;
     }
 }

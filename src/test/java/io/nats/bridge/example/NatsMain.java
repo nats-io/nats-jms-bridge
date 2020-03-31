@@ -13,10 +13,12 @@
 package io.nats.bridge.example;
 
 import io.nats.bridge.MessageBus;
+import io.nats.bridge.example.a.ServiceAUtil;
 import io.nats.bridge.nats.NatsMessageBus;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.client.Nats;
 import io.nats.client.Options;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -37,7 +39,7 @@ public class NatsMain {
                     noReconnect(). // Disable reconnect attempts
                     build();
 
-            final MessageBus messageBus = new NatsMessageBus("test", Nats.connect(options), "exampleGroup", new ExceptionHandler());
+            final MessageBus messageBus = new NatsMessageBus("test", Nats.connect(options), "exampleGroup", new ExceptionHandler(LoggerFactory.getLogger("test")));
 
 
             while (true) {

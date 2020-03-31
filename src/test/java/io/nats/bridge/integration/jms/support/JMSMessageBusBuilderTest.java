@@ -34,6 +34,8 @@ public class JMSMessageBusBuilderTest {
 
 
         builder1.withConsumerSupplier(builder2.getConsumerSupplier());
+        builder1.withJmsBusLogger(builder2.getJmsBusLogger());
+        builder1.withTryHandler(builder2.getTryHandler());
 
         builder1.build();
         builder2.build();
