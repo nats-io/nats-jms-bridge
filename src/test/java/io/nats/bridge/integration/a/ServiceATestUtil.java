@@ -11,32 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package io.nats.bridge.example.service.a;
+package io.nats.bridge.integration.a;
 
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.jms.support.JMSMessageBusBuilder;
 import io.nats.bridge.nats.NatsMessageBus;
+import io.nats.bridge.util.ExceptionHandler;
 import io.nats.client.Nats;
 import io.nats.client.Options;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.UUID;
 
-public class ServiceAUtil {
+public class ServiceATestUtil {
     static MessageBus getMessageBusJms() {
-        final String queueName = "dynamicQueues/AQueue";
+        final String queueName = "dynamicQueues/A1QueueTest-1";
         final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName);
         final MessageBus messageBus = jmsMessageBusBuilder.build();
         return messageBus;
     }
 
     static MessageBus getMessageBusNats() throws IOException, InterruptedException {
-        final String subject = "a-subject";
+        final String subject = "a1-subject-test-1";
 
         final Options options = new Options.Builder().
                 server("nats://localhost:4222").
                 noReconnect(). // Disable reconnect attempts
                 build();
-        return new NatsMessageBus(subject, Nats.connect(options), "queueGroup" + UUID.randomUUID().toString() + System.currentTimeMillis());
+        return new NatsMessageBus(subject, Nats.connect(options), "queueGroup" + UUID.randomUUID().toString() + System.currentTimeMillis(), new ExceptionHandler(LoggerFactory.getLogger("test")));
     }
 }

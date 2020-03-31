@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package io.nats.bridge.example.service.b;
+package io.nats.bridge.example.a;
 
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.example.service.a.ServiceAUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,12 +22,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO turn this into a test.
 // See https://github.com/nats-io/nats-jms-mq-bridge/issues/16
-public class JMSHelloWorldClient {
+public class NatsHelloWorldClient {
 
     public static void main(String... args) {
         try {
             final AtomicBoolean stop = new AtomicBoolean(false);
-            final MessageBus messageBus = ServiceBUtil.getMessageBusJms();
+            final MessageBus messageBus = ServiceAUtil.getMessageBusNats();
             final List<String> names = Arrays.asList("Rick", "Tom", "Chris", "Paul", "Noah", "Lucas");
             Runtime.getRuntime().addShutdownHook(new Thread(() -> stop.set(true)));
 
@@ -46,7 +45,6 @@ public class JMSHelloWorldClient {
                 });
                 count++;
                 Thread.sleep(1000);
-                messageBus.process();
             }
 
         } catch (Exception ex) {

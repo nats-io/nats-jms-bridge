@@ -16,6 +16,15 @@ import io.nats.bridge.Message;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.StringMessage;
 import io.nats.bridge.TimeSource;
+import io.nats.bridge.jms.support.JMSReply;
+import io.nats.bridge.jms.support.JMSRequestResponse;
+import io.nats.bridge.metrics.Counter;
+import io.nats.bridge.metrics.Metrics;
+import io.nats.bridge.metrics.MetricsProcessor;
+import io.nats.bridge.metrics.TimeTracker;
+import io.nats.bridge.util.ExceptionHandler;
+import io.nats.bridge.util.FunctionWithException;
+import org.slf4j.Logger;
 
 import javax.jms.*;
 import java.util.HashMap;
@@ -24,6 +33,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 
 public class JMSMessageBus implements MessageBus {
@@ -36,180 +46,141 @@ public class JMSMessageBus implements MessageBus {
     private final MessageConsumer responseConsumer;
     private final TimeSource timeSource;
     private final Map<String, JMSRequestResponse> requestResponseMap = new HashMap<>();
-
-
+    private final Metrics metrics;
+    private final Counter countRequestResponseErrors;
+    private final Counter countReceivedReply;
+    private final Counter countReceivedReplyErrors;
+    private final Counter countPublish;
+    private final Counter countReceived;
+    private final Counter countPublishErrors;
+    private final Counter messageConvertErrors;
+    private final Counter countRequest;
+    private final Counter countRequestErrors;
+    private final Counter countRequestResponses;
+    private final Counter countRequestResponsesMissing;
+    private final TimeTracker timerRequestResponse;
+    private final TimeTracker timerReceiveReply;
+    private final Supplier<MessageProducer> producerSupplier;
+    private final Supplier<MessageConsumer> consumerSupplier;
+    private final MetricsProcessor metricsProcessor;
+    private final ExceptionHandler tryHandler;
+    private final Logger logger;
     private MessageProducer producer;
     private MessageConsumer consumer;
+    private java.util.Queue<JMSReply> jmsReplyQueue = new LinkedTransferQueue<>();
 
-
-    public JMSMessageBus(final Destination destination, final Session session, final Connection connection, final TimeSource timeSource) {
+    public JMSMessageBus(final Destination destination, final Session session,
+                         final Connection connection, final Destination responseDestination,
+                         final MessageConsumer responseConsumer, final TimeSource timeSource, final Metrics metrics,
+                         final Supplier<MessageProducer> producerSupplier,
+                         final Supplier<MessageConsumer> consumerSupplier,
+                         final MetricsProcessor metricsProcessor,
+                         final ExceptionHandler tryHandler, Logger logger) {
         this.destination = destination;
         this.session = session;
         this.connection = connection;
+        this.responseDestination = responseDestination;
+        this.responseConsumer = responseConsumer;
         //TODO setup exception listener for JMS Connection
         this.timeSource = timeSource;
-        try {
-            this.responseDestination = session.createTemporaryQueue();
-            this.responseConsumer = session.createConsumer(responseDestination);
-        } catch (JMSException e) {
-            throw new JMSMessageBusException("unable to create response destination", e);
-        }
+        this.tryHandler = tryHandler;
 
+
+        this.metrics = metrics;
+        countPublish = metrics.createCounter("publish-count");
+        countPublishErrors = metrics.createCounter("publish-count-errors");
+        countRequest = metrics.createCounter("request-count");
+        countRequestErrors = metrics.createCounter("request-count-errors");
+        countRequestResponses = metrics.createCounter("request-response-count");
+        countRequestResponseErrors = metrics.createCounter("request-response-count-errors");
+        countRequestResponsesMissing = metrics.createCounter("request-response-missing-count");
+        timerRequestResponse = metrics.createTimeTracker("request-response-timing");
+        countReceived = metrics.createCounter("received-count");
+        countReceivedReply = metrics.createCounter("received-reply-count");
+        timerReceiveReply = metrics.createTimeTracker("receive-reply-timing");
+        countReceivedReplyErrors = metrics.createCounter("received-reply-count-errors");
+        messageConvertErrors = metrics.createCounter("message-convert-count-errors");
+
+
+        this.producerSupplier = producerSupplier;
+
+        this.consumerSupplier = consumerSupplier;
+        this.metricsProcessor = metricsProcessor;
+        this.logger = logger;
     }
 
     private MessageProducer producer() {
         if (producer == null) {
-            try {
-                producer = session.createProducer(destination);
-            } catch (Exception ex) {
-                throw new JMSMessageBusException("unable to create producer", ex);
-            }
+            producer = producerSupplier.get();
         }
         return producer;
     }
 
     private MessageConsumer consumer() {
         if (consumer == null) {
-            try {
-                consumer = session.createConsumer(destination);
-            } catch (Exception ex) {
-                throw new JMSMessageBusException("unable to create consumer", ex);
-            }
+            consumer = consumerSupplier.get();
         }
         return consumer;
     }
 
     @Override
-    public void publish(Message message) {
-        try {
+    public void publish(final Message message) {
+
+        if (logger.isInfoEnabled()) logger.info("publish called " + message);
+        tryHandler.tryWithErrorCount(() -> {
             producer().send(convertToJMSMessage(message));
-        } catch (Exception ex) {
-            throw new JMSMessageBusException("Unable to send the message to the producer", ex);
-        }
-    }
+            countPublish.increment();
+        }, countPublishErrors, "Unable to send the message to the producer");
 
-    class JMSRequestResponse {
-        private final String jmsCorrelationID;
-        private final Consumer<Message> replyCallback;
-        private final long sentTime;
-
-        public String getJmsCorrelationID() {
-            return jmsCorrelationID;
-        }
-
-        public Consumer<Message> getReplyCallback() {
-            return replyCallback;
-        }
-
-        public long getSentTime() {
-            return sentTime;
-        }
-
-        public JMSRequestResponse(final String jmsCorrelationID, final Consumer<Message> replyCallback, final long sentTime) {
-            this.jmsCorrelationID = jmsCorrelationID;
-            this.replyCallback = replyCallback;
-            this.sentTime = sentTime;
-        }
     }
 
 
     @Override
     public void request(final Message message, final Consumer<Message> replyCallback) {
+
+        if (logger.isInfoEnabled()) logger.info("request called " + message);
+
         //TODO to get this to be more generic as part of builder pass a createDestination Function<Session, Destination> that calls session.createTemporaryQueue() or session.createTemporaryTopic()
         final javax.jms.Message jmsMessage = convertToJMSMessage(message);
 
 
-
-
-        try {
-
+        tryHandler.tryWithRethrow(() -> {
             final String correlationID = UUID.randomUUID().toString();
             jmsMessage.setJMSReplyTo(responseDestination);
             jmsMessage.setJMSCorrelationID(correlationID);
             producer().send(jmsMessage);
-
-
             if (message instanceof StringMessage) {
-                System.out.println("REQUEST BODY " + ((StringMessage) message).getBody());
+                if (logger.isDebugEnabled()) logger.debug("REQUEST BODY " + ((StringMessage) message).getBody());
             }
-            System.out.printf("CORRELATION ID: %s %s\n", correlationID, responseDestination.toString());
-            requestResponseMap.put(correlationID, new JMSRequestResponse(correlationID, replyCallback, timeSource.getTime()));
+            if (logger.isDebugEnabled())
+                logger.debug(String.format("CORRELATION ID: %s %s\n", correlationID, responseDestination.toString()));
+            requestResponseMap.put(correlationID, new JMSRequestResponse(replyCallback, timeSource.getTime()));
+            countRequest.increment();
+        }, countRequestErrors, e -> new JMSMessageBusException("unable to send JMS request", e));
 
-        } catch (JMSException e) {
-            throw new JMSMessageBusException("unable to send JMS request", e);
-        }
     }
+
 
     //TODO pass this a Function<Message, JMSMessage> as part of the builder
     private javax.jms.Message convertToJMSMessage(final Message message) {
-        if (message instanceof StringMessage) {
-            try {
+        return tryHandler.tryFunctionOrRethrow(message, (FunctionWithException<Message, javax.jms.Message>) var1 -> {
+            if (message instanceof StringMessage) {
                 return session.createTextMessage(((StringMessage) message).getBody());
-            } catch (Exception ex) {
-                throw new JMSMessageBusException("Unable to create JMS text message", ex);
+            } else {
+                throw new JMSMessageBusException("Unexpected message type");
             }
-        } else {
-            throw new JMSMessageBusException("Unexpected message type");
-        }
+        }, e -> new JMSMessageBusException("Unable to create JMS text message", e));
     }
 
 
-    class JMSReply {
-        private final StringMessage reply;
-        private final String correlationID;
-        private final Destination jmsReplyTo;
-
-        public StringMessage getReply() {
-            return reply;
-        }
-
-        public String getCorrelationID() {
-            return correlationID;
-        }
-
-        public Destination getJmsReplyTo() {
-            return jmsReplyTo;
-        }
-
-        JMSReply(final StringMessage reply, final String correlationID, final Destination jmsReplyTo) {
-            this.reply = reply;
-            this.correlationID = correlationID;
-            this.jmsReplyTo = jmsReplyTo;
-        }
-    }
-
-    private java.util.Queue<JMSReply> jmsReplyQueue = new LinkedTransferQueue<>();
-
-    private void enqueueReply(final StringMessage reply, final String correlationID, final Destination jmsReplyTo) throws JMSException {
-
-        jmsReplyQueue.add(new JMSReply(reply, correlationID, jmsReplyTo));
-
-
+    private void enqueueReply(final long sentTime, final StringMessage reply, final String correlationID, final Destination jmsReplyTo) {
+        jmsReplyQueue.add(new JMSReply(sentTime, reply, correlationID, jmsReplyTo));
     }
 
     //TODO pass this a Function<JMSMessage, Message> as part of the builder
     private Message convertToBusMessage(final javax.jms.Message jmsMessage) {
         if (jmsMessage instanceof TextMessage) {
-            try {
-                final Destination jmsReplyTo = jmsMessage.getJMSReplyTo();
-                if (jmsReplyTo != null) {
-                    return new StringMessage(((TextMessage) jmsMessage).getText()) {
-                        @Override
-                        public void reply(final Message reply) {
-                            final StringMessage stringMessage = (StringMessage) reply;
-                            try {
-                                enqueueReply(stringMessage, jmsMessage.getJMSCorrelationID(), jmsReplyTo);
-                            } catch (Exception ex) {
-                                throw new JMSMessageBusException("Unable to send to JMS reply", ex);
-                            }
-                        }
-                    };
-                } else {
-                    return new StringMessage(((TextMessage) jmsMessage).getText());
-                }
-            } catch (Exception ex) {
-                throw new JMSMessageBusException("Unable to create JMS text message", ex);
-            }
+            return convertTextMessage(jmsMessage);
         } else if (jmsMessage == null) {
             return null;
         } else {
@@ -217,77 +188,127 @@ public class JMSMessageBus implements MessageBus {
         }
     }
 
+    private Message convertTextMessage(javax.jms.Message jmsMessage) {
+
+        return tryHandler.tryFunctionOrRethrow(jmsMessage, (FunctionWithException<javax.jms.Message, Message>) var1 -> {
+            final Destination jmsReplyTo = jmsMessage.getJMSReplyTo();
+            final long startTime = timeSource.getTime();
+            if (jmsReplyTo != null) {
+                return new StringMessage(((TextMessage) jmsMessage).getText()) {
+                    @Override
+                    public void reply(final Message reply) {
+                        tryHandler.tryWithRethrow(() -> {
+                            final StringMessage stringMessage = (StringMessage) reply;
+                            enqueueReply(startTime, stringMessage, jmsMessage.getJMSCorrelationID(), jmsReplyTo);
+                        }, e -> {
+                            throw new JMSMessageBusException("Unable to send to JMS reply", e);
+                        });
+                    }
+                };
+            } else {
+                return new StringMessage(((TextMessage) jmsMessage).getText());
+            }
+
+        }, e -> new JMSMessageBusException("Unable to create JMS text message", e));
+
+    }
+
     //TODO I imagine there being a bunch of these managed by one thread and then having a receive method that takes a Duration that gets called last.
-    // There is a another class that deals with a collection of JMSMessageBus called a bridge
+    // There is another class that deals with a collection of JMSMessageBus called a bridge
     @Override
     public Optional<Message> receive() {
 
-        try {
-            return Optional.ofNullable(convertToBusMessage(consumer().receiveNoWait()));
-        } catch (JMSException e) {
+        return tryHandler.tryReturnOrRethrow(() -> {
+            final javax.jms.Message message = consumer().receiveNoWait();
+            if (message != null) {
+                countReceived.increment();
+            }
+            return Optional.ofNullable(convertToBusMessage(message));
+        }, e -> {
             throw new JMSMessageBusException("Error receiving message", e);
-        }
+        });
+
+
     }
 
     @Override
     public void close() {
-        try {
-            connection.close();
-        } catch (Exception e) {
-            throw new JMSMessageBusException("Error closing connection", e);
-        }
+        tryHandler.tryWithRethrow(connection::close, e -> new JMSMessageBusException("Error closing connection", e));
     }
 
-    @Override
-    public void process() {
 
+    /**
+     * This gets called by bridge to process outstanding responses.
+     * If the client is Nats and the Server is JMS then there will be messages from the `responseConsumer`.
+     */
+    private void processResponses() {
 
-        javax.jms.Message message;
-        try {
+        tryHandler.tryWithErrorCount(() -> {
+            javax.jms.Message message;
             do {
                 message = responseConsumer.receiveNoWait();
-
                 if (message != null) {
                     final String correlationID = message.getJMSCorrelationID();
 
-                    System.out.printf("Process JMS Message Consumer %s %s \n", correlationID, ((TextMessage)message).getText());
-                    Optional<JMSRequestResponse> jmsRequestResponse = Optional.ofNullable(requestResponseMap.get(correlationID));
+                    if (logger.isDebugEnabled())
+                        logger.debug(String.format("Process JMS Message Consumer %s %s \n", correlationID, ((TextMessage) message).getText()));
+                    final Optional<JMSRequestResponse> jmsRequestResponse = Optional.ofNullable(requestResponseMap.get(correlationID));
+
                     final javax.jms.Message msg = message;
-
-
                     jmsRequestResponse.ifPresent(requestResponse -> {
                         requestResponse.getReplyCallback().accept(convertToBusMessage(msg));
+                        /* Record metrics for duration and count. */
+                        timerRequestResponse.recordTiming(this.timeSource.getTime() - requestResponse.getSentTime());
+                        countRequestResponses.increment();
                     });
+
+                    if (!jmsRequestResponse.isPresent()) {
+                        countRequestResponsesMissing.increment();
+                    }
                 }
 
             }
             while (message != null);
 
+        }, countRequestResponseErrors, "Error Processing Responses");
+
+    }
+
+    @Override
+    public void process() {
+        processResponses();
+        processReplies();
+
+        metricsProcessor.process();
+    }
+
+    /**
+     * This gets called to process replies.
+     * If the client is JMS and the Server is Nats then there will be replies to process.
+     */
+    private void processReplies() {
+
+        tryHandler.tryWithErrorCount(() -> {
             JMSReply reply = null;
             do {
                 reply = jmsReplyQueue.poll();
                 if (reply != null) {
-
                     final String messageBody = reply.getReply().getBody();
-                    final String correlationId =  reply.getCorrelationID();
+                    final String correlationId = reply.getCorrelationID();
                     final MessageProducer replyProducer = session.createProducer(reply.getJmsReplyTo());
                     final TextMessage jmsReplyMessage = session.createTextMessage(messageBody);
-
-                    System.out.printf("Reply handler - %s %s %s\n", messageBody, correlationId, replyProducer.getDestination().toString());
+                    timerReceiveReply.recordTiming(timeSource.getTime() - reply.getSentTime());
+                    countReceivedReply.increment();
+                    if (logger.isDebugEnabled())
+                        logger.debug(String.format("Reply handler - %s %s %s\n", messageBody, correlationId, replyProducer.getDestination().toString()));
                     jmsReplyMessage.setJMSCorrelationID(correlationId);
-
-
                     replyProducer.send(jmsReplyMessage);
-                    // TODO close these BOTH nicer.
                     replyProducer.close();
                 }
-            } while (reply != null);
 
 
-        } catch (JMSException e) {
-            throw new JMSMessageBusException("error processing JMS receive queue", e);
-        }
-
-
+            }
+            while (reply != null);
+        }, countReceivedReplyErrors, "error processing JMS receive queue for replies");
     }
 }

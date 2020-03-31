@@ -3,6 +3,8 @@ package io.nats.bridge.nats;
 import io.nats.bridge.Message;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.StringMessage;
+import io.nats.bridge.util.ExceptionHandler;
+import io.nats.bridge.util.SupplierWithException;
 import io.nats.client.Connection;
 import io.nats.client.Subscription;
 
@@ -20,22 +22,18 @@ public class NatsMessageBus implements MessageBus {
     private final String subject;
     private final Subscription subscription;
     private final ExecutorService pool;
+    private final ExceptionHandler tryHandler;
 
 
     //TODO create NatsMessageBusBuilder.
 
-    public NatsMessageBus(final String subject, final Connection connection) {
-        this.connection = connection;
-        this.subject = subject;
-        this.subscription = connection.subscribe(subject);
-        this.pool = Executors.newFixedThreadPool(25);
-    }
 
-    public NatsMessageBus(final String subject, final Connection connection, final String queueGroup) {
+    public NatsMessageBus(final String subject, final Connection connection, final String queueGroup, final ExceptionHandler tryHandler) {
         this.connection = connection;
         this.subject = subject;
         this.subscription = connection.subscribe(subject, queueGroup);
         this.pool = Executors.newFixedThreadPool(25);
+        this.tryHandler = tryHandler;
     }
 
 
@@ -69,29 +67,25 @@ public class NatsMessageBus implements MessageBus {
         // both of the above came out in Java 9
 
         pool.submit(() -> {
-            try {
-                final io.nats.client.Message replyMessage = future.get();
-                replyCallback.accept(new StringMessage(new String(replyMessage.getData(), StandardCharsets.UTF_8)));
-            } catch (Exception e) {
-                //TODO log and track metrics instead.
-                e.printStackTrace();
-            }
-        });
-
-
+                    tryHandler.tryWithLog(() -> {
+                        final io.nats.client.Message replyMessage = future.get();
+                        replyCallback.accept(new StringMessage(new String(replyMessage.getData(), StandardCharsets.UTF_8)));
+                    }, "Unable to handle nats reply");
+                }
+        );
     }
 
     @Override
     public Optional<Message> receive() {
-        try {
+        return tryHandler.tryReturnOrRethrow((SupplierWithException<Optional<Message>>) () -> {
             io.nats.client.Message message = subscription.nextMessage(Duration.ofMillis(1));
             if (message != null) {
                 //TODO for now, just always send a StringMessage. Later create a Function<NatMessage, BridgeMessage> and we may need builder like JMS.
                 // Also, we might be using JSON to send a message with headers. see https://github.com/nats-io/nats-jms-mq-bridge/issues/20
-                final String  replyTo = message.getReplyTo();
+                final String replyTo = message.getReplyTo();
 
+                final String messageBody = new String(message.getData(), StandardCharsets.UTF_8);
                 if (replyTo != null) {
-                    final String messageBody = new String(message.getData(), StandardCharsets.UTF_8);
                     return Optional.of(new StringMessage(messageBody) {
                         @Override
                         public void reply(final Message reply) {
@@ -100,28 +94,21 @@ public class NatsMessageBus implements MessageBus {
                         }
                     });
                 } else {
-                    final String messageBody = new String(message.getData(), StandardCharsets.UTF_8);
                     return Optional.of(new StringMessage(messageBody));
                 }
-
-
             } else {
                 return Optional.empty();
             }
-        } catch (InterruptedException e) {
-            throw new NatsMessageBusException("unable to get next message", e);
-        }
+        }, e -> {
+            throw new NatsMessageBusException("unable to get next message from nats bus", e);
+        });
+
     }
 
     @Override
     public void close() {
-        try {
-            CompletableFuture<Boolean> drain = connection.drain(Duration.ofSeconds(10));
-            drain.get();
-            connection.close();
-        } catch (Exception e) {
-            throw new NatsMessageBusException("Can't drain and close nats connection " + subject, e);
-        }
+        tryHandler.tryWithLog(() -> {
+        }, "Can't drain and close nats connection " + subject);
     }
 
     @Override

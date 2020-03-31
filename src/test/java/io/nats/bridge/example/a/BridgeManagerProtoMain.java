@@ -10,47 +10,39 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package io.nats.bridge.example;
 
+package io.nats.bridge.example.a;
+
+import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.nats.NatsMessageBus;
-import io.nats.client.Nats;
-import io.nats.client.Options;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
 //TODO turn this into a test.
-public class NatsMain {
+// See https://github.com/nats-io/nats-jms-mq-bridge/issues/16
+public class BridgeManagerProtoMain {
 
     public static void main(String... args) {
         try {
+            final MessageBus messageBusSource = ServiceAUtil.getMessageBusNats();
+            final MessageBus messageBusDestination = ServiceAUtil.getMessageBusJms();
+            final MessageBridge messageBridge = new MessageBridge(messageBusSource, messageBusDestination, true);
 
             final AtomicBoolean stop = new AtomicBoolean(false);
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                stop.set(true);
-            }));
 
-            final Options options = new Options.Builder().
-                    server("nats://localhost:4222").
-                    noReconnect(). // Disable reconnect attempts
-                    build();
-
-            final MessageBus messageBus = new NatsMessageBus("test", Nats.connect(options));
-
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> stop.set(true)));
 
             while (true) {
-                Thread.sleep(1000);
-                if (stop.get()) {
-                    messageBus.close();
-                    break;
-                }
-
-                messageBus.request("some message", System.out::println);
+                if (stop.get()) break;
+                Thread.sleep(10);
+                messageBridge.process();
             }
+            messageBridge.close();
 
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
+
 }

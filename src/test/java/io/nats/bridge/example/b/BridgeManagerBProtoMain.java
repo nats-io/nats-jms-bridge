@@ -11,47 +11,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package io.nats.bridge.example.service.a;
+package io.nats.bridge.example.b;
 
-import io.nats.bridge.Message;
+import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.StringMessage;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
 //TODO turn this into a test.
-public class ServiceAJMSServer {
+// See https://github.com/nats-io/nats-jms-mq-bridge/issues/16
+public class BridgeManagerBProtoMain {
 
     public static void main(String... args) {
         try {
+            final MessageBus messageBusSource = ServiceBUtil.getMessageBusJms();
+            final MessageBus messageBusDestination = ServiceBUtil.getMessageBusNats();
+            final MessageBridge messageBridge = new MessageBridge(messageBusSource, messageBusDestination, true);
 
             final AtomicBoolean stop = new AtomicBoolean(false);
-            final MessageBus messageBus = ServiceAUtil.getMessageBusJms();
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> stop.set(true)));
 
             while (true) {
-                if (stop.get()) {
-                    messageBus.close();
-                    break;
-                }
-                final Optional<Message> receive = messageBus.receive();
-                receive.ifPresent(message -> {
-
-                    StringMessage stringMessage = (StringMessage) message;
-                    System.out.println("Handle message " + stringMessage.getBody());
-                    message.reply(new StringMessage("Hello " + stringMessage.getBody()));
-                });
-
-
+                if (stop.get()) break;
                 Thread.sleep(10);
-                messageBus.process();
+                messageBridge.process();
             }
+            messageBridge.close();
 
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
+
 }

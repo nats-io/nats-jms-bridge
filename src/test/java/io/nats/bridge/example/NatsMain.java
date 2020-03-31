@@ -10,42 +10,46 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-package io.nats.bridge.example.service.a;
+package io.nats.bridge.example;
 
 import io.nats.bridge.MessageBus;
+import io.nats.bridge.example.a.ServiceAUtil;
+import io.nats.bridge.nats.NatsMessageBus;
+import io.nats.bridge.util.ExceptionHandler;
+import io.nats.client.Nats;
+import io.nats.client.Options;
+import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 
 //TODO turn this into a test.
-// See https://github.com/nats-io/nats-jms-mq-bridge/issues/16
-public class NatsHelloWorldClient {
+public class NatsMain {
 
     public static void main(String... args) {
         try {
-            final AtomicBoolean stop = new AtomicBoolean(false);
-            final MessageBus messageBus = ServiceAUtil.getMessageBusNats();
-            final List<String> names = Arrays.asList("Rick", "Tom", "Chris", "Paul", "Noah", "Lucas");
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> stop.set(true)));
 
-            int count = 0;
+            final AtomicBoolean stop = new AtomicBoolean(false);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                stop.set(true);
+            }));
+
+            final Options options = new Options.Builder().
+                    server("nats://localhost:4222").
+                    noReconnect(). // Disable reconnect attempts
+                    build();
+
+            final MessageBus messageBus = new NatsMessageBus("test", Nats.connect(options), "exampleGroup", new ExceptionHandler(LoggerFactory.getLogger("test")));
+
+
             while (true) {
-                Thread.sleep(1);
+                Thread.sleep(1000);
                 if (stop.get()) {
                     messageBus.close();
                     break;
                 }
-                final int index = count;
-                names.forEach(name -> {
-                    System.out.println("Sending: " + name + index);
-                    messageBus.request(name + index, s -> System.out.println("Received: " + s));
-                });
-                count++;
-                Thread.sleep(1000);
+
+                messageBus.request("some message", System.out::println);
             }
 
         } catch (Exception ex) {

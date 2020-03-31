@@ -11,12 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package io.nats.bridge.example.service.b;
+package io.nats.bridge.example.b;
 
 import io.nats.bridge.Message;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.StringMessage;
-import io.nats.bridge.example.service.a.ServiceAUtil;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
