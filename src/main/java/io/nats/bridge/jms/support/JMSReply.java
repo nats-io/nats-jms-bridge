@@ -1,6 +1,6 @@
 package io.nats.bridge.jms.support;
 
-import io.nats.bridge.StringMessage;
+import io.nats.bridge.messages.StringMessage;
 
 import javax.jms.Destination;
 

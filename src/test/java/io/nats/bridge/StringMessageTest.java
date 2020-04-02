@@ -1,8 +1,7 @@
 package io.nats.bridge;
 
+import io.nats.bridge.messages.StringMessage;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class StringMessageTest {
 

@@ -11,22 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package io.nats.bridge;
+package io.nats.bridge.messages;
 
-public class StringMessage implements Message {
 
-    private final String body;
+import java.nio.charset.StandardCharsets;
+
+public class StringMessage extends BaseMessage {
+
 
     public StringMessage(String body) {
-        this.body = body;
+        super(body.getBytes(StandardCharsets.UTF_8));
+
     }
 
 
-    @Override
-    public void reply(final Message reply) {
-    }
 
     public String getBody() {
-        return body;
+        return new String(this.getBodyBytes(), StandardCharsets.UTF_8);
     }
 }

@@ -13,6 +13,9 @@
 
 package io.nats.bridge;
 
+import io.nats.bridge.messages.Message;
+import io.nats.bridge.messages.StringMessage;
+
 import java.io.Closeable;
 import java.util.Optional;
 import java.util.function.Consumer;

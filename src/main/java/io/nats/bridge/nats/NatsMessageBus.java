@@ -1,8 +1,8 @@
 package io.nats.bridge.nats;
 
-import io.nats.bridge.Message;
+import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.StringMessage;
+import io.nats.bridge.messages.StringMessage;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.bridge.util.SupplierWithException;
 import io.nats.client.Connection;

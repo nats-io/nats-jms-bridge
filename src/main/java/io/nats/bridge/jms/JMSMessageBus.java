@@ -12,9 +12,9 @@
 // limitations under the License.
 package io.nats.bridge.jms;
 
-import io.nats.bridge.Message;
+import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.StringMessage;
+import io.nats.bridge.messages.StringMessage;
 import io.nats.bridge.TimeSource;
 import io.nats.bridge.jms.support.JMSReply;
 import io.nats.bridge.jms.support.JMSRequestResponse;

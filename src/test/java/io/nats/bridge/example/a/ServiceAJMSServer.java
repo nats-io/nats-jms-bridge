@@ -13,9 +13,9 @@
 
 package io.nats.bridge.example.a;
 
-import io.nats.bridge.Message;
+import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.StringMessage;
+import io.nats.bridge.messages.StringMessage;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;

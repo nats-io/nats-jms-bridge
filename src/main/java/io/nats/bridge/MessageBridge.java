@@ -14,6 +14,8 @@
 package io.nats.bridge;
 
 
+import io.nats.bridge.messages.Message;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Optional;

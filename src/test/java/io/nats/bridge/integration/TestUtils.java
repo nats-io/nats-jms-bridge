@@ -13,10 +13,10 @@
 
 package io.nats.bridge.integration;
 
-import io.nats.bridge.Message;
+import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.StringMessage;
+import io.nats.bridge.messages.StringMessage;
 import io.nats.bridge.jms.support.JMSMessageBusBuilder;
 import io.nats.bridge.nats.NatsMessageBus;
 import io.nats.bridge.util.ExceptionHandler;
