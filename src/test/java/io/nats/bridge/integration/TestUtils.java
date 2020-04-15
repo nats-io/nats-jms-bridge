@@ -18,15 +18,10 @@ import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.jms.support.JMSMessageBusBuilder;
 import io.nats.bridge.messages.MessageBuilder;
-import io.nats.bridge.nats.NatsMessageBus;
-import io.nats.bridge.util.ExceptionHandler;
-import io.nats.client.Nats;
-import io.nats.client.Options;
-import org.slf4j.LoggerFactory;
+import io.nats.bridge.nats.support.NatsMessageBusBuilder;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,13 +34,12 @@ public class TestUtils {
     }
 
     public static MessageBus getMessageBusNats(final String topicPostFix) throws IOException, InterruptedException {
-        final String subject = "message-only-subject-" + topicPostFix;
 
-        final Options options = new Options.Builder().
-                server("nats://localhost:4222").
-                noReconnect(). // Disable reconnect attempts
-                build();
-        return new NatsMessageBus(subject, Nats.connect(options), "queueGroup" + UUID.randomUUID().toString() + System.currentTimeMillis(), new ExceptionHandler(LoggerFactory.getLogger("test")));
+        final String subject =  topicPostFix + "NatsMessageBus";
+
+        final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withSubject(subject);
+        natsMessageBusBuilder.getOptionsBuilder().noReconnect();
+        return natsMessageBusBuilder.build();
     }
 
 

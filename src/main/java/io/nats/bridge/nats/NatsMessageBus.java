@@ -13,7 +13,6 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class NatsMessageBus implements MessageBus {
@@ -28,11 +27,14 @@ public class NatsMessageBus implements MessageBus {
     //TODO create NatsMessageBusBuilder.
 
 
-    public NatsMessageBus(final String subject, final Connection connection, final String queueGroup, final ExceptionHandler tryHandler) {
+    public NatsMessageBus(final String subject, final Connection connection, final String queueGroup,
+                          final ExecutorService pool, final ExceptionHandler tryHandler) {
+
+        System.out.println("SUBJECT" + subject);
         this.connection = connection;
         this.subject = subject;
+        this.pool = pool;
         this.subscription = connection.subscribe(subject, queueGroup);
-        this.pool = Executors.newFixedThreadPool(25);
         this.tryHandler = tryHandler;
     }
 
