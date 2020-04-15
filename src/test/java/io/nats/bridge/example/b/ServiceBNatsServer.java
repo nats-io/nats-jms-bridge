@@ -15,7 +15,8 @@ package io.nats.bridge.example.b;
 
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.messages.StringMessage;
+import io.nats.bridge.messages.MessageBuilder;
+
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,10 +40,8 @@ public class ServiceBNatsServer {
                 }
                 final Optional<Message> receive = messageBus.receive();
                 receive.ifPresent(message -> {
-
-                    StringMessage stringMessage = (StringMessage) message;
-                    System.out.println("Handle message " + stringMessage.getBody());
-                    message.reply(new StringMessage("Hello " + stringMessage.getBody()));
+                    System.out.println("Handle message " + message.bodyAsString());
+                    message.reply(MessageBuilder.builder().withBody("Hello message " + message.bodyAsString()).build());
                 });
 
 

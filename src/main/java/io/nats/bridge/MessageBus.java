@@ -14,7 +14,8 @@
 package io.nats.bridge;
 
 import io.nats.bridge.messages.Message;
-import io.nats.bridge.messages.StringMessage;
+import io.nats.bridge.messages.MessageBuilder;
+
 
 import java.io.Closeable;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public interface MessageBus extends Closeable {
      * @param message string message
      */
     default void publish(String message) {
-        publish(new StringMessage(message));
+        publish( MessageBuilder.builder().withBody(message).build());
     }
 
     /**
@@ -59,7 +60,8 @@ public interface MessageBus extends Closeable {
      * @param reply   callback for reply string
      */
     default void request(final String message, final Consumer<String> reply) {
-        request(new StringMessage(message), replyMessage -> reply.accept(((StringMessage) replyMessage).getBody()));
+        request(MessageBuilder.builder().withBody(message).build(),
+                replyMessage -> reply.accept(replyMessage.bodyAsString()));
     }
 
     /**

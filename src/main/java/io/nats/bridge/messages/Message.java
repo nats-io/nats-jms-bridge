@@ -13,6 +13,7 @@
 
 package io.nats.bridge.messages;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
@@ -37,5 +38,13 @@ public interface Message {
 
     default byte [] getBodyBytes() {
         return new byte[0];
+    }
+
+    default String bodyAsString() {
+        return new String(getBodyBytes(), StandardCharsets.UTF_8);
+    }
+
+    default byte [] getMessageBytes() {
+        return getBodyBytes();
     }
 }

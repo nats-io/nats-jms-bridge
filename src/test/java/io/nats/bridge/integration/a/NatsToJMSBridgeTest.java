@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,24 +22,24 @@ public class NatsToJMSBridgeTest {
     private CountDownLatch serverStopped;
     private CountDownLatch bridgeStopped;
 
-    private MessageBus serverMessageBus;
-    private MessageBus clientMessageBus;
-    private MessageBus bridgeMessageBusSource;
-    private MessageBus bridgeMessageBusDestination;
-    private MessageBridge messageBridge;
+    private MessageBus serverMessageJMSBus;
+    private MessageBus clientMessageNatsBus;
+    private MessageBus bridgeMessageBusNatsSource;
+    private MessageBus bridgeMessageBusJMSDestination;
+    private MessageBridge messageBridgeFomrNatsToJMS;
 
     @Before
     public void setUp() throws Exception {
-        clientMessageBus = TestUtils.getMessageBusNats("A");
-        serverMessageBus = TestUtils.getMessageBusJms("A");
+        clientMessageNatsBus = TestUtils.getMessageBusNats("A");
+        serverMessageJMSBus = TestUtils.getMessageBusJms("A");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSource = TestUtils.getMessageBusNats("A");
-        bridgeMessageBusDestination = TestUtils.getMessageBusJms("A");
+        bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("A");
+        bridgeMessageBusJMSDestination = TestUtils.getMessageBusJms("A");
 
-        messageBridge = new MessageBridge(bridgeMessageBusSource, bridgeMessageBusDestination, true);
+        messageBridgeFomrNatsToJMS = new MessageBridge(bridgeMessageBusNatsSource, bridgeMessageBusJMSDestination, true);
 
     }
 
@@ -53,12 +54,12 @@ public class NatsToJMSBridgeTest {
         runBridgeLoop();
 
 
-        clientMessageBus.request("RICK", s ->  {
+        clientMessageNatsBus.request("RICK", s ->  {
             responseFromServer.set(s);
             resultSignal.countDown();
         });
 
-        resultSignal.await();
+        resultSignal.await(10, TimeUnit.SECONDS);
 
         assertEquals("Hello RICK", responseFromServer.get());
 
@@ -67,7 +68,7 @@ public class NatsToJMSBridgeTest {
     }
 
     private void runBridgeLoop() {
-        TestUtils.runBridgeLoop(messageBridge, stop, bridgeStopped);
+        TestUtils.runBridgeLoop(messageBridgeFomrNatsToJMS, stop, bridgeStopped);
     }
 
     private void stopServerAndBridgeLoops() throws Exception{
@@ -75,6 +76,6 @@ public class NatsToJMSBridgeTest {
     }
 
     private void runServerLoop() {
-        TestUtils.runServerLoop(stop, serverMessageBus, serverStopped);
+        TestUtils.runServerLoop(stop, serverMessageJMSBus, serverStopped);
     }
 }

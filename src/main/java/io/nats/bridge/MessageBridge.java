@@ -19,6 +19,7 @@ import io.nats.bridge.messages.Message;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class MessageBridge implements Closeable {
 
@@ -35,9 +36,23 @@ public class MessageBridge implements Closeable {
     public void process() {
         final Optional<Message> receiveMessageFromSourceOption = sourceBus.receive();
 
+//        if (!receiveMessageFromSourceOption.isPresent()) {
+//            System.out.println("No message bus");
+//        } else {
+//            System.out.println("GOT MESSAGE ON BRIDGE....................");
+//        }
+
         if (requestReply) {
             receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource ->
-                    destinationBus.request(receiveMessageFromSource, receiveMessageFromSource::reply));
+                    destinationBus.request(receiveMessageFromSource, new Consumer<Message>() {
+                        @Override
+                        public void accept(Message message) {
+                            System.out.println("GOT REPLY 1");
+                            receiveMessageFromSource.reply(message);
+                            System.out.println("GOT REPLY 2");
+                        }
+                    })
+            );
         } else {
             receiveMessageFromSourceOption.ifPresent(destinationBus::publish);
         }

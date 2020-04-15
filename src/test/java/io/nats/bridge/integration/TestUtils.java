@@ -16,8 +16,8 @@ package io.nats.bridge.integration;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.messages.StringMessage;
 import io.nats.bridge.jms.support.JMSMessageBusBuilder;
+import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.nats.NatsMessageBus;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.client.Nats;
@@ -54,7 +54,7 @@ public class TestUtils {
         final Thread thread = new Thread(() -> {
             try {
                 while (!stop.get()) {
-                    Thread.sleep(10);
+                    Thread.sleep(1000);
                     messageBridge.process();
                 }
                 messageBridge.close();
@@ -84,10 +84,11 @@ public class TestUtils {
                 }
                 final Optional<Message> receive = serverMessageBus.receive();
                 receive.ifPresent(message -> {
+                    System.out.println("Handle message " + message.bodyAsString());
 
-                    StringMessage stringMessage = (StringMessage) message;
-                    System.out.println("Handle message " + stringMessage.getBody());
-                    message.reply(new StringMessage("Hello " + stringMessage.getBody()));
+
+                    final Message reply = MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build();
+                    message.reply(reply);
                 });
 
 

@@ -1,38 +1,49 @@
 package io.nats.bridge.messages;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.Collections;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+
+import static io.nats.bridge.messages.Protocol.*;
 
 public class MessageBuilder {
 
-    private long timestamp;
+    private long timestamp=-1;
     //TTL plus timestamp
-    private long expirationTime;
+    private long expirationTime=-1;
     //Delivery time is not instant
-    private long deliveryTime;
-    private int mode;
+    private long deliveryTime=-1;
+    private int mode=-1;
     private String type = Message.NO_TYPE;
     private boolean redelivered;
-    private int priority;
+    private int priority=-1;
     private Map<String, Object> headers;
     private byte[] body;
+    private final static ObjectMapper mapper = new ObjectMapper();
 
-    public HeaderFactory getHeaderFactory() {
-        if (headerFactory == null) {
-            headerFactory = bytes -> Collections.emptyMap();
+    private  Consumer<Message> replyHandler;
+
+    public Consumer<Message> getReplyHandler() {
+        if (replyHandler == null) {
+            replyHandler = message -> System.out.println("DEFAULT HANDLER CALLED ");
         }
-        return headerFactory;
+        return replyHandler;
     }
 
-    public MessageBuilder setHeaderFactory(HeaderFactory headerFactory) {
-        this.headerFactory = headerFactory;
+    public MessageBuilder withReplyHandler(Consumer<Message> replyHandler) {
+        this.replyHandler = replyHandler;
         return this;
     }
 
-    private HeaderFactory headerFactory;
+    public static MessageBuilder builder() {
+        return new MessageBuilder();
+    }
 
     public long getTimestamp() {
         return timestamp;
@@ -98,6 +109,9 @@ public class MessageBuilder {
     }
 
     public Map<String, Object> getHeaders() {
+        if (headers == null) {
+            headers = new HashMap<>(9);
+        }
         return headers;
     }
 
@@ -115,101 +129,88 @@ public class MessageBuilder {
         return this;
     }
 
+    public MessageBuilder withBody(String body) {
+        this.body = body.getBytes(StandardCharsets.UTF_8);
+        return this;
+    }
+
     public Message build() {
-        if (timestamp == -1 && headers == null && deliveryTime == -1 && expirationTime == -1
+        if (timestamp == -1 && headers == null && deliveryTime == -1 && expirationTime == -1 && mode == -1
                 && type == Message.NO_TYPE && !redelivered && priority == -1) {
-            return new BaseMessage(body);
+            return new BaseMessage(getBody(), getReplyHandler());
         } else {
-            return new BaseMessageWithHeaders(timestamp, expirationTime, deliveryTime, mode, type,
-                    redelivered, priority, headers, body);
+            return new BaseMessageWithHeaders(getTimestamp(), getExpirationTime(), getDeliveryTime(), getMode(), getType(),
+                    isRedelivered(), getPriority(), getHeaders(), getBody(), getReplyHandler());
         }
     }
 
 
-    public static int hashCode(byte[] value) {
-        int h = 0;
-        byte[] var2 = value;
-        int var3 = value.length;
-
-        for (int var4 = 0; var4 < var3; ++var4) {
-            byte v = var2[var4];
-            h = 31 * h + (v & 255);
-        }
-
-        return h;
-    }
-
-    private final byte magicByte1 = 20;
-    private final byte magicByte2 = 20;
-    private final byte magicByte3 = (byte) 0xbe;
-    private final byte magicByte4 = (byte) 0xef;
-
-
-    //<magic number><version_number><json_len><json_hash><json_flat_map><payload len><payload_hash><payload>
     public Message buildFromBytes(byte[] buffer) {
 
         if (buffer.length > 5) {
 
-            if (buffer[0] == magicByte1 &&
-                    buffer[1] == magicByte2 &&
-                    buffer[2] == magicByte3 &&
-                    buffer[3] == magicByte4) {
+            if (buffer[0] == MARKER_AB &&
+                    buffer[1] == MARKER_CD &&
+                    buffer[2] == Protocol.MESSAGE_VERSION_MAJOR &&
+                    buffer[3] == Protocol.MESSAGE_VERSION_MINOR &&
+                    buffer[4] == MARKER_AB &&
+                    buffer[5] == MARKER_CD
+            ) {
 
                 final DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(buffer));
                 try {
-
-                    //Skip magic byte
-                    dataInputStream.skipBytes(4);
-
-                    // Check the version
-                    final int version = dataInputStream.readInt();
-
-                    if (version != 1) {
-                        throw new IllegalStateException("Unsupported version " + version);
-                    }
+                    dataInputStream.skipBytes(6);
 
                     //Read the header
                     final int jsonLength = dataInputStream.readInt();
                     final int jsonHash = dataInputStream.readInt();
                     final byte[] jsonByteBuffer = new byte[jsonLength];
                     dataInputStream.read(jsonByteBuffer);
-                    if (hashCode(jsonByteBuffer) != jsonHash) {
-                        throw new MessageBuilderException("JSON Hash did not match ");
+                    if (Protocol.createHashCode(jsonByteBuffer) != jsonHash) {
+                        throw new MessageBuilderException("JSON Hash did not match for headers");
                     }
-                    final Map<String, Object> header = getHeaderFactory().readHeader(jsonByteBuffer);
+                    final Map<String, Object> header = mapper.readValue(jsonByteBuffer, Map.class);
 
                     //Read the body
                     final int bodyLength = dataInputStream.readInt();
+
+                    //ystem.out.println("body len " + bodyLength);
                     final int bodyHash = dataInputStream.readInt();
+                    //ystem.out.println("body hash " + bodyHash);
                     final byte[] bodyBuffer = new byte[bodyLength];
-                    if (hashCode(bodyBuffer) != bodyHash) {
+                    dataInputStream.read(bodyBuffer);
+                    if (Protocol.createHashCode(bodyBuffer) != bodyHash) {
                         throw new MessageBuilderException("Body Hash did not match ");
                     }
 
                     /* read headers */
-                    if (header.containsKey("timestamp")) {
-                        withTimestamp((long) header.get("timestamp"));
+                    if (header.containsKey(HEADER_KEY_TIMESTAMP)) {
+                        withTimestamp((long) header.get(HEADER_KEY_TIMESTAMP));
+                        header.remove(HEADER_KEY_TIMESTAMP);
                     }
-                    if (header.containsKey("expirationTime")) {
-                        withExpirationTime((long) header.get("expirationTime"));
+                    if (header.containsKey(HEADER_KEY_EXPIRATION_TIME)) {
+                        withExpirationTime((long) header.get(HEADER_KEY_EXPIRATION_TIME));
+                        header.remove(HEADER_KEY_EXPIRATION_TIME);
                     }
-                    if (header.containsKey("deliveryTime")) {
-                        withDeliveryTime((long) header.get("deliveryTime"));
+                    if (header.containsKey(HEADER_KEY_DELIVERY_TIME)) {
+                        withDeliveryTime((long) header.get(HEADER_KEY_DELIVERY_TIME));
+                        header.remove(HEADER_KEY_DELIVERY_TIME);
                     }
-                    if (header.containsKey("deliveryTime")) {
-                        withDeliveryTime((long) header.get("deliveryTime"));
+                    if (header.containsKey(HEADER_KEY_MODE)) {
+                        withMode((int) header.get(HEADER_KEY_MODE));
+                        header.remove(HEADER_KEY_MODE);
                     }
-                    if (header.containsKey("mode")) {
-                        withMode((int) header.get("mode"));
+                    if (header.containsKey(HEADER_KEY_TYPE)) {
+                        withType((String) header.get(HEADER_KEY_TYPE));
+                        header.remove(HEADER_KEY_TYPE);
                     }
-                    if (header.containsKey("type")) {
-                        withType((String) header.get("type"));
+                    if (header.containsKey(HEADER_KEY_REDELIVERED)) {
+                        withRedelivered((boolean) header.get(HEADER_KEY_REDELIVERED));
+                        header.remove(HEADER_KEY_REDELIVERED);
                     }
-                    if (header.containsKey("redelivered")) {
-                        withRedelivered((boolean) header.get("redelivered"));
-                    }
-                    if (header.containsKey("priority")) {
-                        withPriority((int) header.get("priority"));
+                    if (header.containsKey(HEADER_KEY_PRIORITY)) {
+                        withPriority((int) header.get(HEADER_KEY_PRIORITY));
+                        header.remove(HEADER_KEY_PRIORITY);
                     }
 
                     withHeaders(header);
@@ -231,4 +232,36 @@ public class MessageBuilder {
         }
 
     }
+
+    public MessageBuilder withHeader(final String key, final int value) {
+        getHeaders().put(key, value);
+        return this;
+    }
+
+    public MessageBuilder withHeader(final String key, final long value) {
+        getHeaders().put(key, value);
+        return this;
+    }
+
+    public MessageBuilder withHeader(final String key, final boolean value) {
+        getHeaders().put(key, value);
+        return this;
+    }
+
+    public MessageBuilder withHeader(final String key, final double value) {
+        getHeaders().put(key, value);
+        return this;
+    }
+
+    public MessageBuilder withHeader(final String key, final float value) {
+        getHeaders().put(key, value);
+        return this;
+    }
+
+
+    public MessageBuilder withHeader(final String key, final String value) {
+        getHeaders().put(key, value);
+        return this;
+    }
+
 }

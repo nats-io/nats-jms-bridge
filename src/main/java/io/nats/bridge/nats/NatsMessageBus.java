@@ -2,7 +2,7 @@ package io.nats.bridge.nats;
 
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.messages.StringMessage;
+import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.bridge.util.SupplierWithException;
 import io.nats.client.Connection;
@@ -39,11 +39,7 @@ public class NatsMessageBus implements MessageBus {
 
     @Override
     public void publish(final Message message) {
-        if (message instanceof StringMessage) {
-            connection.publish(subject, ((StringMessage) message).getBody().getBytes(StandardCharsets.UTF_8));
-        } else {
-            throw new NatsMessageBusException("Message type not supported");
-        }
+        connection.publish(subject, message.getMessageBytes());
     }
 
     @Override
@@ -53,9 +49,8 @@ public class NatsMessageBus implements MessageBus {
 
     @Override
     public void request(final Message message, final Consumer<Message> replyCallback) {
-        final String msg = ((StringMessage) message).getBody();
 
-        final CompletableFuture<io.nats.client.Message> future = connection.request(subject, msg.getBytes(StandardCharsets.UTF_8));
+        final CompletableFuture<io.nats.client.Message> future = connection.request(subject, message.getMessageBytes());
 
 
         //TODO change the JAVA API to use a callback or use a queue reaction. Use future.isDone() and some mapping. Not cool. Need a callback here.  :)
@@ -69,7 +64,7 @@ public class NatsMessageBus implements MessageBus {
         pool.submit(() -> {
                     tryHandler.tryWithLog(() -> {
                         final io.nats.client.Message replyMessage = future.get();
-                        replyCallback.accept(new StringMessage(new String(replyMessage.getData(), StandardCharsets.UTF_8)));
+                        replyCallback.accept(MessageBuilder.builder().withBody(replyMessage.getData()).build());
                     }, "Unable to handle nats reply");
                 }
         );
@@ -84,17 +79,17 @@ public class NatsMessageBus implements MessageBus {
                 // Also, we might be using JSON to send a message with headers. see https://github.com/nats-io/nats-jms-mq-bridge/issues/20
                 final String replyTo = message.getReplyTo();
 
-                final String messageBody = new String(message.getData(), StandardCharsets.UTF_8);
                 if (replyTo != null) {
-                    return Optional.of(new StringMessage(messageBody) {
-                        @Override
-                        public void reply(final Message reply) {
-                            final StringMessage stringMessage = (StringMessage) reply;
-                            connection.publish(replyTo, stringMessage.getBody().getBytes(StandardCharsets.UTF_8));
-                        }
-                    });
+                    return Optional.of(
+                            MessageBuilder.builder().withBody(message.getData()).withReplyHandler(new Consumer<Message>() {
+                                @Override
+                                public void accept(final Message reply) {
+                                    connection.publish(replyTo, reply.getMessageBytes());
+                                }
+                            }).build()
+                     );
                 } else {
-                    return Optional.of(new StringMessage(messageBody));
+                    return Optional.of(MessageBuilder.builder().withBody(message.getData()).build());
                 }
             } else {
                 return Optional.empty();
