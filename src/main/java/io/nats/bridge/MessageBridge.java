@@ -43,14 +43,14 @@ public class MessageBridge implements Closeable {
         final Optional<Message> receiveMessageFromSourceOption = sourceBus.receive();
 
 //        if (!receiveMessageFromSourceOption.isPresent()) {
-//            System.out.println("No message bus");
+//            ystem.out.println("No message bus");
 //        } else {
-//            System.out.println("GOT MESSAGE ON BRIDGE....................");
+//            ystem.out.println("GOT MESSAGE ON BRIDGE....................");
 //        }
 
         if (requestReply) {
             receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
-                System.out.println("### MESSAGE BRIDGE MESSAGE " + receiveMessageFromSource.bodyAsString() + " HEADERS" + receiveMessageFromSource.headers() );
+                //ystem.out.println("### MESSAGE BRIDGE MESSAGE " + receiveMessageFromSource.bodyAsString() + " HEADERS" + receiveMessageFromSource.headers() );
 
                 destinationBus.request(receiveMessageFromSource, replyMessage -> {
                             //ystem.out.println("GOT REPLY 1");

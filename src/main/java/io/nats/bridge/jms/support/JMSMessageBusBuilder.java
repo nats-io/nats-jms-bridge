@@ -34,6 +34,7 @@ import javax.naming.InitialContext;
 import java.time.Duration;
 import java.util.Queue;
 import java.util.concurrent.LinkedTransferQueue;
+import java.util.Hashtable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -66,6 +67,8 @@ public class JMSMessageBusBuilder {
     private FunctionWithException<io.nats.bridge.messages.Message, javax.jms.Message> bridgeMessageConverter;
     private java.util.Queue<JMSReply> jmsReplyQueue;
     private boolean copyHeaders = false;
+    private Hashtable<String, Object> jndiProperties = new Hashtable<>();
+
 
 
     public FunctionWithException<io.nats.bridge.messages.Message, Message> getBridgeMessageConverter() {
@@ -300,9 +303,12 @@ public class JMSMessageBusBuilder {
         return this;
     }
 
+
     public Context getContext() {
         if (context == null) {
-            context = exceptionHandler.tryReturnOrRethrow((SupplierWithException<Context>) InitialContext::new,
+
+
+            context = exceptionHandler.tryReturnOrRethrow((SupplierWithException<Context>) () -> new InitialContext(getJndiProperties()),
                     (e) -> new JMSMessageBusBuilderException("Unable to create JNDI context", e));
         }
         return context;
@@ -402,4 +408,17 @@ public class JMSMessageBusBuilder {
     }
 
 
+    public Hashtable<String, Object> getJndiProperties() {
+        if (jndiProperties.size() == 0) {
+            jndiProperties.put("java.naming.factory.initial", (String) System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory"));
+            jndiProperties.put("connectionFactory.ConnectionFactory", (String) System.getenv().getOrDefault("NATS_BRIDGE_JMS_CONNECTION_FACTORY", "tcp://localhost:61616"));
+            jndiProperties.put("queue.queue/testQueue", (String) System.getenv().getOrDefault("NATS_BRIDGE_JMS_QUEUE", "queue.queue/testQueue=testQueue"));
+        }
+        return jndiProperties;
+    }
+
+    public JMSMessageBusBuilder setJndiProperties(Hashtable<String, Object> jndiProperties) {
+        this.jndiProperties = jndiProperties;
+        return this;
+    }
 }

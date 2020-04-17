@@ -33,7 +33,7 @@ public class ConvertBridgeMessageToJmsMessageWithHeaders implements FunctionWith
         final Map<String, Object> headers = message.headers();
         final Set<String> keys = headers.keySet();
         for (String key : keys) {
-            System.out.println(key);
+            //ystem.out.println(key);
             bytesMessage.setObjectProperty(key, headers.get(key));
         }
 
