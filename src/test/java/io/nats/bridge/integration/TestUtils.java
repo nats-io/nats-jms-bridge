@@ -85,10 +85,19 @@ public class TestUtils {
                 final Optional<Message> receive = serverMessageBus.receive();
                 receive.ifPresent(message -> {
                     System.out.println("Handle message " + message.bodyAsString());
+                    System.out.println("Handle message headers " + message.headers());
 
 
-                    final Message reply = MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build();
-                    message.reply(reply);
+
+                    final String myHeader = (String) message.headers().get("MY_HEADER");
+                    if (myHeader == null) {
+                        final Message reply = MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build();
+                        message.reply(reply);
+                    } else {
+                        final Message reply = MessageBuilder.builder().withBody("Hello " + message.bodyAsString() + " MY_HEADER " + myHeader).build();
+                        message.reply(reply);
+                    }
+
                 });
 
 

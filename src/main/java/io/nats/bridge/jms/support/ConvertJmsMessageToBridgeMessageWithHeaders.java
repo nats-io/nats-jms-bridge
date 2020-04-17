@@ -70,7 +70,9 @@ public class ConvertJmsMessageToBridgeMessageWithHeaders implements FunctionWith
         final Enumeration<String> propertyNames = (Enumeration<String>) jmsMessage.getPropertyNames();
         while (propertyNames.hasMoreElements()) {
             final String propertyName = propertyNames.nextElement();
-            System.out.println("JMS " + propertyName);
+            //ystem.out.println("JMS HEADER ---------------------------------------->" + propertyName);
+
+            if (!propertyName.startsWith("JMS"))
             builder.withHeader(propertyName, jmsMessage.getObjectProperty(propertyName));
         }
 

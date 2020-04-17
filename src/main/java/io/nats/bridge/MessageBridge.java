@@ -54,7 +54,7 @@ public class MessageBridge implements Closeable {
 
                 destinationBus.request(receiveMessageFromSource, replyMessage -> {
                             //ystem.out.println("GOT REPLY 1");
-                            System.out.println("### MESSAGE BRIDGE REPLY " + replyMessage.bodyAsString() + " HEADERS" + replyMessage.headers() );
+                            //ystem.out.println("### MESSAGE BRIDGE REPLY " + replyMessage.bodyAsString() + " HEADERS" + replyMessage.headers() );
                             receiveMessageFromSource.reply(replyMessage);
                             //ystem.out.println("GOT REPLY 2");
                         });

@@ -67,8 +67,7 @@ public class NatsToJmsBridgeWithHeadersTest {
 
 
         runClientLoop();
-        //assertEquals ("MY_VALUE", responseHeaderFromServer.get());
-        assertEquals ("Hello RICK", responseFromServer.get());
+        assertEquals ("Hello RICK MY_HEADER MY_VALUE", responseFromServer.get());
 
         System.out.println(responseFromServer.get());
 

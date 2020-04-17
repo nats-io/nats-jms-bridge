@@ -30,7 +30,7 @@ public class NatsMessageBus implements MessageBus {
     public NatsMessageBus(final String subject, final Connection connection, final String queueGroup,
                           final ExecutorService pool, final ExceptionHandler tryHandler) {
 
-        System.out.println("SUBJECT" + subject);
+        //ystem.out.println("SUBJECT" + subject);
         this.connection = connection;
         this.subject = subject;
         this.pool = pool;
