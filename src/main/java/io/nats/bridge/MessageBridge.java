@@ -21,6 +21,12 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+/**
+ * A message bridge connects two MessageBuses.
+ * A message bus is a queue or stream messaging system like Nats, Active MQ, SQS, Kinesis, Kafka, IBM MQ, RabbitMQ or JMS.
+ *
+ * The bridge handles request/reply bridging or plain message forwarding.
+ */
 public class MessageBridge implements Closeable {
 
     private final MessageBus sourceBus;
@@ -43,15 +49,16 @@ public class MessageBridge implements Closeable {
 //        }
 
         if (requestReply) {
-            receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource ->
-                    destinationBus.request(receiveMessageFromSource, new Consumer<Message>() {
-                        @Override
-                        public void accept(Message message) {
-                            System.out.println("GOT REPLY 1");
-                            receiveMessageFromSource.reply(message);
-                            System.out.println("GOT REPLY 2");
-                        }
-                    })
+            receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
+                System.out.println("### MESSAGE BRIDGE MESSAGE " + receiveMessageFromSource.bodyAsString() + " HEADERS" + receiveMessageFromSource.headers() );
+
+                destinationBus.request(receiveMessageFromSource, replyMessage -> {
+                            //ystem.out.println("GOT REPLY 1");
+                            System.out.println("### MESSAGE BRIDGE REPLY " + replyMessage.bodyAsString() + " HEADERS" + replyMessage.headers() );
+                            receiveMessageFromSource.reply(replyMessage);
+                            //ystem.out.println("GOT REPLY 2");
+                        });
+                    }
             );
         } else {
             receiveMessageFromSourceOption.ifPresent(destinationBus::publish);

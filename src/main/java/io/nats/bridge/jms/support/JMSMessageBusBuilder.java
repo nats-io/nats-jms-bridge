@@ -23,6 +23,7 @@ import io.nats.bridge.metrics.MetricsProcessor;
 import io.nats.bridge.metrics.Output;
 import io.nats.bridge.metrics.implementation.SimpleMetrics;
 import io.nats.bridge.util.ExceptionHandler;
+import io.nats.bridge.util.FunctionWithException;
 import io.nats.bridge.util.SupplierWithException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import java.time.Duration;
+import java.util.Queue;
+import java.util.concurrent.LinkedTransferQueue;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -59,7 +62,73 @@ public class JMSMessageBusBuilder {
     private Supplier<MessageConsumer> consumerSupplier;
     private MetricsProcessor metricsProcessor;
     private ExceptionHandler tryHandler;
+    private FunctionWithException<Message, io.nats.bridge.messages.Message> jmsMessageConverter;
+    private FunctionWithException<io.nats.bridge.messages.Message, javax.jms.Message> bridgeMessageConverter;
+    private java.util.Queue<JMSReply> jmsReplyQueue;
+    private boolean copyHeaders = false;
 
+
+    public FunctionWithException<io.nats.bridge.messages.Message, Message> getBridgeMessageConverter() {
+
+        if (bridgeMessageConverter == null) {
+            if (isCopyHeaders()) {
+                bridgeMessageConverter = new ConvertBridgeMessageToJmsMessageWithHeaders(getSession());
+            } else {
+                bridgeMessageConverter = new ConvertBridgeMessageToJmsMessage(getSession());
+            }
+        }
+        return bridgeMessageConverter;
+    }
+
+    public JMSMessageBusBuilder withBridgeMessageConverter(final FunctionWithException<io.nats.bridge.messages.Message, Message> bridgeMessageConverter) {
+        this.bridgeMessageConverter = bridgeMessageConverter;
+        return this;
+    }
+
+    public static JMSMessageBusBuilder builder() {
+        return new JMSMessageBusBuilder();
+    }
+
+    public boolean isCopyHeaders() {
+        return copyHeaders;
+    }
+
+    public JMSMessageBusBuilder turnOnCopyHeaders() {
+        return withCopyHeaders(true);
+    }
+
+    public JMSMessageBusBuilder withCopyHeaders(boolean copyHeaders) {
+        this.copyHeaders = copyHeaders;
+        return this;
+    }
+
+    public Queue<JMSReply> getJmsReplyQueue() {
+        if (jmsReplyQueue == null) {
+            jmsReplyQueue = new LinkedTransferQueue<>();
+        }
+        return jmsReplyQueue;
+    }
+
+    public JMSMessageBusBuilder withJmsReplyQueue(Queue<JMSReply> jmsReplyQueue) {
+        this.jmsReplyQueue = jmsReplyQueue;
+        return this;
+    }
+
+    public FunctionWithException<Message, io.nats.bridge.messages.Message> getJmsMessageConverter() {
+        if (jmsMessageConverter == null) {
+            if (!isCopyHeaders()) {
+                jmsMessageConverter = new ConvertJmsMessageToBridgeMessage(getTryHandler(), getTimeSource(), getJmsReplyQueue());
+            } else {
+                jmsMessageConverter = new ConvertJmsMessageToBridgeMessageWithHeaders(getTryHandler(), getTimeSource(), getJmsReplyQueue());
+            }
+        }
+        return jmsMessageConverter;
+    }
+
+    public JMSMessageBusBuilder withJmsMessageConverter(final FunctionWithException<Message, io.nats.bridge.messages.Message> messageConverter) {
+        this.jmsMessageConverter = messageConverter;
+        return this;
+    }
 
     public ExceptionHandler getTryHandler() {
         if (tryHandler == null) {
@@ -328,7 +397,8 @@ public class JMSMessageBusBuilder {
 
     public MessageBus build() {
         return new JMSMessageBus(getDestination(), getSession(), getConnection(), getResponseDestination(),
-                getResponseConsumer(), getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(), getMetricsProcessor(), getTryHandler(), getJmsBusLogger());
+                getResponseConsumer(), getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(),
+                getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(), getBridgeMessageConverter());
     }
 
 

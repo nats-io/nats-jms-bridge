@@ -18,7 +18,7 @@ public class BaseMessageWithHeadersTest {
         builder.withBody("Hello Cruel World".getBytes(StandardCharsets.UTF_8));
         builder.withPriority(1);
         builder.withExpirationTime(expirationTime).withTimestamp(time);
-        builder.withMode(3);
+        builder.withDeliveryMode(3);
         builder.withRedelivered(true);
         builder.withDeliveryTime(time + 1);
         builder.withHeader("header1", 1);

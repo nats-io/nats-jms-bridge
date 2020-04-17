@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static io.nats.bridge.messages.Protocol.*;
@@ -23,6 +20,10 @@ public class BaseMessageWithHeaders implements BytesMessage {
     private final String type;
     private final boolean redelivered;
     private final int priority;
+
+    private final String correlationID;
+
+
     private final Map<String, Object> headers;
 
     private final byte[] bodyBytes;
@@ -32,7 +33,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
 
 
     public BaseMessageWithHeaders(long timestamp, long expirationTime, long deliveryTime, int mode, String type,
-                                  boolean redelivered, int priority, Map<String, Object> headers, byte[] bytes,
+                                  boolean redelivered, int priority, String correlationID, Map<String, Object> headers, byte[] bytes,
                                   Consumer<Message> replyHandler) {
         this.timestamp = timestamp;
         this.expirationTime = expirationTime;
@@ -41,11 +42,16 @@ public class BaseMessageWithHeaders implements BytesMessage {
         this.type = type;
         this.redelivered = redelivered;
         this.priority = priority;
+        this.correlationID = correlationID;
         this.headers = headers;
         this.bodyBytes = bytes;
         this.replyHandler = replyHandler;
     }
 
+    @Override
+    public String correlationID() {
+        return correlationID;
+    }
 
     @Override
     public void reply(final Message reply) {
@@ -70,7 +76,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
         return deliveryTime;
     }
 
-    public int mode() {
+    public int deliveryMode() {
         return mode;
     }
 
@@ -87,6 +93,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
     }
 
     public Map<String, Object> headers() {
+        if (headers==null) return Collections.emptyMap();
         return headers;
     }
 
@@ -115,7 +122,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
                 outputHeaders.put(HEADER_KEY_DELIVERY_TIME, this.deliveryTime());
             }
             if (mode != -1)
-                outputHeaders.put(HEADER_KEY_MODE, this.mode());
+                outputHeaders.put(HEADER_KEY_MODE, this.deliveryMode());
             if (expirationTime > 0)
                 outputHeaders.put(HEADER_KEY_EXPIRATION_TIME, this.expirationTime());
             if (timestamp > 0)

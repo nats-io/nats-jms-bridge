@@ -27,10 +27,12 @@ public interface Message {
     default long expirationTime() {return -1L;}
     //Delivery time is not instant
     default long deliveryTime() {return -1L;}
-    default int mode() {return -1;}
+    default int deliveryMode() {return -1;}
     default String type() {return NO_TYPE;}
     default boolean redelivered() {return false;}
     default int priority() {return -1;}
+
+    default String correlationID() {return "";}
 
     default Map<String, Object> headers() {return Collections.emptyMap();}
 

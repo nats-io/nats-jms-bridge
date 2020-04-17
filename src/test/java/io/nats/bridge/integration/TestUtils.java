@@ -38,6 +38,12 @@ public class TestUtils {
         return jmsMessageBusBuilder.build();
     }
 
+    public static MessageBus getMessageBusJmsWithHeaders(final String topicPostFix) {
+        final String queueName = "dynamicQueues/headers-message-only-" + topicPostFix;
+        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().turnOnCopyHeaders().withDestinationName(queueName);
+        return jmsMessageBusBuilder.build();
+    }
+
     public static MessageBus getMessageBusNats(final String topicPostFix) throws IOException, InterruptedException {
         final String subject = "message-only-subject-" + topicPostFix;
 

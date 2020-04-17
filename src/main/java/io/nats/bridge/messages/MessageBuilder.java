@@ -26,8 +26,21 @@ public class MessageBuilder {
     private Map<String, Object> headers;
     private byte[] body;
     private final static ObjectMapper mapper = new ObjectMapper();
+    private  String correlationID;
 
     private  Consumer<Message> replyHandler;
+
+    public MessageBuilder() {
+    }
+
+    public String getCorrelationID() {
+        return correlationID;
+    }
+
+    public MessageBuilder withCorrelationID(String correlationID) {
+        this.correlationID = correlationID;
+        return this;
+    }
 
     public Consumer<Message> getReplyHandler() {
         if (replyHandler == null) {
@@ -76,7 +89,7 @@ public class MessageBuilder {
         return mode;
     }
 
-    public MessageBuilder withMode(int mode) {
+    public MessageBuilder withDeliveryMode(int mode) {
         this.mode = mode;
         return this;
     }
@@ -140,7 +153,7 @@ public class MessageBuilder {
             return new BaseMessage(getBody(), getReplyHandler());
         } else {
             return new BaseMessageWithHeaders(getTimestamp(), getExpirationTime(), getDeliveryTime(), getMode(), getType(),
-                    isRedelivered(), getPriority(), getHeaders(), getBody(), getReplyHandler());
+                    isRedelivered(), getPriority(), getCorrelationID(), getHeaders(), getBody(), getReplyHandler());
         }
     }
 
@@ -197,7 +210,7 @@ public class MessageBuilder {
                         header.remove(HEADER_KEY_DELIVERY_TIME);
                     }
                     if (header.containsKey(HEADER_KEY_MODE)) {
-                        withMode((int) header.get(HEADER_KEY_MODE));
+                        withDeliveryMode((int) header.get(HEADER_KEY_MODE));
                         header.remove(HEADER_KEY_MODE);
                     }
                     if (header.containsKey(HEADER_KEY_TYPE)) {
@@ -237,6 +250,12 @@ public class MessageBuilder {
         getHeaders().put(key, value);
         return this;
     }
+
+    public MessageBuilder withHeader(final String key, final Object value) {
+        getHeaders().put(key, value);
+        return this;
+    }
+
 
     public MessageBuilder withHeader(final String key, final long value) {
         getHeaders().put(key, value);

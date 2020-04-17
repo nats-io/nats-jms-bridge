@@ -19,7 +19,7 @@ public class MessageTest {
         assertEquals("NO_TYPE", message.type() );
         assertEquals(-1, message.expirationTime() );
 
-        assertEquals(-1, message.mode() );
+        assertEquals(-1, message.deliveryMode() );
 
         assertEquals(0, message.getBodyBytes().length );
 

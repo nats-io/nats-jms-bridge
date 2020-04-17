@@ -15,6 +15,96 @@ public class JMSMessage implements javax.jms.Message {
 
     private  Object body;
 
+    private  long timestamp;
+    //TTL plus timestamp
+    private  long expirationTime;
+    //Delivery time is not instant
+    private  long deliveryTime;
+    private  int mode;
+    private  String type;
+    private  boolean redelivered;
+    private  int priority;
+    private Destination destination;
+    private Destination replyDest;
+    private String correlationID;
+
+
+    public Map<String, Object> getMap() {
+        return map;
+    }
+
+    public Object getBody() {
+        return body;
+    }
+
+    public JMSMessage setBody(Object body) {
+        this.body = body;
+        return this;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public JMSMessage withTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+        return this;
+    }
+
+    public long getExpirationTime() {
+        return expirationTime;
+    }
+
+    public JMSMessage withExpirationTime(long expirationTime) {
+        this.expirationTime = expirationTime;
+        return this;
+    }
+
+    public long getDeliveryTime() {
+        return deliveryTime;
+    }
+
+    public JMSMessage withDeliveryTime(long deliveryTime) {
+        this.deliveryTime = deliveryTime;
+        return this;
+    }
+
+    public int getMode() {
+        return mode;
+    }
+
+    public JMSMessage withMode(int mode) {
+        this.mode = mode;
+        return this;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public JMSMessage withType(String type) {
+        this.type = type;
+        return this;
+    }
+
+    public boolean isRedelivered() {
+        return redelivered;
+    }
+
+    public JMSMessage withRedelivered(boolean redelivered) {
+        this.redelivered = redelivered;
+        return this;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public JMSMessage withPriority(int priority) {
+        this.priority = priority;
+        return this;
+    }
+
     public JMSMessage(Object body) {
         this.body = body;
     }
@@ -31,12 +121,12 @@ public class JMSMessage implements javax.jms.Message {
 
     @Override
     public long getJMSTimestamp() throws JMSException {
-        return (long) map.get("Timestamp");
+        return timestamp;
     }
 
     @Override
     public void setJMSTimestamp(long timestamp) throws JMSException {
-        map.put("Timestamp", timestamp);
+      this. timestamp = timestamp;
     }
 
     @Override
@@ -51,97 +141,96 @@ public class JMSMessage implements javax.jms.Message {
 
     @Override
     public void setJMSCorrelationID(String correlationID) throws JMSException {
-        map.put("CorrelationID", correlationID);
+            this.correlationID = correlationID;
     }
 
     @Override
     public String getJMSCorrelationID() throws JMSException {
-        return (String) map.get("CorrelationID");
+        return correlationID;
     }
 
     @Override
     public Destination getJMSReplyTo() throws JMSException {
-        return (Destination) map.get("ReplyTo");
+        return replyDest;
     }
 
     @Override
     public void setJMSReplyTo(Destination replyTo) throws JMSException {
-        map.put("ReplyTo", replyTo);
+        replyDest = replyTo;
     }
 
     @Override
     public Destination getJMSDestination() throws JMSException {
-        return (Destination) map.get("Destination");
+        return destination;
     }
 
     @Override
-    public void setJMSDestination(Destination destination) throws JMSException {
-        map.put("Destination", destination);
+    public void setJMSDestination(final Destination destination) throws JMSException {
+        this.destination = destination;
     }
 
     @Override
     public int getJMSDeliveryMode() throws JMSException {
-        return (int) map.get("DeliveryMode");
+        return mode;
     }
 
     @Override
     public void setJMSDeliveryMode(int deliveryMode) throws JMSException {
-        map.put("DeliveryMode", deliveryMode);
+       this.mode = deliveryMode;
     }
 
     @Override
     public boolean getJMSRedelivered() throws JMSException {
-        return (boolean) map.get("Redelivered");
+        return redelivered;
     }
 
     @Override
     public void setJMSRedelivered(boolean redelivered) throws JMSException {
-        map.put("Redelivered", redelivered);
+       this.redelivered = redelivered;
     }
 
     @Override
     public String getJMSType() throws JMSException {
-        return (String) map.get("Type");
+        return type;
     }
 
     @Override
     public void setJMSType(String type) throws JMSException {
-        map.put("Type", type);
+        this.type = type;
     }
 
     @Override
     public long getJMSExpiration() throws JMSException {
-        return (Long) map.get("Expiration");
+        return expirationTime;
     }
 
     @Override
     public void setJMSExpiration(long expiration) throws JMSException {
-        map.put("Expiration", expiration);
+        expirationTime = expiration;
     }
 
     @Override
     public long getJMSDeliveryTime() throws JMSException {
-        return (long)map.get("DeliveryTime");
+        return deliveryTime;
     }
 
     @Override
     public void setJMSDeliveryTime(long deliveryTime) throws JMSException {
-        map.put("DeliveryTime", deliveryTime);
+       this.deliveryTime = deliveryTime;
     }
 
     @Override
     public int getJMSPriority() throws JMSException {
-        return (int) map.get("Priority");
+        return priority;
     }
 
     @Override
     public void setJMSPriority(int priority) throws JMSException {
-        map.put("Priority", priority);
+        this.priority = priority;
     }
 
     @Override
     public void clearProperties() throws JMSException {
-
         map.clear();
     }
 

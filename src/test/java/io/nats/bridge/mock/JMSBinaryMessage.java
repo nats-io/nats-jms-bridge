@@ -15,6 +15,12 @@ public class JMSBinaryMessage extends JMSMessage implements javax.jms.BytesMessa
         byteBuffer = ByteBuffer.wrap(bytes);
     }
 
+    public JMSBinaryMessage(String body) {
+        super(body);
+        bytes = body.getBytes(StandardCharsets.UTF_8);
+        byteBuffer = ByteBuffer.wrap(bytes);
+    }
+
     @Override
     public long getBodyLength() throws JMSException {
         return bytes.length;

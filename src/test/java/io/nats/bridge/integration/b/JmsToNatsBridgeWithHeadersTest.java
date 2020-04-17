@@ -3,6 +3,8 @@ package io.nats.bridge.integration.b;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.integration.TestUtils;
+import io.nats.bridge.messages.Message;
+import io.nats.bridge.messages.MessageBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 
-public class JmsToNatsBridgeTest {
+public class JmsToNatsBridgeWithHeadersTest {
 
     private final AtomicBoolean stop = new AtomicBoolean(false);
     private final AtomicReference<String> responseFromServer = new AtomicReference<>();
@@ -27,16 +29,17 @@ public class JmsToNatsBridgeTest {
     private MessageBus bridgeMessageBusSource;
     private MessageBus bridgeMessageBusDestination;
     private MessageBridge messageBridge;
+    private final AtomicReference<String> responseHeaderFromServer = new AtomicReference<>();
 
     @Before
     public void setUp() throws Exception {
-        clientMessageBus = TestUtils.getMessageBusJms("B");
+        clientMessageBus = TestUtils.getMessageBusJmsWithHeaders("B");
         serverMessageBus = TestUtils.getMessageBusNats("B");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSource = TestUtils.getMessageBusJms("B");
+        bridgeMessageBusSource = TestUtils.getMessageBusJmsWithHeaders("B");
         bridgeMessageBusDestination = TestUtils.getMessageBusNats("B");
         messageBridge = new MessageBridge(bridgeMessageBusSource, bridgeMessageBusDestination, true);
 
@@ -54,13 +57,17 @@ public class JmsToNatsBridgeTest {
         runBridgeLoop();
 
 
-        clientMessageBus.request("RICK", s ->  {
-            responseFromServer.set(s);
+        final Message message = MessageBuilder.builder().withHeader("MY_HEADER", "MY_VALUE").withBody("RICK").build();
+
+        clientMessageBus.request(message, reply ->  {
+
+            responseHeaderFromServer.set((String)reply.headers().get("MY_HEADER"));
+            responseFromServer.set(reply.bodyAsString());
             resultSignal.countDown();
         });
 
-
         runClientLoop();
+        //assertEquals ("MY_VALUE", responseHeaderFromServer.get());
         assertEquals ("Hello RICK", responseFromServer.get());
 
 

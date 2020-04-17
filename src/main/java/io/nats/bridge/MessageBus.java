@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 /**
  * Message Bus wraps a Nats.io and a JMS message context to send/recieve messages to the messaging systems.
  * It also encapsulates how request/reply is DONE.
- * TODO write Nats.io version
+ * A message bus is a queue or stream messaging system like Nats, Active MQ, SQS, Kinesis, Kafka, IBM MQ, RabbitMQ or JMS.
  */
 public interface MessageBus extends Closeable {
 

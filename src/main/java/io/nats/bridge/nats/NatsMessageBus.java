@@ -64,7 +64,7 @@ public class NatsMessageBus implements MessageBus {
         pool.submit(() -> {
                     tryHandler.tryWithLog(() -> {
                         final io.nats.client.Message replyMessage = future.get();
-                        replyCallback.accept(MessageBuilder.builder().withBody(replyMessage.getData()).build());
+                        replyCallback.accept(MessageBuilder.builder().buildFromBytes(replyMessage.getData()));
                     }, "Unable to handle nats reply");
                 }
         );
@@ -74,6 +74,7 @@ public class NatsMessageBus implements MessageBus {
     public Optional<Message> receive() {
         return tryHandler.tryReturnOrRethrow((SupplierWithException<Optional<Message>>) () -> {
             io.nats.client.Message message = subscription.nextMessage(Duration.ofMillis(1));
+
             if (message != null) {
                 //TODO for now, just always send a StringMessage. Later create a Function<NatMessage, BridgeMessage> and we may need builder like JMS.
                 // Also, we might be using JSON to send a message with headers. see https://github.com/nats-io/nats-jms-mq-bridge/issues/20
@@ -81,15 +82,19 @@ public class NatsMessageBus implements MessageBus {
 
                 if (replyTo != null) {
                     return Optional.of(
-                            MessageBuilder.builder().withBody(message.getData()).withReplyHandler(new Consumer<Message>() {
+                            MessageBuilder.builder().withReplyHandler(new Consumer<Message>() {
                                 @Override
                                 public void accept(final Message reply) {
+
+                                    System.out.println("REPLY MESSAGE " + reply.bodyAsString() + "HEADERS" + reply.headers());
                                     connection.publish(replyTo, reply.getMessageBytes());
                                 }
-                            }).build()
+                            }).buildFromBytes(message.getData())
                      );
                 } else {
-                    return Optional.of(MessageBuilder.builder().withBody(message.getData()).build());
+                    final Message bridgeMessage = MessageBuilder.builder().buildFromBytes(message.getData());
+                    System.out.println("## Receive MESSAGE " + bridgeMessage.bodyAsString() + " " + bridgeMessage.headers());
+                    return Optional.of(bridgeMessage);
                 }
             } else {
                 return Optional.empty();
