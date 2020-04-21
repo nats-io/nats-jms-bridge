@@ -83,7 +83,7 @@ public class ConvertJmsMessageToBridgeMessageWithHeaders implements FunctionWith
         builder.withPriority(jmsMessage.getJMSPriority());
         builder.withExpirationTime(jmsMessage.getJMSExpiration());
         builder.withTimestamp(jmsMessage.getJMSTimestamp());
-        // TODO add this back builder.withCorrelationID(jmsMessage.getJMSCorrelationID());
+        builder.withCorrelationID(jmsMessage.getJMSCorrelationID());
     }
 
 }
