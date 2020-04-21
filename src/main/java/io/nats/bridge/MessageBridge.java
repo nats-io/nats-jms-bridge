@@ -14,10 +14,19 @@
 package io.nats.bridge;
 
 
+import io.nats.bridge.messages.Message;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.function.Consumer;
 
+/**
+ * A message bridge connects two MessageBuses.
+ * A message bus is a queue or stream messaging system like Nats, Active MQ, SQS, Kinesis, Kafka, IBM MQ, RabbitMQ or JMS.
+ *
+ * The bridge handles request/reply bridging or plain message forwarding.
+ */
 public class MessageBridge implements Closeable {
 
     private final MessageBus sourceBus;
@@ -33,9 +42,24 @@ public class MessageBridge implements Closeable {
     public void process() {
         final Optional<Message> receiveMessageFromSourceOption = sourceBus.receive();
 
+//        if (!receiveMessageFromSourceOption.isPresent()) {
+//            ystem.out.println("No message bus");
+//        } else {
+//            ystem.out.println("GOT MESSAGE ON BRIDGE....................");
+//        }
+
         if (requestReply) {
-            receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource ->
-                    destinationBus.request(receiveMessageFromSource, receiveMessageFromSource::reply));
+            receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
+                //ystem.out.println("### MESSAGE BRIDGE MESSAGE " + receiveMessageFromSource.bodyAsString() + " HEADERS" + receiveMessageFromSource.headers() );
+
+                destinationBus.request(receiveMessageFromSource, replyMessage -> {
+                            //ystem.out.println("GOT REPLY 1");
+                            //ystem.out.println("### MESSAGE BRIDGE REPLY " + replyMessage.bodyAsString() + " HEADERS" + replyMessage.headers() );
+                            receiveMessageFromSource.reply(replyMessage);
+                            //ystem.out.println("GOT REPLY 2");
+                        });
+                    }
+            );
         } else {
             receiveMessageFromSourceOption.ifPresent(destinationBus::publish);
         }

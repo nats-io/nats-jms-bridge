@@ -1,8 +1,8 @@
 package io.nats.bridge.nats;
 
-import io.nats.bridge.Message;
+import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.StringMessage;
+import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.bridge.util.SupplierWithException;
 import io.nats.client.Connection;
@@ -13,7 +13,6 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class NatsMessageBus implements MessageBus {
@@ -28,22 +27,21 @@ public class NatsMessageBus implements MessageBus {
     //TODO create NatsMessageBusBuilder.
 
 
-    public NatsMessageBus(final String subject, final Connection connection, final String queueGroup, final ExceptionHandler tryHandler) {
+    public NatsMessageBus(final String subject, final Connection connection, final String queueGroup,
+                          final ExecutorService pool, final ExceptionHandler tryHandler) {
+
+        //ystem.out.println("SUBJECT" + subject);
         this.connection = connection;
         this.subject = subject;
+        this.pool = pool;
         this.subscription = connection.subscribe(subject, queueGroup);
-        this.pool = Executors.newFixedThreadPool(25);
         this.tryHandler = tryHandler;
     }
 
 
     @Override
     public void publish(final Message message) {
-        if (message instanceof StringMessage) {
-            connection.publish(subject, ((StringMessage) message).getBody().getBytes(StandardCharsets.UTF_8));
-        } else {
-            throw new NatsMessageBusException("Message type not supported");
-        }
+        connection.publish(subject, message.getMessageBytes());
     }
 
     @Override
@@ -53,9 +51,8 @@ public class NatsMessageBus implements MessageBus {
 
     @Override
     public void request(final Message message, final Consumer<Message> replyCallback) {
-        final String msg = ((StringMessage) message).getBody();
 
-        final CompletableFuture<io.nats.client.Message> future = connection.request(subject, msg.getBytes(StandardCharsets.UTF_8));
+        final CompletableFuture<io.nats.client.Message> future = connection.request(subject, message.getMessageBytes());
 
 
         //TODO change the JAVA API to use a callback or use a queue reaction. Use future.isDone() and some mapping. Not cool. Need a callback here.  :)
@@ -69,7 +66,7 @@ public class NatsMessageBus implements MessageBus {
         pool.submit(() -> {
                     tryHandler.tryWithLog(() -> {
                         final io.nats.client.Message replyMessage = future.get();
-                        replyCallback.accept(new StringMessage(new String(replyMessage.getData(), StandardCharsets.UTF_8)));
+                        replyCallback.accept(MessageBuilder.builder().buildFromBytes(replyMessage.getData()));
                     }, "Unable to handle nats reply");
                 }
         );
@@ -79,22 +76,27 @@ public class NatsMessageBus implements MessageBus {
     public Optional<Message> receive() {
         return tryHandler.tryReturnOrRethrow((SupplierWithException<Optional<Message>>) () -> {
             io.nats.client.Message message = subscription.nextMessage(Duration.ofMillis(1));
+
             if (message != null) {
                 //TODO for now, just always send a StringMessage. Later create a Function<NatMessage, BridgeMessage> and we may need builder like JMS.
                 // Also, we might be using JSON to send a message with headers. see https://github.com/nats-io/nats-jms-mq-bridge/issues/20
                 final String replyTo = message.getReplyTo();
 
-                final String messageBody = new String(message.getData(), StandardCharsets.UTF_8);
                 if (replyTo != null) {
-                    return Optional.of(new StringMessage(messageBody) {
-                        @Override
-                        public void reply(final Message reply) {
-                            final StringMessage stringMessage = (StringMessage) reply;
-                            connection.publish(replyTo, stringMessage.getBody().getBytes(StandardCharsets.UTF_8));
-                        }
-                    });
+                    return Optional.of(
+                            MessageBuilder.builder().withReplyHandler(new Consumer<Message>() {
+                                @Override
+                                public void accept(final Message reply) {
+
+                                    //ystem.out.println("REPLY MESSAGE " + reply.bodyAsString() + "HEADERS" + reply.headers());
+                                    connection.publish(replyTo, reply.getMessageBytes());
+                                }
+                            }).buildFromBytes(message.getData())
+                     );
                 } else {
-                    return Optional.of(new StringMessage(messageBody));
+                    final Message bridgeMessage = MessageBuilder.builder().buildFromBytes(message.getData());
+                    //ystem.out.println("## Receive MESSAGE " + bridgeMessage.bodyAsString() + " " + bridgeMessage.headers());
+                    return Optional.of(bridgeMessage);
                 }
             } else {
                 return Optional.empty();

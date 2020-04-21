@@ -15,15 +15,9 @@ package io.nats.bridge.example.a;
 
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.jms.support.JMSMessageBusBuilder;
-import io.nats.bridge.nats.NatsMessageBus;
-import io.nats.bridge.util.ExceptionHandler;
-import io.nats.client.Nats;
-import io.nats.client.Options;
+import io.nats.bridge.nats.support.NatsMessageBusBuilder;
 
 import java.io.IOException;
-import java.util.UUID;
-
-import org.slf4j.LoggerFactory;
 
 public class ServiceAUtil {
     static MessageBus getMessageBusJms() {
@@ -34,12 +28,11 @@ public class ServiceAUtil {
     }
 
     static MessageBus getMessageBusNats() throws IOException, InterruptedException {
-        final String subject = "a1-subject";
 
-        final Options options = new Options.Builder().
-                server("nats://localhost:4222").
-                noReconnect(). // Disable reconnect attempts
-                build();
-        return new NatsMessageBus(subject, Nats.connect(options), "queueGroup" + UUID.randomUUID().toString() + System.currentTimeMillis(), new ExceptionHandler(LoggerFactory.getLogger(ServiceAUtil.class)));
+
+        NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withSubject("a1-subject");
+        natsMessageBusBuilder.getOptionsBuilder().noReconnect();
+        return natsMessageBusBuilder.build();
+
     }
 }
