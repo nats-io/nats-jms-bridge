@@ -16,6 +16,26 @@ public class Protocol {
     public static final String HEADER_KEY_REDELIVERED = "BRIDGE_redelivered";
 
 
+    public static final int RESERVED_START_TYPES = -109;
+    public static final int TYPE_SHORT_STRING = -110;
+    public static final int TYPE_STRING = -111;
+    public static final int TYPE_BOOLEAN_TRUE = -112;
+    public static final int TYPE_BOOLEAN_FALSE = -113;
+    public static final int TYPE_BYTE = -114;
+    //public static final int TYPE_UNSIGNED_BYTE = -115;
+    public static final int TYPE_SHORT = -116;
+    public static final int TYPE_UNSIGNED_SHORT = -117;
+    public static final int TYPE_INT = -118;
+    //public static final int TYPE_UNSIGNED_INT = -119;
+    public static final int TYPE_LONG = -120;
+    //public static final int TYPE_UNSIGNED_LONG = -121;
+    public static final int TYPE_FLOAT = -122;
+    public static final int TYPE_DOUBLE = -123;
+    public static final int RESERVED_END_TYPES = -128;
+
+
+
+
     public static int createHashCode(byte[] value) {
         int h = 0;
         byte[] var2 = value;

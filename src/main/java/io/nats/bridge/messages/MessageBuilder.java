@@ -160,29 +160,101 @@ public class MessageBuilder {
 
     public Message buildFromBytes(byte[] buffer) {
 
-        if (buffer.length > 5) {
+        if (buffer.length > 3) {
 
             if (buffer[0] == MARKER_AB &&
                     buffer[1] == MARKER_CD &&
                     buffer[2] == Protocol.MESSAGE_VERSION_MAJOR &&
-                    buffer[3] == Protocol.MESSAGE_VERSION_MINOR &&
-                    buffer[4] == MARKER_AB &&
-                    buffer[5] == MARKER_CD
+                    buffer[3] == Protocol.MESSAGE_VERSION_MINOR
             ) {
 
                 final DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(buffer));
                 try {
-                    dataInputStream.skipBytes(6);
+                    dataInputStream.skipBytes(4);
 
                     //Read the header
-                    final int jsonLength = dataInputStream.readInt();
-                    final int jsonHash = dataInputStream.readInt();
-                    final byte[] jsonByteBuffer = new byte[jsonLength];
-                    dataInputStream.read(jsonByteBuffer);
-                    if (Protocol.createHashCode(jsonByteBuffer) != jsonHash) {
-                        throw new MessageBuilderException("JSON Hash did not match for headers");
+                    int numHHeaders = dataInputStream.readByte();
+
+
+                    if (numHHeaders > 0) {
+
+                        final Map<String, Object> headers = new HashMap<>(numHHeaders);
+                        int headerNameLength;
+                        byte [] headerNameBytes ;
+                        byte [] stringBytes;
+                        int stringLength;
+                        String headerName;
+                        for (int index = 0; index < numHHeaders; index++) {
+
+                            headerNameLength= dataInputStream.readByte();
+                            if (headerNameLength < 1) {
+                                throw new RuntimeException("bad header length");
+                            }
+                            headerNameBytes = new byte[headerNameLength];
+                            dataInputStream.read(headerNameBytes);
+                            headerName = new String(headerNameBytes, StandardCharsets.UTF_8);
+
+                            System.out.println(headerName);
+
+                            int type = dataInputStream.readByte();
+                            switch (type) {
+                                case TYPE_SHORT_STRING:
+                                    stringLength = dataInputStream.readByte();
+                                    if (stringLength < 1) {
+                                        throw new RuntimeException("bad string length");
+                                    }
+                                    stringBytes = new byte[stringLength];
+                                    dataInputStream.read(stringBytes);
+                                    headers.put(headerName, new String(stringBytes, StandardCharsets.UTF_8));
+                                    break;
+                                case TYPE_STRING:
+                                    stringLength = dataInputStream.readChar();
+                                    if (stringLength < 1) {
+                                        throw new RuntimeException("bad string length");
+                                    }
+                                    stringBytes = new byte[stringLength];
+                                    dataInputStream.read(stringBytes);
+                                    headers.put(headerName, new String(stringBytes, StandardCharsets.UTF_8));
+                                    break;
+                                case TYPE_BOOLEAN_TRUE:
+                                    headers.put(headerName, true);
+                                    break;
+                                case TYPE_BOOLEAN_FALSE:
+                                    headers.put(headerName, false);
+                                    break;
+//                                case TYPE_UNSIGNED_BYTE:
+//                                    headers.put(headerName, dataInputStream.readUnsignedByte());
+//                                    break;
+                                case TYPE_BYTE:
+                                    headers.put(headerName, dataInputStream.readByte());
+                                    break;
+                                case TYPE_SHORT:
+                                    headers.put(headerName, dataInputStream.readShort());
+                                    break;
+//                                case TYPE_UNSIGNED_SHORT:
+//                                    headers.put(headerName, dataInputStream.readUnsignedShort());
+//                                    break;
+                                case TYPE_INT:
+                                    headers.put(headerName, dataInputStream.readInt());
+                                    break;
+                                case TYPE_LONG:
+                                    headers.put(headerName, dataInputStream.readLong());
+                                    break;
+                                case TYPE_FLOAT:
+                                    headers.put(headerName, dataInputStream.readFloat());
+                                    break;
+                                case TYPE_DOUBLE:
+                                    headers.put(headerName, dataInputStream.readDouble());
+                                    break;
+                                default:
+                                    if (type < RESERVED_START_TYPES ) {
+                                        throw new RuntimeException("bad type code");
+                                    }else {
+                                        headers.put(headerName, type);
+                                    }
+                            }
+                        }
                     }
-                    final Map<String, Object> header = mapper.readValue(jsonByteBuffer, Map.class);
 
                     //Read the body
                     final int bodyLength = dataInputStream.readInt();
@@ -197,42 +269,44 @@ public class MessageBuilder {
                     }
 
                     /* read headers */
-                    if (header.containsKey(HEADER_KEY_TIMESTAMP)) {
-                        withTimestamp((long) header.get(HEADER_KEY_TIMESTAMP));
-                        header.remove(HEADER_KEY_TIMESTAMP);
+                    if (headers.containsKey(HEADER_KEY_TIMESTAMP)) {
+                        withTimestamp((long) headers.get(HEADER_KEY_TIMESTAMP));
+                        headers.remove(HEADER_KEY_TIMESTAMP);
                     }
-                    if (header.containsKey(HEADER_KEY_EXPIRATION_TIME)) {
-                        withExpirationTime((long) header.get(HEADER_KEY_EXPIRATION_TIME));
-                        header.remove(HEADER_KEY_EXPIRATION_TIME);
+                    if (headers.containsKey(HEADER_KEY_EXPIRATION_TIME)) {
+                        withExpirationTime((long) headers.get(HEADER_KEY_EXPIRATION_TIME));
+                        headers.remove(HEADER_KEY_EXPIRATION_TIME);
                     }
-                    if (header.containsKey(HEADER_KEY_DELIVERY_TIME)) {
-                        withDeliveryTime((long) header.get(HEADER_KEY_DELIVERY_TIME));
-                        header.remove(HEADER_KEY_DELIVERY_TIME);
+                    if (headers.containsKey(HEADER_KEY_DELIVERY_TIME)) {
+                        withDeliveryTime((long) headers.get(HEADER_KEY_DELIVERY_TIME));
+                        headers.remove(HEADER_KEY_DELIVERY_TIME);
                     }
-                    if (header.containsKey(HEADER_KEY_MODE)) {
-                        withDeliveryMode((int) header.get(HEADER_KEY_MODE));
-                        header.remove(HEADER_KEY_MODE);
+                    if (headers.containsKey(HEADER_KEY_MODE)) {
+                        withDeliveryMode((int) headers.get(HEADER_KEY_MODE));
+                        headers.remove(HEADER_KEY_MODE);
                     }
-                    if (header.containsKey(HEADER_KEY_TYPE)) {
-                        withType((String) header.get(HEADER_KEY_TYPE));
-                        header.remove(HEADER_KEY_TYPE);
+                    if (headers.containsKey(HEADER_KEY_TYPE)) {
+                        withType((String) headers.get(HEADER_KEY_TYPE));
+                        headers.remove(HEADER_KEY_TYPE);
                     }
-                    if (header.containsKey(HEADER_KEY_REDELIVERED)) {
-                        withRedelivered((boolean) header.get(HEADER_KEY_REDELIVERED));
-                        header.remove(HEADER_KEY_REDELIVERED);
+                    if (headers.containsKey(HEADER_KEY_REDELIVERED)) {
+                        withRedelivered((boolean) headers.get(HEADER_KEY_REDELIVERED));
+                        headers.remove(HEADER_KEY_REDELIVERED);
                     }
-                    if (header.containsKey(HEADER_KEY_PRIORITY)) {
-                        withPriority((int) header.get(HEADER_KEY_PRIORITY));
-                        header.remove(HEADER_KEY_PRIORITY);
+                    if (headers.containsKey(HEADER_KEY_PRIORITY)) {
+                        withPriority((int) headers.get(HEADER_KEY_PRIORITY));
+                        headers.remove(HEADER_KEY_PRIORITY);
                     }
 
-                    withHeaders(header);
+                    withHeaders(headers);
                     withBody(bodyBuffer);
 
                     return build();
 
-                } catch (final IOException ex) {
-                    throw new MessageBuilderException("Unable to create message", ex);
+                } catch (final Exception ex) {
+                    ex.printStackTrace();
+                    withBody(buffer);
+                    return build();
                 }
 
             } else {

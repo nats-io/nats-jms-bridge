@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static io.nats.bridge.messages.Protocol.*;
@@ -109,8 +111,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
             streamOut.writeByte(Protocol.MARKER_CD);
             streamOut.writeByte(Protocol.MESSAGE_VERSION_MAJOR);
             streamOut.writeByte(Protocol.MESSAGE_VERSION_MINOR);
-            streamOut.writeByte(Protocol.MARKER_AB);
-            streamOut.writeByte(Protocol.MARKER_CD);
+
 
 
             final HashMap<String, Object> outputHeaders = new HashMap<>(9 + (headers != null ? headers.size() : 0));
@@ -134,18 +135,72 @@ public class BaseMessageWithHeaders implements BytesMessage {
             if (redelivered)
                 outputHeaders.put(HEADER_KEY_REDELIVERED, this.redelivered());
 
-            byte[] headerBytes = mapper.writeValueAsBytes(outputHeaders);
-            streamOut.writeInt(headerBytes.length);
-            streamOut.writeInt(Protocol.createHashCode(headerBytes));
-            streamOut.write(headerBytes);
 
-            //ystem.out.println("header bytes length " + headerBytes.length);
-            //ystem.out.println("header bytes hash " + Protocol.createHashCode(headerBytes));
+            int headerSize = outputHeaders.size();
 
+            if (headerSize > 512) {
+                throw new MessageException("Can't write out the message as there are too many headers");
+            }
 
+            streamOut.writeByte(headerSize);
+
+            for (Map.Entry<String, Object>kv : outputHeaders.entrySet()) {
+                if (kv.getKey().length() > 512) {
+                    throw new MessageException("Can't write out the message as there header name length is too long");
+                }
+                streamOut.writeByte(kv.getKey().length());
+                streamOut.write(kv.getKey().getBytes(StandardCharsets.UTF_8));
+
+                switch (kv.getValue().getClass().getSimpleName()) {
+                    case "String":
+                        final String string = (String) kv.getValue();
+                        if (string.length() < 512) {
+                            streamOut.writeByte(TYPE_SHORT_STRING);
+                        } else {
+                            streamOut.writeByte(TYPE_STRING);
+                        }
+                        streamOut.write(string.getBytes(StandardCharsets.UTF_8));
+                        break;
+                    case "Boolean" :
+                       boolean b = (boolean) kv.getValue();
+                       if (b) {
+                           streamOut.writeByte(TYPE_BOOLEAN_TRUE);
+                       } else {
+                           streamOut.writeByte(TYPE_BOOLEAN_FALSE);
+                       }
+                       break;
+                    case "Short":
+                        streamOut.writeByte(TYPE_SHORT);
+                        streamOut.writeShort((Short) kv.getValue());
+                        break;
+
+                    case "Integer":
+                        int value = (int) kv.getValue();
+                        if (value < RESERVED_START_TYPES ||
+                                (value > RESERVED_END_TYPES && value  <= 512)) {
+                            streamOut.writeByte(value);
+                        } else {
+                            streamOut.writeByte(TYPE_INT);
+                            streamOut.writeInt(value);
+                        }
+                        break;
+                    case "Long":
+                        streamOut.writeByte(TYPE_LONG);
+                        streamOut.writeLong((Long) kv.getValue());
+                        break;
+
+                    case "Float":
+                        streamOut.writeByte(TYPE_FLOAT);
+                        streamOut.writeFloat((Float) kv.getValue());
+                        break;
+
+                    case "Double":
+                        streamOut.writeByte(TYPE_DOUBLE);
+                        streamOut.writeDouble((Double) kv.getValue());
+                        break;
+                }
+            }
             if (bodyBytes != null) {
-
-
                 streamOut.writeInt(bodyBytes.length);
                 streamOut.writeInt(Protocol.createHashCode(bodyBytes));
                 //ystem.out.println("body bytes length " + bodyBytes.length);

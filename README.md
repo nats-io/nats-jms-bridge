@@ -38,3 +38,72 @@ The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nat
 ```
 
 This all happens async. 
+
+## The bridge can encode headers 
+
+## Wire protocol for the message body with headers
+
+### VERSION AND MARKER - byte 0 to byte 4
+
+* `<AB marker [byte]>`                  0
+* `<CD marker [byte]>`                  1
+* `<MAJOR_VERSION [byte]>`              2
+* `<MINOR_VERSION[byte]>`               4
+
+
+###  HEADERS          - byte 5 to N
+
+* `<HEADER_LENGTH [ubyte]>`             5
+
+### FIELD ENCODING  - 2 bytes
+
+* `<HEADER_NAME_LENGTH [ubyte]>` 
+* `<HEADER_TYPE [byte]>` 
+
+
+### Header type short string    TYPE_SHORT_STRING(110)
+* `<STRING_LENGTH [ubyte]>` 
+* `<STRING_BYTES [byte[N]]>` 
+
+### Header type string         TYPE_STRING(111)
+* `<STRING_LENGTH [ubyte]>` 
+* `<STRING_BYTES [byte[N]]>` 
+
+### Header type boolean true   TYPE_BOOLEAN_TRUE(112)
+* `<TRUE [byte[N]]>` 
+
+### Header type boolean false   TYPE_BOOLEAN_FALSE(113)
+* `<FALSE [ubyte]>` 
+
+### Header type byte            TYPE_BYTE(114) 1 byte
+* `<BYTE [byte]>` 
+
+### Header type byte            TYPE_UNSIGNED_BYTE(115) - 1 byte
+* `<UBYTE [ubyte]>` 
+
+### Header type short int       TYPE_SHORT(116) - two bytes
+* `<SHORT [short]>` 
+
+### Header type ushort int       TYPE_UNSIGNED_SHORT(116) - two bytes
+* `<USHORT [ushort]>` 
+
+### Header type int              TYPE_INT(118) - four bytes
+* `<INT [INT]>` 
+
+### Header type long             TYPE_LONG(120) - eight bytes
+* `<LONG [LONG]>` 
+
+### Header type float             TYPE_FLOAT(122) - four bytes
+* `<FLOAT [FLOAT]>` 
+
+
+### Header type double             TYPE_DOUBLE(122) - eight bytes
+* `<DOUBLE [DOUBLE]>` 
+
+Any type with the value lower than 109 or a value above 123 is translated
+to an int type matching the same value as the type encoding. 
+
+###  OPAQUE BODY
+* `<BODY_LEN [int]>`
+* `<BODY_HASH [int]>`
+* `<OPAQUE_BODY_BYTES>[bytes]`
