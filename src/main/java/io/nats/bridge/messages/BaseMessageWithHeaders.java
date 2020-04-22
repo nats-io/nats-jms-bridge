@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.BiConsumer;
+
 import java.util.function.Consumer;
 
 import static io.nats.bridge.messages.Protocol.*;
@@ -46,7 +46,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
         this.priority = priority;
         this.correlationID = correlationID;
         this.headers = headers;
-        this.bodyBytes = bytes;
+        this.bodyBytes = bytes==null ? new byte[0] : bytes;
         this.replyHandler = replyHandler;
     }
 
@@ -105,14 +105,10 @@ public class BaseMessageWithHeaders implements BytesMessage {
         final DataOutputStream streamOut = new DataOutputStream(baos);
 
         try {
-
-
             streamOut.writeByte(Protocol.MARKER_AB);
             streamOut.writeByte(Protocol.MARKER_CD);
             streamOut.writeByte(Protocol.MESSAGE_VERSION_MAJOR);
             streamOut.writeByte(Protocol.MESSAGE_VERSION_MINOR);
-
-
 
             final HashMap<String, Object> outputHeaders = new HashMap<>(9 + (headers != null ? headers.size() : 0));
 
@@ -128,7 +124,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
                 outputHeaders.put(HEADER_KEY_EXPIRATION_TIME, this.expirationTime());
             if (timestamp > 0)
                 outputHeaders.put(HEADER_KEY_TIMESTAMP, this.timestamp());
-            if (type != null)
+            if (type != null && !NO_TYPE.equals(type))
                 outputHeaders.put(HEADER_KEY_TYPE, this.type());
             if (priority != -1)
                 outputHeaders.put(HEADER_KEY_PRIORITY, this.priority());
@@ -156,8 +152,10 @@ public class BaseMessageWithHeaders implements BytesMessage {
                         final String string = (String) kv.getValue();
                         if (string.length() < 512) {
                             streamOut.writeByte(TYPE_SHORT_STRING);
+                            streamOut.writeByte(string.length());
                         } else {
                             streamOut.writeByte(TYPE_STRING);
+                            streamOut.writeChar(string.length());
                         }
                         streamOut.write(string.getBytes(StandardCharsets.UTF_8));
                         break;
@@ -174,11 +172,16 @@ public class BaseMessageWithHeaders implements BytesMessage {
                         streamOut.writeShort((Short) kv.getValue());
                         break;
 
+                    case "Byte":
+                        streamOut.writeByte(TYPE_BYTE);
+                        streamOut.writeByte((Byte) kv.getValue());
+                        break;
+
                     case "Integer":
                         int value = (int) kv.getValue();
                         if (value < RESERVED_START_TYPES ||
-                                (value > RESERVED_END_TYPES && value  <= 512)) {
-                            streamOut.writeByte(value);
+                                (value > RESERVED_END_TYPES && value  <= 255)) {
+                            streamOut.write(value);
                         } else {
                             streamOut.writeByte(TYPE_INT);
                             streamOut.writeInt(value);
@@ -200,15 +203,15 @@ public class BaseMessageWithHeaders implements BytesMessage {
                         break;
                 }
             }
-            if (bodyBytes != null) {
+            if (bodyBytes != null && bodyBytes.length > 0) {
                 streamOut.writeInt(bodyBytes.length);
                 streamOut.writeInt(Protocol.createHashCode(bodyBytes));
                 //ystem.out.println("body bytes length " + bodyBytes.length);
                 //ystem.out.println("body bytes hash " + Protocol.createHashCode(bodyBytes));
                 streamOut.write(bodyBytes);
             } else {
-                streamOut.write(0);
-                streamOut.write(0);
+                streamOut.writeInt(0);
+                streamOut.writeInt(0);
             }
 
 
@@ -219,7 +222,6 @@ public class BaseMessageWithHeaders implements BytesMessage {
                 streamOut.close();
                 baos.close();
             } catch (Exception e) {
-                throw new MessageException("Can't write out message", e);
             }
         }
         return baos.toByteArray();
@@ -236,8 +238,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
                 mode == that.mode &&
                 redelivered == that.redelivered &&
                 priority == that.priority &&
-                Objects.equals(type, that.type) && compareHeaders(that.headers);
-        //&& Arrays.equals(bodyBytes, that.bodyBytes);
+                Objects.equals(type, that.type) && compareHeaders(that.headers) && Arrays.equals(bodyBytes, that.bodyBytes);
     }
 
     private boolean compareHeaders(Map<String, Object> thatHeaders) {
@@ -277,6 +278,12 @@ public class BaseMessageWithHeaders implements BytesMessage {
 
     @Override
     public String toString() {
+
+        if (bodyBytes!=null) {
+            System.out.println("BODY LEN " + bodyBytes.length);
+        }
+        String bodyStr = bodyBytes!=null ?", bodyBytes=" + Arrays.toString(bodyBytes) :"";
+
         return "BaseMessageWithHeaders{" +
                 "timestamp=" + timestamp +
                 ", expirationTime=" + expirationTime +
@@ -285,8 +292,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
                 ", type='" + type + '\'' +
                 ", redelivered=" + redelivered +
                 ", priority=" + priority +
-                ", headers=" + headers +
-                ", bodyBytes=" + Arrays.toString(bodyBytes) +
+                ", headers=" + headers + bodyStr +
                 '}';
     }
 }

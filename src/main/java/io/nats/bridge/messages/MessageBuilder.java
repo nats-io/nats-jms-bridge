@@ -1,11 +1,15 @@
 package io.nats.bridge.messages;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.nats.bridge.jms.JMSMessageBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -13,6 +17,7 @@ import java.util.function.Consumer;
 import static io.nats.bridge.messages.Protocol.*;
 
 public class MessageBuilder {
+    static Logger logger = LoggerFactory.getLogger(MessageBuilder .class);
 
     private long timestamp=-1;
     //TTL plus timestamp
@@ -160,6 +165,8 @@ public class MessageBuilder {
 
     public Message buildFromBytes(byte[] buffer) {
 
+        Map<String, Object> headersRead = Collections.emptyMap();
+
         if (buffer.length > 3) {
 
             if (buffer[0] == MARKER_AB &&
@@ -178,7 +185,7 @@ public class MessageBuilder {
 
                     if (numHHeaders > 0) {
 
-                        final Map<String, Object> headers = new HashMap<>(numHHeaders);
+                        headersRead = new HashMap<>(numHHeaders);
                         int headerNameLength;
                         byte [] headerNameBytes ;
                         byte [] stringBytes;
@@ -194,7 +201,7 @@ public class MessageBuilder {
                             dataInputStream.read(headerNameBytes);
                             headerName = new String(headerNameBytes, StandardCharsets.UTF_8);
 
-                            System.out.println(headerName);
+                            //ystem.out.println(headerName);
 
                             int type = dataInputStream.readByte();
                             switch (type) {
@@ -205,7 +212,7 @@ public class MessageBuilder {
                                     }
                                     stringBytes = new byte[stringLength];
                                     dataInputStream.read(stringBytes);
-                                    headers.put(headerName, new String(stringBytes, StandardCharsets.UTF_8));
+                                    headersRead.put(headerName, new String(stringBytes, StandardCharsets.UTF_8));
                                     break;
                                 case TYPE_STRING:
                                     stringLength = dataInputStream.readChar();
@@ -214,43 +221,43 @@ public class MessageBuilder {
                                     }
                                     stringBytes = new byte[stringLength];
                                     dataInputStream.read(stringBytes);
-                                    headers.put(headerName, new String(stringBytes, StandardCharsets.UTF_8));
+                                    headersRead.put(headerName, new String(stringBytes, StandardCharsets.UTF_8));
                                     break;
                                 case TYPE_BOOLEAN_TRUE:
-                                    headers.put(headerName, true);
+                                    headersRead.put(headerName, true);
                                     break;
                                 case TYPE_BOOLEAN_FALSE:
-                                    headers.put(headerName, false);
+                                    headersRead.put(headerName, false);
                                     break;
 //                                case TYPE_UNSIGNED_BYTE:
 //                                    headers.put(headerName, dataInputStream.readUnsignedByte());
 //                                    break;
                                 case TYPE_BYTE:
-                                    headers.put(headerName, dataInputStream.readByte());
+                                    headersRead.put(headerName, dataInputStream.readByte());
                                     break;
                                 case TYPE_SHORT:
-                                    headers.put(headerName, dataInputStream.readShort());
+                                    headersRead.put(headerName, dataInputStream.readShort());
                                     break;
 //                                case TYPE_UNSIGNED_SHORT:
 //                                    headers.put(headerName, dataInputStream.readUnsignedShort());
 //                                    break;
                                 case TYPE_INT:
-                                    headers.put(headerName, dataInputStream.readInt());
+                                    headersRead.put(headerName, dataInputStream.readInt());
                                     break;
                                 case TYPE_LONG:
-                                    headers.put(headerName, dataInputStream.readLong());
+                                    headersRead.put(headerName, dataInputStream.readLong());
                                     break;
                                 case TYPE_FLOAT:
-                                    headers.put(headerName, dataInputStream.readFloat());
+                                    headersRead.put(headerName, dataInputStream.readFloat());
                                     break;
                                 case TYPE_DOUBLE:
-                                    headers.put(headerName, dataInputStream.readDouble());
+                                    headersRead.put(headerName, dataInputStream.readDouble());
                                     break;
                                 default:
                                     if (type < RESERVED_START_TYPES ) {
                                         throw new RuntimeException("bad type code");
                                     }else {
-                                        headers.put(headerName, type);
+                                        headersRead.put(headerName, type);
                                     }
                             }
                         }
@@ -268,6 +275,11 @@ public class MessageBuilder {
                         throw new MessageBuilderException("Body Hash did not match ");
                     }
 
+                    if (headers == null) {
+                        headers = headersRead;
+                    } else {
+                        headers.putAll(headersRead);
+                    }
                     /* read headers */
                     if (headers.containsKey(HEADER_KEY_TIMESTAMP)) {
                         withTimestamp((long) headers.get(HEADER_KEY_TIMESTAMP));
@@ -304,7 +316,7 @@ public class MessageBuilder {
                     return build();
 
                 } catch (final Exception ex) {
-                    ex.printStackTrace();
+                    logger.warn("Unable to parse the message after detecting that headers are present", ex);
                     withBody(buffer);
                     return build();
                 }
@@ -321,6 +333,16 @@ public class MessageBuilder {
     }
 
     public MessageBuilder withHeader(final String key, final int value) {
+        getHeaders().put(key, value);
+        return this;
+    }
+
+    public MessageBuilder withHeader(final String key, final short value) {
+        getHeaders().put(key, value);
+        return this;
+    }
+
+    public MessageBuilder withHeader(final String key, final byte value) {
         getHeaders().put(key, value);
         return this;
     }
