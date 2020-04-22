@@ -85,7 +85,7 @@ public class Protocol {
     public static final int TYPE_BYTE = -114;
     //public static final int TYPE_UNSIGNED_BYTE = -115; RESERVED
     public static final int TYPE_SHORT = -116;
-    public static final int TYPE_UNSIGNED_SHORT = -117;
+    //public static final int TYPE_UNSIGNED_SHORT = -117;
     public static final int TYPE_INT = -118;
     //public static final int TYPE_UNSIGNED_INT = -119; RESERVED
     public static final int TYPE_LONG = -120;

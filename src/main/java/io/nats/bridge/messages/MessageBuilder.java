@@ -1,13 +1,11 @@
 package io.nats.bridge.messages;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.nats.bridge.jms.JMSMessageBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,23 +15,23 @@ import java.util.function.Consumer;
 import static io.nats.bridge.messages.Protocol.*;
 
 public class MessageBuilder {
-    static Logger logger = LoggerFactory.getLogger(MessageBuilder .class);
+    static Logger logger = LoggerFactory.getLogger(MessageBuilder.class);
 
-    private long timestamp=-1;
+    private long timestamp = -1;
     //TTL plus timestamp
-    private long expirationTime=-1;
+    private long expirationTime = -1;
     //Delivery time is not instant
-    private long deliveryTime=-1;
-    private int mode=-1;
+    private long deliveryTime = -1;
+    private int mode = -1;
     private String type = Message.NO_TYPE;
     private boolean redelivered;
-    private int priority=-1;
+    private int priority = -1;
     private Map<String, Object> headers;
     private byte[] body;
     private final static ObjectMapper mapper = new ObjectMapper();
-    private  String correlationID;
+    private String correlationID;
 
-    private  Consumer<Message> replyHandler;
+    private Consumer<Message> replyHandler;
 
     public MessageBuilder() {
     }
@@ -168,7 +166,10 @@ public class MessageBuilder {
         Map<String, Object> headersRead = Collections.emptyMap();
 
         if (buffer.length > 3) {
-
+            /*
+             * Check for protocol markers.
+             * If no markers, then no header.
+             */
             if (buffer[0] == MARKER_AB &&
                     buffer[1] == MARKER_CD &&
                     buffer[2] == Protocol.MESSAGE_VERSION_MAJOR &&
@@ -177,23 +178,25 @@ public class MessageBuilder {
 
                 final DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(buffer));
                 try {
+                    //Skip markers
                     dataInputStream.skipBytes(4);
 
-                    //Read the header
+                    //Read the header count.
                     int numHHeaders = dataInputStream.readByte();
-
-
+                    //If there are headers read them.
                     if (numHHeaders > 0) {
-
-                        headersRead = new HashMap<>(numHHeaders);
-                        int headerNameLength;
-                        byte [] headerNameBytes ;
-                        byte [] stringBytes;
-                        int stringLength;
-                        String headerName;
+                        headersRead = new HashMap<>(numHHeaders); //hold headers read in
+                        int headerNameLength; //hold current header name length.
+                        byte[] headerNameBytes; //hold header name bytes
+                        byte[] stringBytes; //hold bytes to read a string header
+                        int stringLength; //hold string length bytes
+                        String headerName; //hold the current header name.
                         for (int index = 0; index < numHHeaders; index++) {
 
-                            headerNameLength= dataInputStream.readByte();
+                            /*
+                             * Read the header name which could be encoded as a header code if under 0.
+                             */
+                            headerNameLength = dataInputStream.readByte();
                             if (headerNameLength < 0) {
                                 headerName = Protocol.getHeaderFromCode(headerNameLength);
                             } else {
@@ -201,8 +204,9 @@ public class MessageBuilder {
                                 dataInputStream.read(headerNameBytes);
                                 headerName = new String(headerNameBytes, StandardCharsets.UTF_8);
                             }
-                            //ystem.out.println(headerName);
-
+                            /*
+                             * Read the header type then based on type read the value from the stream.
+                             */
                             int type = dataInputStream.readByte();
                             switch (type) {
                                 case TYPE_SHORT_STRING:
@@ -229,7 +233,7 @@ public class MessageBuilder {
                                 case TYPE_BOOLEAN_FALSE:
                                     headersRead.put(headerName, false);
                                     break;
-//                                case TYPE_UNSIGNED_BYTE:
+//                                case TYPE_UNSIGNED_BYTE: NOT USED YET
 //                                    headers.put(headerName, dataInputStream.readUnsignedByte());
 //                                    break;
                                 case TYPE_BYTE:
@@ -238,7 +242,7 @@ public class MessageBuilder {
                                 case TYPE_SHORT:
                                     headersRead.put(headerName, dataInputStream.readShort());
                                     break;
-//                                case TYPE_UNSIGNED_SHORT:
+//                                case TYPE_UNSIGNED_SHORT: NOT USED YET
 //                                    headers.put(headerName, dataInputStream.readUnsignedShort());
 //                                    break;
                                 case TYPE_INT:
@@ -254,33 +258,30 @@ public class MessageBuilder {
                                     headersRead.put(headerName, dataInputStream.readDouble());
                                     break;
                                 default:
-                                    if (type < RESERVED_START_TYPES ) {
+                                    if (type < RESERVED_START_TYPES) {
                                         throw new RuntimeException("bad type code");
-                                    }else {
+                                    } else {
                                         headersRead.put(headerName, type);
                                     }
                             }
                         }
                     }
-
-                    //Read the body
+                    //Read the body length, hash, and then read the body.
+                    // Check the hash to see if the body gets read correctly from the input stream.
                     final int bodyLength = dataInputStream.readInt();
-
-                    //ystem.out.println("body len " + bodyLength);
                     final int bodyHash = dataInputStream.readInt();
-                    //ystem.out.println("body hash " + bodyHash);
                     final byte[] bodyBuffer = new byte[bodyLength];
                     dataInputStream.read(bodyBuffer);
                     if (Protocol.createHashCode(bodyBuffer) != bodyHash) {
                         throw new MessageBuilderException("Body Hash did not match ");
                     }
-
+                    /* This is message builder code so there could be headers that are being injected in already. */
                     if (headers == null) {
                         headers = headersRead;
                     } else {
                         headers.putAll(headersRead);
                     }
-                    /* read headers */
+                    /* Remove common headers if they were included into the header map, and set the common header property instead. */
                     if (headers.containsKey(HEADER_KEY_TIMESTAMP)) {
                         withTimestamp((long) headers.get(HEADER_KEY_TIMESTAMP));
                         headers.remove(HEADER_KEY_TIMESTAMP);
@@ -310,17 +311,16 @@ public class MessageBuilder {
                         headers.remove(HEADER_KEY_PRIORITY);
                     }
 
+                    /* Set the builder headers and body. */
                     withHeaders(headers);
                     withBody(bodyBuffer);
-
                     return build();
-
                 } catch (final Exception ex) {
+                    /* Exception resort to returning the message as a normal byte buffer message, but it sends a warning to logs. */
                     logger.warn("Unable to parse the message after detecting that headers are present", ex);
                     withBody(buffer);
                     return build();
                 }
-
             } else {
                 withBody(buffer);
                 return build();
@@ -329,7 +329,6 @@ public class MessageBuilder {
             withBody(buffer);
             return build();
         }
-
     }
 
     public MessageBuilder withHeader(final String key, final int value) {

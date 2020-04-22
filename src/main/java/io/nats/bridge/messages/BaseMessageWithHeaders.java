@@ -101,40 +101,32 @@ public class BaseMessageWithHeaders implements BytesMessage {
         return headers;
     }
 
+    /**
+     * Convert byte representation of Message
+     * @return bytes of message
+     */
     public byte[] getMessageAsBytes() {
-
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final DataOutputStream streamOut = new DataOutputStream(baos);
-
+        final ByteArrayOutputStream bytesOutputStream = new ByteArrayOutputStream();
+        final DataOutputStream streamOut = new DataOutputStream(bytesOutputStream);
         try {
+            /*
+             * Write the markers and message protocol version.
+             */
             streamOut.writeByte(Protocol.MARKER_AB);
             streamOut.writeByte(Protocol.MARKER_CD);
             streamOut.writeByte(Protocol.MESSAGE_VERSION_MAJOR);
             streamOut.writeByte(Protocol.MESSAGE_VERSION_MINOR);
-
+            /*
+             * Create the map that holds the headers.
+             */
             final Map<String, Object> outputHeaders = (headers == null) ? Collections.emptyMap() : headers;
-//
-//
-//            if (headers != null) {
-//                outputHeaders.putAll(headers);
-//            }
-//            if (deliveryTime > 0) {
-//                outputHeaders.put(HEADER_KEY_DELIVERY_TIME, this.deliveryTime());
-//            }
-//            if (mode != -1)
-//                outputHeaders.put(HEADER_KEY_MODE, this.deliveryMode());
-//            if (expirationTime > 0)
-//                outputHeaders.put(HEADER_KEY_EXPIRATION_TIME, this.expirationTime());
-//            if (timestamp > 0)
-//                outputHeaders.put(HEADER_KEY_TIMESTAMP, this.timestamp());
-//            if (type != null && !NO_TYPE.equals(type))
-//                outputHeaders.put(HEADER_KEY_TYPE, this.type());
-//            if (priority != -1)
-//                outputHeaders.put(HEADER_KEY_PRIORITY, this.priority());
-//            if (redelivered)
-//                outputHeaders.put(HEADER_KEY_REDELIVERED, this.redelivered());
-
+            /*
+                The size of headers we are sending which is the baked headers plus user headers.
+             */
             int headerSize = 0;
+            /*
+                Only send these common headers if not equal to the default value.
+            */
             if (deliveryTime > 0) headerSize++;
             if (mode != -1) headerSize++;
             if (expirationTime > 0) headerSize++;
@@ -146,68 +138,58 @@ public class BaseMessageWithHeaders implements BytesMessage {
             headerSize += outputHeaders.size();
             streamOut.writeByte(headerSize);
 
-            if (headerSize > 255) {
-                throw new MessageException("Can't write out the message as there are too many headers");
-            }
+            /* Limit headers we are sending to the size of 1 unsigned byte. */
+            if (headerSize > 255) throw new MessageException("Can't write out the message as there are too many headers");
 
-            if (deliveryTime > 0) {
-                headerSize++;
+            if (deliveryTime() > 0) {
                 streamOut.writeByte(HEADER_KEY_DELIVERY_TIME_CODE);
                 streamOut.writeByte(TYPE_LONG);
                 streamOut.writeLong(deliveryTime());
             }
-            if (mode != -1) {
-                headerSize++;
+            if (deliveryMode() != -1) {
                 streamOut.writeByte(HEADER_KEY_MODE_CODE);
                 streamOut.writeByte(deliveryMode());
             }
-            if (expirationTime > 0) {
-                headerSize++;
+            if (expirationTime() > 0) {
                 streamOut.writeByte(HEADER_KEY_EXPIRATION_TIME_CODE);
                 streamOut.writeByte(TYPE_LONG);
                 streamOut.writeLong(expirationTime());
             }
-            if (timestamp > 0) {
-                headerSize++;
+            if (timestamp() > 0) {
                 streamOut.writeByte(HEADER_KEY_TIMESTAMP_CODE);
                 streamOut.writeByte(TYPE_LONG);
                 streamOut.writeLong(timestamp());
             }
-            if (type != null && !NO_TYPE.equals(type)) {
-                headerSize++;
+            if (type() != null && !NO_TYPE.equals(type())) {
                 streamOut.writeByte(HEADER_KEY_TYPE_CODE);
                 streamOut.writeByte(TYPE_SHORT_STRING);
                 streamOut.writeByte(type().length());
                 streamOut.write(type().getBytes(StandardCharsets.UTF_8));
             }
-
             if (priority != -1) {
-                headerSize++;
                 streamOut.writeByte(HEADER_KEY_PRIORITY_CODE);
                 streamOut.writeByte(priority());
             }
             if (redelivered) {
-                headerSize++;
                 streamOut.writeByte(HEADER_KEY_REDELIVERED_CODE);
                 streamOut.writeByte(TYPE_BOOLEAN_TRUE);
             }
 
-
-
+            /* Output the user defined headers, i.e., the non common headers. */
             for (Map.Entry<String, Object> kv : outputHeaders.entrySet()) {
                 if (kv.getKey().length() > 255) {
                     throw new MessageException("Can't write out the message as there header name length is too long");
                 }
 
                 int codeFromHeader = getCodeFromHeader(kv.getKey());
+                // If the headers is under 0, it is a header with a code. */
                 if (codeFromHeader>0) {
                     streamOut.writeByte(kv.getKey().length());
                     streamOut.write(kv.getKey().getBytes(StandardCharsets.UTF_8));
                 } else {
                     streamOut.writeByte(codeFromHeader);
                 }
-
-
+                /* Write out headers by type, encode the type, size if needed and value. */
                 switch (kv.getValue().getClass().getSimpleName()) {
                     case "String":
                         final String string = (String) kv.getValue();
@@ -232,12 +214,10 @@ public class BaseMessageWithHeaders implements BytesMessage {
                         streamOut.writeByte(TYPE_SHORT);
                         streamOut.writeShort((Short) kv.getValue());
                         break;
-
                     case "Byte":
                         streamOut.writeByte(TYPE_BYTE);
                         streamOut.writeByte((Byte) kv.getValue());
                         break;
-
                     case "Integer":
                         int value = (int) kv.getValue();
                         if (value < RESERVED_START_TYPES &&  value > Byte.MIN_VALUE) {
@@ -256,7 +236,6 @@ public class BaseMessageWithHeaders implements BytesMessage {
                         streamOut.writeByte(TYPE_FLOAT);
                         streamOut.writeFloat((Float) kv.getValue());
                         break;
-
                     case "Double":
                         streamOut.writeByte(TYPE_DOUBLE);
                         streamOut.writeDouble((Double) kv.getValue());
@@ -266,25 +245,21 @@ public class BaseMessageWithHeaders implements BytesMessage {
             if (bodyBytes != null && bodyBytes.length > 0) {
                 streamOut.writeInt(bodyBytes.length);
                 streamOut.writeInt(Protocol.createHashCode(bodyBytes));
-                //ystem.out.println("body bytes length " + bodyBytes.length);
-                //ystem.out.println("body bytes hash " + Protocol.createHashCode(bodyBytes));
                 streamOut.write(bodyBytes);
             } else {
                 streamOut.writeInt(0);
                 streamOut.writeInt(0);
             }
-
-
         } catch (Exception e) {
             throw new MessageException("Can't write out message", e);
         } finally {
             try {
                 streamOut.close();
-                baos.close();
+                bytesOutputStream.close();
             } catch (Exception e) {
             }
         }
-        return baos.toByteArray();
+        return bytesOutputStream.toByteArray();
     }
 
     @Override
