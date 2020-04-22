@@ -529,9 +529,6 @@ public class MessageBuilder {
             return build();
         }
     }
-
-
-
 }
 ```
 
