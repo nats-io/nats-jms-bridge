@@ -194,13 +194,13 @@ public class MessageBuilder {
                         for (int index = 0; index < numHHeaders; index++) {
 
                             headerNameLength= dataInputStream.readByte();
-                            if (headerNameLength < 1) {
-                                throw new RuntimeException("bad header length");
+                            if (headerNameLength < 0) {
+                                headerName = Protocol.getHeaderFromCode(headerNameLength);
+                            } else {
+                                headerNameBytes = new byte[headerNameLength];
+                                dataInputStream.read(headerNameBytes);
+                                headerName = new String(headerNameBytes, StandardCharsets.UTF_8);
                             }
-                            headerNameBytes = new byte[headerNameLength];
-                            dataInputStream.read(headerNameBytes);
-                            headerName = new String(headerNameBytes, StandardCharsets.UTF_8);
-
                             //ystem.out.println(headerName);
 
                             int type = dataInputStream.readByte();

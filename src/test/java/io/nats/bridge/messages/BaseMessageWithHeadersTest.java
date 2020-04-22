@@ -46,6 +46,27 @@ public class BaseMessageWithHeadersTest {
 
 
     @Test
+    public void createMessageJustPriority() {
+
+
+        final MessageBuilder builder = MessageBuilder.builder();
+        builder.withBody("Hello Cruel World".getBytes(StandardCharsets.UTF_8));
+        builder.withPriority(1);
+
+
+        final BaseMessageWithHeaders message1 = (BaseMessageWithHeaders) builder.build();
+
+        final byte[] bytes = message1.getMessageAsBytes();
+
+        final BaseMessageWithHeaders message2 = (BaseMessageWithHeaders) MessageBuilder.builder().buildFromBytes(bytes);
+
+
+        assertEquals(message1, message2);
+
+    }
+
+
+    @Test
     public void createMessageWithType() {
 
         long time = System.currentTimeMillis();

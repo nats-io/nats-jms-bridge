@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static io.nats.bridge.messages.Protocol.*;
@@ -46,7 +48,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
         this.priority = priority;
         this.correlationID = correlationID;
         this.headers = headers;
-        this.bodyBytes = bytes==null ? new byte[0] : bytes;
+        this.bodyBytes = bytes == null ? new byte[0] : bytes;
         this.replyHandler = replyHandler;
     }
 
@@ -95,7 +97,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
     }
 
     public Map<String, Object> headers() {
-        if (headers==null) return Collections.emptyMap();
+        if (headers == null) return Collections.emptyMap();
         return headers;
     }
 
@@ -110,42 +112,101 @@ public class BaseMessageWithHeaders implements BytesMessage {
             streamOut.writeByte(Protocol.MESSAGE_VERSION_MAJOR);
             streamOut.writeByte(Protocol.MESSAGE_VERSION_MINOR);
 
-            final HashMap<String, Object> outputHeaders = new HashMap<>(9 + (headers != null ? headers.size() : 0));
+            final Map<String, Object> outputHeaders = (headers == null) ? Collections.emptyMap() : headers;
+//
+//
+//            if (headers != null) {
+//                outputHeaders.putAll(headers);
+//            }
+//            if (deliveryTime > 0) {
+//                outputHeaders.put(HEADER_KEY_DELIVERY_TIME, this.deliveryTime());
+//            }
+//            if (mode != -1)
+//                outputHeaders.put(HEADER_KEY_MODE, this.deliveryMode());
+//            if (expirationTime > 0)
+//                outputHeaders.put(HEADER_KEY_EXPIRATION_TIME, this.expirationTime());
+//            if (timestamp > 0)
+//                outputHeaders.put(HEADER_KEY_TIMESTAMP, this.timestamp());
+//            if (type != null && !NO_TYPE.equals(type))
+//                outputHeaders.put(HEADER_KEY_TYPE, this.type());
+//            if (priority != -1)
+//                outputHeaders.put(HEADER_KEY_PRIORITY, this.priority());
+//            if (redelivered)
+//                outputHeaders.put(HEADER_KEY_REDELIVERED, this.redelivered());
 
-            if (headers != null) {
-                outputHeaders.putAll(headers);
-            }
-            if (deliveryTime > 0) {
-                outputHeaders.put(HEADER_KEY_DELIVERY_TIME, this.deliveryTime());
-            }
-            if (mode != -1)
-                outputHeaders.put(HEADER_KEY_MODE, this.deliveryMode());
-            if (expirationTime > 0)
-                outputHeaders.put(HEADER_KEY_EXPIRATION_TIME, this.expirationTime());
-            if (timestamp > 0)
-                outputHeaders.put(HEADER_KEY_TIMESTAMP, this.timestamp());
-            if (type != null && !NO_TYPE.equals(type))
-                outputHeaders.put(HEADER_KEY_TYPE, this.type());
-            if (priority != -1)
-                outputHeaders.put(HEADER_KEY_PRIORITY, this.priority());
-            if (redelivered)
-                outputHeaders.put(HEADER_KEY_REDELIVERED, this.redelivered());
+            int headerSize = 0;
+            if (deliveryTime > 0) headerSize++;
+            if (mode != -1) headerSize++;
+            if (expirationTime > 0) headerSize++;
+            if (timestamp > 0) headerSize++;
+            if (type != null && !NO_TYPE.equals(type)) headerSize++;
+            if (priority != -1)headerSize++;
+            if (redelivered) headerSize++;
 
+            headerSize += outputHeaders.size();
+            streamOut.writeByte(headerSize);
 
-            int headerSize = outputHeaders.size();
-
-            if (headerSize > 512) {
+            if (headerSize > 255) {
                 throw new MessageException("Can't write out the message as there are too many headers");
             }
 
-            streamOut.writeByte(headerSize);
+            if (deliveryTime > 0) {
+                headerSize++;
+                streamOut.writeByte(HEADER_KEY_DELIVERY_TIME_CODE);
+                streamOut.writeByte(TYPE_LONG);
+                streamOut.writeLong(deliveryTime());
+            }
+            if (mode != -1) {
+                headerSize++;
+                streamOut.writeByte(HEADER_KEY_MODE_CODE);
+                streamOut.writeByte(deliveryMode());
+            }
+            if (expirationTime > 0) {
+                headerSize++;
+                streamOut.writeByte(HEADER_KEY_EXPIRATION_TIME_CODE);
+                streamOut.writeByte(TYPE_LONG);
+                streamOut.writeLong(expirationTime());
+            }
+            if (timestamp > 0) {
+                headerSize++;
+                streamOut.writeByte(HEADER_KEY_TIMESTAMP_CODE);
+                streamOut.writeByte(TYPE_LONG);
+                streamOut.writeLong(timestamp());
+            }
+            if (type != null && !NO_TYPE.equals(type)) {
+                headerSize++;
+                streamOut.writeByte(HEADER_KEY_TYPE_CODE);
+                streamOut.writeByte(TYPE_SHORT_STRING);
+                streamOut.writeByte(type().length());
+                streamOut.write(type().getBytes(StandardCharsets.UTF_8));
+            }
 
-            for (Map.Entry<String, Object>kv : outputHeaders.entrySet()) {
-                if (kv.getKey().length() > 512) {
+            if (priority != -1) {
+                headerSize++;
+                streamOut.writeByte(HEADER_KEY_PRIORITY_CODE);
+                streamOut.writeByte(priority());
+            }
+            if (redelivered) {
+                headerSize++;
+                streamOut.writeByte(HEADER_KEY_REDELIVERED_CODE);
+                streamOut.writeByte(TYPE_BOOLEAN_TRUE);
+            }
+
+
+
+            for (Map.Entry<String, Object> kv : outputHeaders.entrySet()) {
+                if (kv.getKey().length() > 255) {
                     throw new MessageException("Can't write out the message as there header name length is too long");
                 }
-                streamOut.writeByte(kv.getKey().length());
-                streamOut.write(kv.getKey().getBytes(StandardCharsets.UTF_8));
+
+                int codeFromHeader = getCodeFromHeader(kv.getKey());
+                if (codeFromHeader>0) {
+                    streamOut.writeByte(kv.getKey().length());
+                    streamOut.write(kv.getKey().getBytes(StandardCharsets.UTF_8));
+                } else {
+                    streamOut.writeByte(codeFromHeader);
+                }
+
 
                 switch (kv.getValue().getClass().getSimpleName()) {
                     case "String":
@@ -159,14 +220,14 @@ public class BaseMessageWithHeaders implements BytesMessage {
                         }
                         streamOut.write(string.getBytes(StandardCharsets.UTF_8));
                         break;
-                    case "Boolean" :
-                       boolean b = (boolean) kv.getValue();
-                       if (b) {
-                           streamOut.writeByte(TYPE_BOOLEAN_TRUE);
-                       } else {
-                           streamOut.writeByte(TYPE_BOOLEAN_FALSE);
-                       }
-                       break;
+                    case "Boolean":
+                        boolean b = (boolean) kv.getValue();
+                        if (b) {
+                            streamOut.writeByte(TYPE_BOOLEAN_TRUE);
+                        } else {
+                            streamOut.writeByte(TYPE_BOOLEAN_FALSE);
+                        }
+                        break;
                     case "Short":
                         streamOut.writeByte(TYPE_SHORT);
                         streamOut.writeShort((Short) kv.getValue());
@@ -179,8 +240,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
 
                     case "Integer":
                         int value = (int) kv.getValue();
-                        if (value < RESERVED_START_TYPES ||
-                                (value > RESERVED_END_TYPES && value  <= 255)) {
+                        if (value < RESERVED_START_TYPES &&  value > Byte.MIN_VALUE) {
                             streamOut.write(value);
                         } else {
                             streamOut.writeByte(TYPE_INT);
@@ -272,17 +332,17 @@ public class BaseMessageWithHeaders implements BytesMessage {
         return result;
     }
 
-    public byte [] getMessageBytes() {
+    public byte[] getMessageBytes() {
         return getMessageAsBytes();
     }
 
     @Override
     public String toString() {
 
-        if (bodyBytes!=null) {
+        if (bodyBytes != null) {
             System.out.println("BODY LEN " + bodyBytes.length);
         }
-        String bodyStr = bodyBytes!=null ?", bodyBytes=" + Arrays.toString(bodyBytes) :"";
+        String bodyStr = bodyBytes != null ? ", bodyBytes=" + Arrays.toString(bodyBytes) : "";
 
         return "BaseMessageWithHeaders{" +
                 "timestamp=" + timestamp +
