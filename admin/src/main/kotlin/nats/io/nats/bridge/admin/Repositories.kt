@@ -2,7 +2,7 @@ package nats.io.nats.bridge.admin
 
 
 import nats.io.nats.bridge.admin.models.bridges.Cluster
-import nats.io.nats.bridge.admin.models.bridges.MessageBridge
+import nats.io.nats.bridge.admin.models.bridges.MessageBridgeInfo
 import nats.io.nats.bridge.admin.models.bridges.NatsBridgeConfig
 import nats.io.nats.bridge.admin.models.logins.Login
 import nats.io.nats.bridge.admin.models.logins.LoginRequest
@@ -15,7 +15,7 @@ interface ConfigRepo {
 
     fun readClusterConfigs(): Map<String, Cluster>
 
-    fun addBridge(messageBridge: MessageBridge)
+    fun addBridge(messageBridge: MessageBridgeInfo)
 
     fun saveConfig(conf: NatsBridgeConfig)
 }

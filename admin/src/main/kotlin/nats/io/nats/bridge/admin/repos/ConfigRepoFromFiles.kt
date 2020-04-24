@@ -3,12 +3,11 @@ package nats.io.nats.bridge.admin.repos
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import nats.io.nats.bridge.admin.ConfigRepo
-import nats.io.nats.bridge.admin.models.bridges.MessageBridge
+import nats.io.nats.bridge.admin.models.bridges.MessageBridgeInfo
 import nats.io.nats.bridge.admin.models.bridges.NatsBridgeConfig
 import nats.io.nats.bridge.admin.util.ObjectMapperUtils
 import com.fasterxml.jackson.module.kotlin.*
 import nats.io.nats.bridge.admin.RepoException
-import nats.io.nats.bridge.admin.models.bridges.ClusterConfig
 import nats.io.nats.bridge.admin.models.bridges.defaultDataModel
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -29,7 +28,7 @@ class ConfigRepoFromFiles(private val configFile: File = File("./config/nats-bri
 
     override fun readClusterConfigs()= readConfig().clusters
 
-    override fun addBridge(messageBridge: MessageBridge) {
+    override fun addBridge(messageBridge: MessageBridgeInfo) {
         logger.info("Adding Bridge: ${messageBridge.name ?: "noName"} ...")
 
         /* Read in the whole config file. */

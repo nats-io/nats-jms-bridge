@@ -56,6 +56,12 @@ public class NatsMessageBusBuilder {
         return this;
     }
 
+    public NatsMessageBusBuilder withServers(List<String> servers) {
+        this.servers.addAll(servers);
+        return this;
+    }
+
+
     public Connection getConnection() {
         if (connection == null) {
             try {

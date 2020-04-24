@@ -2,6 +2,7 @@ package nats.io.nats.bridge.admin
 
 import nats.io.nats.bridge.admin.repos.ConfigRepoFromFiles
 import nats.io.nats.bridge.admin.repos.LoginRepoFromFiles
+import nats.io.nats.bridge.admin.runner.BridgeRunner
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -29,6 +30,9 @@ class Configuration {
         return repo
     }
 
+
+    @Bean
+    fun bridgeRunner(repo: ConfigRepo) = BridgeRunner(repo)
 
     @Bean
     fun loginRepo(env: Environment,

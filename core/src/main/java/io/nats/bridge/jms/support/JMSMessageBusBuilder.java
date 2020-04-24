@@ -32,6 +32,7 @@ import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.Hashtable;
@@ -130,6 +131,15 @@ public class JMSMessageBusBuilder {
 
     public JMSMessageBusBuilder withJmsMessageConverter(final FunctionWithException<Message, io.nats.bridge.messages.Message> messageConverter) {
         this.jmsMessageConverter = messageConverter;
+        return this;
+    }
+
+    public JMSMessageBusBuilder withJndiProperty(String name, String value) {
+        this.getJndiProperties().put(name, value);
+        return this;
+    }
+    public JMSMessageBusBuilder withJndiProperties(Map<String, String> props) {
+        this.getJndiProperties().putAll(props);
         return this;
     }
 

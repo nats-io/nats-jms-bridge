@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 data class NatsBridgeConfig(val name: String,
                             val dateTime: LocalDateTime = LocalDateTime.now(),
                             val secretKey: String? = null,
-                            val bridges: List<MessageBridge>,
+                            val bridges: List<MessageBridgeInfo>,
                             val clusters: Map<String, Cluster>)
 
 
@@ -21,14 +21,14 @@ data class NatsBridgeConfig(val name: String,
  * A Message bus represents a message bus system, i.e., IBM MQ, Nats, ActiveMQ, JMS, Rabbit MQ, Kafka, SQS, etc.
  * A message bus has a subject which can be Nats subject or a JMS destination.
  */
-data class MessageBus(val name: String, val busType: BusType, val subject: String, val clusterName: String)
+data class MessageBusInfo(val name: String, val busType: BusType, val subject: String, val clusterName: String)
 
 /**
  * A Message Bridge connects two MessageBus and will forward messages or relay request replies between the message bus systems.
  *
  */
-data class MessageBridge(val name: String, val bridgeType: BridgeType,
-                         val source: MessageBus, val destination: MessageBus, val copyHeaders: Boolean? = false)
+data class MessageBridgeInfo(val name: String, val bridgeType: BridgeType,
+                             val source: MessageBusInfo, val destination: MessageBusInfo, val copyHeaders: Boolean? = false)
 
 /**
  * Two supported message bus types are JMS and NATS.
@@ -95,27 +95,27 @@ data class NatsClusterConfig(override val userName: String? = null, override val
 val defaultDataModel = NatsBridgeConfig(
         name = "Starter Config",
         bridges = listOf(
-                MessageBridge("jmsToNatsSample",
+                MessageBridgeInfo("jmsToNatsSample",
                         bridgeType = BridgeType.REQUEST_REPLY,
-                        source = MessageBus(name = "jms",
+                        source = MessageBusInfo(name = "jms",
                                 busType = BusType.JMS,
                                 subject = "dynamicQueues/sample-jms-queue",
                                 clusterName = "activeMQTest"
                         ),
-                        destination = MessageBus(name = "Nats Sample",
+                        destination = MessageBusInfo(name = "Nats Sample",
                                 busType = BusType.NATS,
                                 subject = "sample-nats-subject",
                                 clusterName = "natsTest"
                         )
                 ),
-                MessageBridge("natsToJMS",
+                MessageBridgeInfo("natsToJMS",
                         bridgeType = BridgeType.FORWARD,
-                        source = MessageBus(name = "Nats Sample",
+                        source = MessageBusInfo(name = "Nats Sample",
                                 busType = BusType.NATS,
                                 subject = "sample-nats-subject",
                                 clusterName = "natsTest"
                         ),
-                        destination = MessageBus(name = "jms",
+                        destination = MessageBusInfo(name = "jms",
                                 busType = BusType.JMS,
                                 subject = "dynamicQueues/sample-jms-queue",
                                 clusterName = "activeMQTest"

@@ -22,6 +22,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
 
+    id("maven-publish")
+
 }
 
 version = "0.2.2"
@@ -108,6 +110,8 @@ tasks {
         // Swagger
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
+
+        implementation("io.nats.bridge:nats-jms-bridge:0.1")
 
 
         // Testing

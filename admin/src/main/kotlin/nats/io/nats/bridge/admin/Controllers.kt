@@ -105,7 +105,7 @@ class AdminController(private val config: ConfigRepo) {
     @PreAuthorize("hasAnyAuthority('Admin')")
     @PutMapping(path = ["/admin/config/bridge"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
-    fun addBridge(messageBridge: MessageBridge) = config.addBridge(messageBridge)
+    fun addBridge(messageBridge: MessageBridgeInfo) = config.addBridge(messageBridge)
 
     @PreAuthorize("hasAnyAuthority('Admin')")
     @PostMapping(path = ["/admin/config"])
