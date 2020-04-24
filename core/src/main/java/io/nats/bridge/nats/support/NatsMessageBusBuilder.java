@@ -1,6 +1,7 @@
 package io.nats.bridge.nats.support;
 
 import io.nats.bridge.nats.NatsMessageBus;
+import io.nats.bridge.support.MessageBusBuilder;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.client.Connection;
 import io.nats.client.Nats;
@@ -14,7 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class NatsMessageBusBuilder {
+public class NatsMessageBusBuilder implements MessageBusBuilder{
 
 
     private List<String> servers = new ArrayList<>();

@@ -31,8 +31,8 @@ class Configuration {
     }
 
 
-    @Bean
-    fun bridgeRunner(repo: ConfigRepo) = BridgeRunner(repo)
+//    @Bean
+//    fun bridgeRunner(repo: ConfigRepo) = BridgeRunner(repo)
 
     @Bean
     fun loginRepo(env: Environment,

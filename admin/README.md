@@ -526,7 +526,7 @@ Nats To JMS <TAB> f <TAB> nat Bar <TAB> n <TAB> natsBarSubject <TAB> natsTest   
 ```
 
 1. Lines that begin with # are comments 
-2. There will be exactly 9 entries per line that denote the config of two buses (`MessageBus`) that make up a bridge (`MessageBridge`)
+2. There will be exactly 10 entries per line that denote the config of two buses (`MessageBus`) that make up a bridge (`MessageBridge`)
 3. Each line that is not a comment refers to a bridge (`MessageBridge`)
 4. White space around the `<TAB>`s (refers to `\t`, i.e., `0x9`) is ignored
 

@@ -161,3 +161,9 @@ class UserAdminController(private val loginRepo: LoginRepo) {
     fun roles(authentication: Authentication) = authentication.authorities
 
 }
+
+@RestController
+@RequestMapping("/api/v1/logins")
+class Runner(private val loginRepo: LoginRepo) {
+    private val logger = LoggerFactory.getLogger(this.javaClass)
+}
