@@ -5,16 +5,16 @@ Nats MQ JMS Bridge.
 
 
 
-## Early version 
+## Early version
 
 The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nats.io`.
 
-1. A request gets sent to `nats.io` which then sends that request to IBM/MQ/JMS. 
-2. Bridge gets the response and sends it back to the original client. 
-3. The focus is on Queues and Request/Reply. 
+1. A request gets sent to `nats.io` which then sends that request to IBM/MQ/JMS.
+2. Bridge gets the response and sends it back to the original client.
+3. The focus is on Queues and Request/Reply.
 
 
-#### Basic flow 
+#### Basic flow
 
 ```ascii
 
@@ -37,4 +37,4 @@ The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nat
 
 ```
 
-This all happens async. 
+This all happens async.
