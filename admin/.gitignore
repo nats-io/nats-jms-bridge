@@ -1,0 +1,15 @@
+.DS_Store
+.gradle/
+.idea/
+build/
+*.iml
+*.mv.db
+*.trace.db
+/gradle.properties
+/keys/private_key.pem
+/keys/public_key.pem
+/data
+/admin
+/config
+/out
+
