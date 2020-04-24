@@ -13,20 +13,15 @@
 
 package io.nats.bridge.integration;
 
-import io.nats.bridge.Message;
+import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.StringMessage;
 import io.nats.bridge.jms.support.JMSMessageBusBuilder;
-import io.nats.bridge.nats.NatsMessageBus;
-import io.nats.bridge.util.ExceptionHandler;
-import io.nats.client.Nats;
-import io.nats.client.Options;
-import org.slf4j.LoggerFactory;
+import io.nats.bridge.messages.MessageBuilder;
+import io.nats.bridge.nats.support.NatsMessageBusBuilder;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,14 +33,19 @@ public class TestUtils {
         return jmsMessageBusBuilder.build();
     }
 
-    public static MessageBus getMessageBusNats(final String topicPostFix) throws IOException, InterruptedException {
-        final String subject = "message-only-subject-" + topicPostFix;
+    public static MessageBus getMessageBusJmsWithHeaders(final String topicPostFix) {
+        final String queueName = "dynamicQueues/headers-message-only-" + topicPostFix;
+        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().turnOnCopyHeaders().withDestinationName(queueName);
+        return jmsMessageBusBuilder.build();
+    }
 
-        final Options options = new Options.Builder().
-                server("nats://localhost:4222").
-                noReconnect(). // Disable reconnect attempts
-                build();
-        return new NatsMessageBus(subject, Nats.connect(options), "queueGroup" + UUID.randomUUID().toString() + System.currentTimeMillis(), new ExceptionHandler(LoggerFactory.getLogger("test")));
+    public static MessageBus getMessageBusNats(final String topicPostFix) throws IOException, InterruptedException {
+
+        final String subject =  topicPostFix + "NatsMessageBus";
+
+        final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withSubject(subject);
+        natsMessageBusBuilder.getOptionsBuilder().noReconnect();
+        return natsMessageBusBuilder.build();
     }
 
 
@@ -54,7 +54,7 @@ public class TestUtils {
         final Thread thread = new Thread(() -> {
             try {
                 while (!stop.get()) {
-                    Thread.sleep(10);
+                    Thread.sleep(1000);
                     messageBridge.process();
                 }
                 messageBridge.close();
@@ -84,10 +84,20 @@ public class TestUtils {
                 }
                 final Optional<Message> receive = serverMessageBus.receive();
                 receive.ifPresent(message -> {
+                    System.out.println("Handle message " + message.bodyAsString());
+                    System.out.println("Handle message headers " + message.headers());
 
-                    StringMessage stringMessage = (StringMessage) message;
-                    System.out.println("Handle message " + stringMessage.getBody());
-                    message.reply(new StringMessage("Hello " + stringMessage.getBody()));
+
+
+                    final String myHeader = (String) message.headers().get("MY_HEADER");
+                    if (myHeader == null) {
+                        final Message reply = MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build();
+                        message.reply(reply);
+                    } else {
+                        final Message reply = MessageBuilder.builder().withBody("Hello " + message.bodyAsString() + " MY_HEADER " + myHeader).build();
+                        message.reply(reply);
+                    }
+
                 });
 
 

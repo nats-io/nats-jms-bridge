@@ -1,6 +1,6 @@
 package io.nats.bridge.jms.support;
 
-import io.nats.bridge.Message;
+import io.nats.bridge.messages.Message;
 
 import java.util.function.Consumer;
 

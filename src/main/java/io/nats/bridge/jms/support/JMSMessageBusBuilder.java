@@ -23,6 +23,7 @@ import io.nats.bridge.metrics.MetricsProcessor;
 import io.nats.bridge.metrics.Output;
 import io.nats.bridge.metrics.implementation.SimpleMetrics;
 import io.nats.bridge.util.ExceptionHandler;
+import io.nats.bridge.util.FunctionWithException;
 import io.nats.bridge.util.SupplierWithException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,9 @@ import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import java.time.Duration;
+import java.util.Queue;
+import java.util.concurrent.LinkedTransferQueue;
+import java.util.Hashtable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -59,7 +63,75 @@ public class JMSMessageBusBuilder {
     private Supplier<MessageConsumer> consumerSupplier;
     private MetricsProcessor metricsProcessor;
     private ExceptionHandler tryHandler;
+    private FunctionWithException<Message, io.nats.bridge.messages.Message> jmsMessageConverter;
+    private FunctionWithException<io.nats.bridge.messages.Message, javax.jms.Message> bridgeMessageConverter;
+    private java.util.Queue<JMSReply> jmsReplyQueue;
+    private boolean copyHeaders = false;
+    private Hashtable<String, Object> jndiProperties = new Hashtable<>();
 
+
+
+    public FunctionWithException<io.nats.bridge.messages.Message, Message> getBridgeMessageConverter() {
+
+        if (bridgeMessageConverter == null) {
+            if (isCopyHeaders()) {
+                bridgeMessageConverter = new ConvertBridgeMessageToJmsMessageWithHeaders(getSession());
+            } else {
+                bridgeMessageConverter = new ConvertBridgeMessageToJmsMessage(getSession());
+            }
+        }
+        return bridgeMessageConverter;
+    }
+
+    public JMSMessageBusBuilder withBridgeMessageConverter(final FunctionWithException<io.nats.bridge.messages.Message, Message> bridgeMessageConverter) {
+        this.bridgeMessageConverter = bridgeMessageConverter;
+        return this;
+    }
+
+    public static JMSMessageBusBuilder builder() {
+        return new JMSMessageBusBuilder();
+    }
+
+    public boolean isCopyHeaders() {
+        return copyHeaders;
+    }
+
+    public JMSMessageBusBuilder turnOnCopyHeaders() {
+        return withCopyHeaders(true);
+    }
+
+    public JMSMessageBusBuilder withCopyHeaders(boolean copyHeaders) {
+        this.copyHeaders = copyHeaders;
+        return this;
+    }
+
+    public Queue<JMSReply> getJmsReplyQueue() {
+        if (jmsReplyQueue == null) {
+            jmsReplyQueue = new LinkedTransferQueue<>();
+        }
+        return jmsReplyQueue;
+    }
+
+    public JMSMessageBusBuilder withJmsReplyQueue(Queue<JMSReply> jmsReplyQueue) {
+        this.jmsReplyQueue = jmsReplyQueue;
+        return this;
+    }
+
+    public FunctionWithException<Message, io.nats.bridge.messages.Message> getJmsMessageConverter() {
+        if (jmsMessageConverter == null) {
+            if (!isCopyHeaders()) {
+                jmsMessageConverter = new ConvertJmsMessageToBridgeMessage(getTryHandler(), getTimeSource(), getJmsReplyQueue());
+            } else {
+                jmsMessageConverter = new ConvertJmsMessageToBridgeMessageWithHeaders(getTryHandler(), getTimeSource(), getJmsReplyQueue());
+            }
+        }
+        return jmsMessageConverter;
+    }
+
+    public JMSMessageBusBuilder withJmsMessageConverter(final FunctionWithException<Message, io.nats.bridge.messages.Message> messageConverter) {
+        this.jmsMessageConverter = messageConverter;
+        return this;
+    }
 
     public ExceptionHandler getTryHandler() {
         if (tryHandler == null) {
@@ -231,9 +303,12 @@ public class JMSMessageBusBuilder {
         return this;
     }
 
+
     public Context getContext() {
         if (context == null) {
-            context = exceptionHandler.tryReturnOrRethrow((SupplierWithException<Context>) InitialContext::new,
+
+
+            context = exceptionHandler.tryReturnOrRethrow((SupplierWithException<Context>) () -> new InitialContext(getJndiProperties()),
                     (e) -> new JMSMessageBusBuilderException("Unable to create JNDI context", e));
         }
         return context;
@@ -328,8 +403,22 @@ public class JMSMessageBusBuilder {
 
     public MessageBus build() {
         return new JMSMessageBus(getDestination(), getSession(), getConnection(), getResponseDestination(),
-                getResponseConsumer(), getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(), getMetricsProcessor(), getTryHandler(), getJmsBusLogger());
+                getResponseConsumer(), getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(),
+                getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(), getBridgeMessageConverter());
     }
 
 
+    public Hashtable<String, Object> getJndiProperties() {
+        if (jndiProperties.size() == 0) {
+            jndiProperties.put("java.naming.factory.initial", (String) System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory"));
+            jndiProperties.put("connectionFactory.ConnectionFactory", (String) System.getenv().getOrDefault("NATS_BRIDGE_JMS_CONNECTION_FACTORY", "tcp://localhost:61616"));
+            jndiProperties.put("queue.queue/testQueue", (String) System.getenv().getOrDefault("NATS_BRIDGE_JMS_QUEUE", "queue.queue/testQueue=testQueue"));
+        }
+        return jndiProperties;
+    }
+
+    public JMSMessageBusBuilder setJndiProperties(Hashtable<String, Object> jndiProperties) {
+        this.jndiProperties = jndiProperties;
+        return this;
+    }
 }

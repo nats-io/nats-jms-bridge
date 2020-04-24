@@ -1,9 +1,9 @@
 package io.nats.bridge.integration.b;
 
-import io.nats.bridge.Message;
+import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.StringMessage;
+import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.integration.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +74,7 @@ public class JMSToNatsOneWayMessagesTest {
                 receive = responseBusClient.receive();
                 if (receive.isPresent()) {
                     Message message = receive.get();
-                    responseFromServer.set(((StringMessage) message).getBody());
+                    responseFromServer.set(message.bodyAsString());
                     resultSignal.countDown();
                     break;
                 }
@@ -112,9 +112,8 @@ public class JMSToNatsOneWayMessagesTest {
                 }
                 final Optional<Message> receive = serverMessageBus.receive();
                 receive.ifPresent(message -> {
-                    StringMessage stringMessage = (StringMessage) message;
-                    System.out.println("Handle message " + stringMessage.getBody());
-                    responseBusServer.publish(new StringMessage("Hello " + stringMessage.getBody()));
+                    System.out.println("Handle message " + message.bodyAsString());
+                    responseBusServer.publish(MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build());
                 });
                 try {
                     Thread.sleep(10);
