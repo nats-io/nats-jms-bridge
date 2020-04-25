@@ -1,3 +1,7 @@
+# Admin Console for NATS JMS Bridge 
+
+![image](https://user-images.githubusercontent.com/382678/80275243-e3010c80-8694-11ea-843c-b26cf43cf8ae.png)
+
 # Nats JMS MQ Bridge Service service
 
 This is the source code for the Nats JMS MQ Bridge Service Service back-end application developed with Spring Boot (Kotlin). 
