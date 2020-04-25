@@ -1,19 +1,19 @@
 spring:
-    output.ansi.enabled: ALWAYS
-    mvc.throw-exception-if-no-handler-found: true
-    jackson:
-        default-property-inclusion: non_null
+  output.ansi.enabled: ALWAYS
+  mvc.throw-exception-if-no-handler-found: true
+  jackson:
+    default-property-inclusion: non_null
 
 
 app.config:
-    etcd: ./config
+  etcd: ./config
 
 security:
-    secretKey: sk_029aeb1c-03d7-4e15-98b1-43d9e0a2736c
+  secretKey: sk_029aeb1c-03d7-4e15-98b1-43d9e0a2736c
 
 
 jwt:
-    algo: HmacSHA256
+  algo: HmacSHA256
 repo:
-    logins:
-        configFile: ./config/nats-bridge-logins.yaml
+  logins:
+    configFile: ./config/nats-bridge-logins.yaml

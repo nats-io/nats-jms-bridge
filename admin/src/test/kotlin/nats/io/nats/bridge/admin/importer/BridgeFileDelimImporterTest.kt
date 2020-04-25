@@ -6,10 +6,9 @@ import nats.io.nats.bridge.admin.models.bridges.BusType
 import nats.io.nats.bridge.admin.models.bridges.Cluster
 import nats.io.nats.bridge.admin.repos.ConfigRepoFromFiles
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.File
 import java.util.*
 
@@ -18,7 +17,7 @@ internal class BridgeFileDelimImporterTest {
     var fileConf: File? = null
     var fileInput: File? = null
     var configMap: Map<String, Cluster>? = null
-    var configRepo : ConfigRepo? = null
+    var configRepo: ConfigRepo? = null
 
     val inputStr = """
         # JMS to Nats Bridge
@@ -35,7 +34,7 @@ internal class BridgeFileDelimImporterTest {
         configRepo = ConfigRepoFromFiles()
         configMap = configRepo?.readConfig()?.clusters
 
-        println(inputStr.replace("\t",  "<TAB>"))
+        println(inputStr.replace("\t", "<TAB>"))
     }
 
     @AfterEach

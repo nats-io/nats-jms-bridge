@@ -16,6 +16,7 @@ object LoginUtils {
         return roleString?.split(",")?.filter { !it.isBlank() }?.map { Role(it) }//?.filter { Roles.roleSet.contains(it) }
                 ?: emptyList()
     }
+
     fun createLoginFromMap(map: Map<String, String>): LoginToken {
         return LoginToken(map["subject"]!!, extractRoles(map["roles"]))
     }

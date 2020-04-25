@@ -1,17 +1,17 @@
 spring:
-    profiles.active: test
+  profiles.active: test
 
-    jpa:
-        hibernate.ddl-auto: create
-    datasource:
-        driverClassName: org.h2.Driver
-        url: jdbc:h2:mem:testdb
-        username: sa
-        password:
-        tomcat.initSQL: SET NAMES 'utf8mb4'
+  jpa:
+    hibernate.ddl-auto: create
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+    tomcat.initSQL: SET NAMES 'utf8mb4'
 
-    output.ansi.enabled: ALWAYS
-    mvc.throw-exception-if-no-handler-found: true
+  output.ansi.enabled: ALWAYS
+  mvc.throw-exception-if-no-handler-found: true
 
 #logging.level.org.hibernate: INFO
 #logging.level.org.hibernate.SQL: DEBUG

@@ -72,7 +72,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo) : MessageBridgeLoade
         }
 
         if (clusterConfig.config.isNotEmpty()) {
-            val props= Properties()
+            val props = Properties()
             props.putAll(clusterConfig.config)
             builder.withOptionProperties(props)
         }

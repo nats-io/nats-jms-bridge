@@ -9,13 +9,13 @@ class MessageBridgeBuilder {
     var sourceBusBuilder: MessageBusBuilder? = null
     var destBusBuilder: MessageBusBuilder? = null
     var requestReply: Boolean = true
-    var name:String = "NO_NAME"
+    var name: String = "NO_NAME"
 
 
     fun withSourceBusBuilder(sourceBusBuilder: MessageBusBuilder?) = apply { this.sourceBusBuilder = sourceBusBuilder }
     fun withDestinationBusBuilder(destBusBuilder: MessageBusBuilder?) = apply { this.destBusBuilder = destBusBuilder }
     fun withRequestReply(requestReply: Boolean) = apply { this.requestReply = requestReply }
-    fun withName(name:String) = apply {this.name = name}
+    fun withName(name: String) = apply { this.name = name }
 
     fun build(): MessageBridge {
         return MessageBridge(name, sourceBusBuilder!!.build(), destBusBuilder!!.build(), requestReply)

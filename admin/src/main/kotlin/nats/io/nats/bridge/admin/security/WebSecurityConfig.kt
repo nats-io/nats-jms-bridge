@@ -24,25 +24,6 @@ import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-/*
-    HOW TO MODIFY / USE
-
-    1. Build your own JwtAuthentication object.
-       This object will be available later in your controller endpoint,
-       so build it however you need to get the info you need from the jwt token.
-       Your code will be the only thing that looks at this
-
-    2. Modify JWTAuthorizationFilter
-        A. Figure out a way to filter only the paths you need. This uses protectedUrlsMatcher
-        B. Prepare the JwtAuthentication
-
-    3. In your controller, you can access the Authentication object in 2 ways.
-        A. directly through a static function call
-           val authentication = SecurityContextHolder.getContext().authentication
-        B. by adding authentication: Authentication to your signature
-           @GetMapping("/withAuth")
-           fun withAuth(authentication: Authentication, @RequestParam(value = "blah") blah: String)
- */
 
 @Configuration
 @EnableWebSecurity
@@ -109,7 +90,7 @@ class JWTAuthorizationFilter(private val secret: String) : Filter {
         val httpServletRequest = request as HttpServletRequest
         if (adminUsersMatcher.matches(httpServletRequest)) {
             logger.info("Admin Role Protected")
-            val header : String? = httpServletRequest.getHeader("Authorization")
+            val header: String? = httpServletRequest.getHeader("Authorization")
             val hasToken = hasJwtToken(header, response)
             val loginToken: LoginToken? = readLoginTokenFromJwtToken(hasToken, header)
             if (loginToken != null) {
@@ -150,7 +131,7 @@ class JWTAuthorizationFilter(private val secret: String) : Filter {
     private fun readLoginTokenFromJwtToken(hasToken: Boolean, header: String?): LoginToken? {
         return if (hasToken) {
             val token = header?.substring(7)
-            val claims = JwtUtils.readClaims(token, secret+secret)
+            val claims = JwtUtils.readClaims(token, secret + secret)
 
             if (claims != null) {
                 if (claims["subject"] != null) {

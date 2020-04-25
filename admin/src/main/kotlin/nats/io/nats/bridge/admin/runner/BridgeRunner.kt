@@ -32,6 +32,7 @@ class BridgeRunnerManager(private val repo: ConfigRepo,
     }
 
     fun wasError() = bridgeRunner().wasError()
+    fun wasStarted() = bridgeRunner().wasStarted()
     fun getLastError() = bridgeRunner().getLastError()
     fun isRunning() = bridgeRunner().isRunning()
     fun isStopped() = bridgeRunner().isStopped()
@@ -70,13 +71,14 @@ class BridgeRunner(private val bridgeLoader: MessageBridgeLoader,
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     private val lastErrorRef = AtomicReference<Exception>()
-    private var executors : ExecutorService? = null
+    private var executors: ExecutorService? = null
 
     fun wasError() = lastErrorRef.get() != null
-    fun getLastError() = lastErrorRef.get()!!
+    fun getLastError(): Exception? = lastErrorRef.get()
     fun clearLastError() = lastErrorRef.set(null)
     fun isStopped() = stopped.get()
     fun isRunning() = !isStopped()
+    fun wasStarted() = wasStarted.get()
 
     fun stopRunner() {
         sendEndProcessSignal.sendStopRunning()

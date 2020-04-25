@@ -101,7 +101,7 @@ tasks {
         implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.8")
 
         //
-        implementation( "org.springframework.boot:spring-boot-starter-security")
+        implementation("org.springframework.boot:spring-boot-starter-security")
 
 
         implementation("mysql:mysql-connector-java:5.1.44")
@@ -124,8 +124,11 @@ tasks {
         implementation("io.jsonwebtoken:jjwt-api:0.11.1")
         implementation("io.jsonwebtoken:jjwt-impl:0.11.1")
         implementation("io.jsonwebtoken:jjwt-jackson:0.11.1")
-        implementation( "io.nats:jnats:2.6.7")
+        implementation("io.nats:jnats:2.6.7")
 
+
+        // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+        testImplementation("com.squareup.okhttp3:okhttp:4.5.0")
 
 
     }

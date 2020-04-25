@@ -2,7 +2,7 @@ package nats.io.nats.bridge.admin
 
 import nats.io.nats.bridge.admin.repos.ConfigRepoFromFiles
 import nats.io.nats.bridge.admin.repos.LoginRepoFromFiles
-import nats.io.nats.bridge.admin.runner.BridgeRunner
+import nats.io.nats.bridge.admin.runner.BridgeRunnerManager
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -19,26 +19,27 @@ import java.io.File
 @Configuration
 class Configuration {
 
-    fun env (env: Environment) : Environment {
+    fun env(env: Environment): Environment {
         return env
     }
 
     @Bean
-    fun bridgeConfigRepo(env: Environment) : ConfigRepo {
-         val repo = ConfigRepoFromFiles()
+    fun bridgeConfigRepo(env: Environment): ConfigRepo {
+        val repo = ConfigRepoFromFiles()
         repo.init()
         return repo
     }
 
-
-//    @Bean
-//    fun bridgeRunner(repo: ConfigRepo) = BridgeRunner(repo)
+    @Bean
+    fun bridgeRunnerManager(repo: ConfigRepo): BridgeRunnerManager {
+        return BridgeRunnerManager(repo)
+    }
 
     @Bean
     fun loginRepo(env: Environment,
-                  @Value(value = "\${security.secretKey}") secretKey:String,
+                  @Value(value = "\${security.secretKey}") secretKey: String,
                   @Value(value = "\${repo.logins.configFile}") confFile: String
-    ) : LoginRepo {
+    ): LoginRepo {
         val repo = LoginRepoFromFiles(File(confFile), systemSecret = secretKey)
         repo.init()
         return repo
@@ -52,23 +53,23 @@ class SwaggerConfig {
     @Bean
     fun natsBridgeAPI(@Value(value = "\${version:dev}") version: String): Docket {
         return Docket(DocumentationType.SWAGGER_2)
-            .groupName("NatsBridgeAdmin")
-            .apiInfo(
-                ApiInfoBuilder()
-                    .title("Nats Bridge Admin Service API")
-                    .description("Nats Bridge Admin service.")
-                    .contact(
-                        Contact(
-                            "Rick Hightower",
-                            "",
-                            "rick@syndia.com")
-                    )
-                    .version(version)
-                    .license("")
-                    .build())
-            .select()
-            .paths(PathSelectors.ant("/api/v1/**"))
-            .build()
+                .groupName("NatsBridgeAdmin")
+                .apiInfo(
+                        ApiInfoBuilder()
+                                .title("Nats Bridge Admin Service API")
+                                .description("Nats Bridge Admin service.")
+                                .contact(
+                                        Contact(
+                                                "Rick Hightower",
+                                                "",
+                                                "rick@syndia.com")
+                                )
+                                .version(version)
+                                .license("")
+                                .build())
+                .select()
+                .paths(PathSelectors.ant("/api/v1/**"))
+                .build()
     }
 }
 

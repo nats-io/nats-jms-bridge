@@ -5,7 +5,8 @@ import nats.io.nats.bridge.admin.models.bridges.BusType
 import nats.io.nats.bridge.admin.models.bridges.Cluster
 import nats.io.nats.bridge.admin.repos.ConfigRepoFromFiles
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
