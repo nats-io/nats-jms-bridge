@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.Properties;
 
 public class NatsMessageBusBuilder implements MessageBusBuilder{
 
@@ -25,8 +26,48 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
     private ExceptionHandler tryHandler;
     private Options options;
     private Options.Builder optionsBuilder;
+    private Properties optionProperties; 
+
+    private char[] user;
+    private char[] password; 
+
+
+
 
     private String queueGroup;
+
+    public char[] getUser() {
+
+        return user;
+    }
+
+    public NatsMessageBusBuilder withUser(String user ){
+        this.user = user.toCharArray();
+        return this;
+    }
+
+    public char[] getPassword() {
+        return password;
+    }
+
+    public NatsMessageBusBuilder withPassword(String password ){
+        this.password = password.toCharArray();
+        return this;
+    }
+
+    public Properties getOptionProperties() {
+
+        if (optionProperties == null) {
+            optionProperties = new Properties(); 
+        } 
+        return optionProperties;
+    }
+
+    public NatsMessageBusBuilder withOptionProperties(Properties properties ){
+        optionProperties = properties;
+        return this;
+    }
+    
 
     public String getQueueGroup() {
         if (queueGroup == null) {
@@ -125,8 +166,16 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
 
     public Options.Builder getOptionsBuilder() {
         if (optionsBuilder == null) {
-            optionsBuilder = new Options.Builder()
+            if (optionProperties == null) {
+                optionsBuilder = new Options.Builder()
                     .servers(getServers().toArray(new String[1]));
+            } else {
+                optionsBuilder = new Options.Builder(getOptionProperties())
+                .servers(getServers().toArray(new String[1]));
+            }
+            if (password!=null && user!=null) {
+                optionsBuilder.userInfo(user, password);             
+            }
         }
         return optionsBuilder;
     }

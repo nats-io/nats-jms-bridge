@@ -124,6 +124,7 @@ tasks {
         implementation("io.jsonwebtoken:jjwt-api:0.11.1")
         implementation("io.jsonwebtoken:jjwt-impl:0.11.1")
         implementation("io.jsonwebtoken:jjwt-jackson:0.11.1")
+        implementation( "io.nats:jnats:2.6.7")
 
 
 
