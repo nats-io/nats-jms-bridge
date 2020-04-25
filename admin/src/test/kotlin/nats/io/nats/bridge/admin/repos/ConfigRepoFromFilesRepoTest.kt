@@ -30,7 +30,7 @@ internal class ConfigRepoFromFilesRepoTest {
 
         val newConfig = repo.readConfig()
 
-        assertTrue(newConfig.bridges.find{it.name=="newBridge"}!=null)
+        assertTrue(newConfig.bridges.find { it.name == "newBridge" } != null)
         file.delete()
     }
 
@@ -47,7 +47,7 @@ internal class ConfigRepoFromFilesRepoTest {
         try {
             repo.addBridge(bridge.copy(name = "newBridge", source = bridge.source.copy(clusterName = "myleftToe")))
             assertFalse(true)
-        } catch (ex:RepoException) {
+        } catch (ex: RepoException) {
             //pass
         }
 

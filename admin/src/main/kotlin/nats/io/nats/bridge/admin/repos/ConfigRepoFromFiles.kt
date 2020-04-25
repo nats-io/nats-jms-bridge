@@ -2,14 +2,13 @@ package nats.io.nats.bridge.admin.repos
 
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import nats.io.nats.bridge.admin.ConfigRepo
-import nats.io.nats.bridge.admin.models.bridges.MessageBridge
-import nats.io.nats.bridge.admin.models.bridges.NatsBridgeConfig
-import nats.io.nats.bridge.admin.util.ObjectMapperUtils
-import com.fasterxml.jackson.module.kotlin.*
 import nats.io.nats.bridge.admin.RepoException
-import nats.io.nats.bridge.admin.models.bridges.ClusterConfig
+import nats.io.nats.bridge.admin.models.bridges.MessageBridgeInfo
+import nats.io.nats.bridge.admin.models.bridges.NatsBridgeConfig
 import nats.io.nats.bridge.admin.models.bridges.defaultDataModel
+import nats.io.nats.bridge.admin.util.ObjectMapperUtils
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.LocalDateTime
@@ -22,14 +21,15 @@ class ConfigRepoFromFiles(private val configFile: File = File("./config/nats-bri
     fun init() {
         readConfig()
     }
+
     override fun readConfig(): NatsBridgeConfig {
         if (!configFile.exists()) saveConfig(defaultDataModel)
         return mapper.readValue(configFile)
     }
 
-    override fun readClusterConfigs()= readConfig().clusters
+    override fun readClusterConfigs() = readConfig().clusters
 
-    override fun addBridge(messageBridge: MessageBridge) {
+    override fun addBridge(messageBridge: MessageBridgeInfo) {
         logger.info("Adding Bridge: ${messageBridge.name ?: "noName"} ...")
 
         /* Read in the whole config file. */
@@ -42,7 +42,7 @@ class ConfigRepoFromFiles(private val configFile: File = File("./config/nats-bri
                 throw RepoException("The message bridge ${messageBridge.name} source ${messageBridge.source.name} " +
                         "cluster ${messageBridge.source.clusterName} has not been configured yet")
             }
-            if(!readConfig.clusters.containsKey(messageBridge.destination.clusterName)) {
+            if (!readConfig.clusters.containsKey(messageBridge.destination.clusterName)) {
                 throw RepoException("The message bridge ${messageBridge.name} destination ${messageBridge.destination.name} " +
                         "cluster ${messageBridge.destination.clusterName} has not been configured yet")
             }
@@ -58,8 +58,8 @@ class ConfigRepoFromFiles(private val configFile: File = File("./config/nats-bri
 
     override fun saveConfig(conf: NatsBridgeConfig) {
         logger.info("Saving Nats Bridge config... " + LocalDateTime.now())
-            configFile.parentFile.mkdirs();
-            mapper.writeValue(configFile, conf)
+        configFile.parentFile.mkdirs();
+        mapper.writeValue(configFile, conf)
     }
 
 

@@ -1,3 +1,3 @@
 spring:
-    profiles.active: PROD
+  profiles.active: PROD
 

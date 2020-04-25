@@ -3,10 +3,10 @@ package nats.io.nats.bridge.admin.repos
 import nats.io.nats.bridge.admin.models.logins.Login
 import nats.io.nats.bridge.admin.models.logins.Role
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.File
 import java.util.*
 
@@ -46,7 +46,7 @@ internal class LoginRepoFromFilesTest {
                 secret = "sk-" + UUID.randomUUID().toString(), publicKey = "pk-" + UUID.randomUUID().toString()))
 
         assertTrue(repo.listLogins().find { it == "John Doe" } != null)
-        assertTrue(repo.listRolesForLogin("John Doe").find{it == "Admin"}!=null)
+        assertTrue(repo.listRolesForLogin("John Doe").find { it == "Admin" } != null)
     }
 
     @Test

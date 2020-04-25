@@ -37,9 +37,17 @@ The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nat
 
 ```
 
-This all happens async. 
+This all happens async.
 
-## The bridge can encode headers 
+## Dev Note
+
+To deploy to local repo to integrate with admin use:
+
+```sh
+./gradlew clean build publishToMavenLocal
+```
+
+## The bridge can encode headers
 
 ## Wire protocol for the message body with headers
 

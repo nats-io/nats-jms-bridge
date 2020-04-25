@@ -32,11 +32,24 @@ public class MessageBridge implements Closeable {
     private final MessageBus sourceBus;
     private final MessageBus destinationBus;
     private final boolean requestReply;
+    private final String name; 
 
     public MessageBridge(final MessageBus sourceBus, final MessageBus destinationBus, boolean requestReply) {
         this.sourceBus = sourceBus;
         this.destinationBus = destinationBus;
         this.requestReply = requestReply;
+        this.name = "TEST"; 
+    }
+
+    public MessageBridge(final String name, final MessageBus sourceBus, final MessageBus destinationBus, boolean requestReply) {
+        this.sourceBus = sourceBus;
+        this.destinationBus = destinationBus;
+        this.requestReply = requestReply;
+        this.name = name;
+    }
+
+    public String name() {
+        return this.name;
     }
 
     public void process() {

@@ -8,7 +8,8 @@ data class Login(val subject: String, val secret: String,
     fun genKey(systemSecret: String): String {
         return "secured-$systemSecret-nats-bridge-pub-$publicKey-subject-$subject-abcdefjhijklmnopqrstuvwxyz"
     }
-    fun genToken() : LoginToken {
+
+    fun genToken(): LoginToken {
         val cp = this.copy()
         return LoginToken(cp.subject, cp.roles)
     }
@@ -23,7 +24,7 @@ data class LoginToken(val subject: String, val roles: List<Role>) {
     }
 }
 
-data class LoginRequest(val subject: String, val publicKey: String, val secret:String)
+data class LoginRequest(val subject: String, val publicKey: String, val secret: String)
 
 data class TokenResponse(val token: String, val publicKey: String, val subject: String)
 

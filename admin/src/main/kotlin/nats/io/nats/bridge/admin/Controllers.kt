@@ -2,11 +2,13 @@ package nats.io.nats.bridge.admin
 
 
 import io.swagger.annotations.ApiImplicitParam
-import nats.io.nats.bridge.admin.models.bridges.*
+import nats.io.nats.bridge.admin.models.bridges.MessageBridgeInfo
+import nats.io.nats.bridge.admin.models.bridges.NatsBridgeConfig
 import nats.io.nats.bridge.admin.models.logins.Login
 import nats.io.nats.bridge.admin.models.logins.LoginRequest
 import nats.io.nats.bridge.admin.models.logins.LoginToken
 import nats.io.nats.bridge.admin.models.logins.TokenResponse
+import nats.io.nats.bridge.admin.runner.BridgeRunnerManager
 import nats.io.nats.bridge.admin.util.EncryptUtils
 import nats.io.nats.bridge.admin.util.JwtUtils
 import org.slf4j.LoggerFactory
@@ -32,7 +34,6 @@ class LoginController(@Value("\${security.secretKey}") private val adminSecretKe
 
 
     fun doGenerateToken(headers: Map<String, String>, tokenRequest: LoginRequest): TokenResponse {
-
         val authLogin = longRepo.loadLogin(tokenRequest)
         if (authLogin != null) {
             val pwd: String = if (authLogin.secret.startsWith("pk-")) authLogin.secret else {
@@ -41,7 +42,7 @@ class LoginController(@Value("\${security.secretKey}") private val adminSecretKe
             }
             if (tokenRequest.secret == pwd) {
                 val token = JwtUtils.generateToken("LOGIN_TOKEN", authLogin.genToken().toMap(),
-                        adminSecretKey+adminSecretKey, jwtAlgorithm)
+                        adminSecretKey + adminSecretKey, jwtAlgorithm)
                 return TokenResponse(token, authLogin.publicKey, authLogin.subject)
             } else {
                 throw ResponseStatusException(HttpStatus.FORBIDDEN, "Bad Token Request")
@@ -105,7 +106,7 @@ class AdminController(private val config: ConfigRepo) {
     @PreAuthorize("hasAnyAuthority('Admin')")
     @PutMapping(path = ["/admin/config/bridge"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
-    fun addBridge(messageBridge: MessageBridge) = config.addBridge(messageBridge)
+    fun addBridge(messageBridge: MessageBridgeInfo) = config.addBridge(messageBridge)
 
     @PreAuthorize("hasAnyAuthority('Admin')")
     @PostMapping(path = ["/admin/config"])
@@ -159,5 +160,52 @@ class UserAdminController(private val loginRepo: LoginRepo) {
     @GetMapping(path = ["/roles"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
     fun roles(authentication: Authentication) = authentication.authorities
+
+}
+
+@RestController
+@RequestMapping("/api/v1/control/bridges")
+class Runner(val bridgeRunner: BridgeRunnerManager) {
+    private val logger = LoggerFactory.getLogger(this.javaClass)
+
+
+    data class Flag(val message: String, val flag: Boolean)
+    data class Error(val name: String, val message: String)
+    data class Message(val message: String, val error: Error? = null)
+
+    @GetMapping(path = ["/running"])
+    fun isRunning() = Flag("Running?", flag = bridgeRunner.isRunning())
+
+    @GetMapping(path = ["/started"])
+    fun wasStarted() = Flag("Started?", flag = bridgeRunner.wasStarted())
+
+
+    @GetMapping(path = ["/error/was-error"])
+    fun wasError() = Flag("Errors?", flag = bridgeRunner.wasError())
+
+
+    @GetMapping(path = ["/error/last"])
+    @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
+    fun getLastError(): Message {
+        val lastError = bridgeRunner.getLastError()
+        return if (lastError != null) {
+            Message("ERROR", Error(message = lastError.localizedMessage, name = lastError.javaClass.simpleName))
+        } else {
+            Message("NO ERRORS")
+        }
+    }
+
+    @PostMapping(path = ["/admin/clear/last/error"])
+    @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
+    fun clearLastError() = bridgeRunner.clearLastError()
+
+    @PostMapping(path = ["/admin/stop"])
+    @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
+    fun stop() = bridgeRunner.stop()
+
+    @PostMapping(path = ["/admin/restart"])
+    @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
+    fun restart() = bridgeRunner.restart()
+
 
 }

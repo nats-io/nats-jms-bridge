@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import nats.io.nats.bridge.admin.LoginRepo
 import nats.io.nats.bridge.admin.RepoException
-import nats.io.nats.bridge.admin.models.bridges.*
 import nats.io.nats.bridge.admin.models.logins.*
 import nats.io.nats.bridge.admin.util.EncryptUtils
 import nats.io.nats.bridge.admin.util.ObjectMapperUtils
@@ -52,7 +51,7 @@ class LoginRepoFromFiles(private val configFile: File = File("./config/nats-brid
     }
 
     override fun loadLogin(tokenRequest: LoginRequest): Login? {
-        return readConfig().logins.find{ it.subject == tokenRequest.subject && it.publicKey == tokenRequest.publicKey}
+        return readConfig().logins.find { it.subject == tokenRequest.subject && it.publicKey == tokenRequest.publicKey }
     }
 
     override fun addLogin(login: Login) {

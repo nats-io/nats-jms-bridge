@@ -17,7 +17,7 @@ object ObjectMapperUtils {
     }
 
     fun getJsonObjectMapper(): ObjectMapper {
-        val mapper =  jacksonObjectMapper()
+        val mapper = jacksonObjectMapper()
         mapper.findAndRegisterModules()
         return mapper
     }

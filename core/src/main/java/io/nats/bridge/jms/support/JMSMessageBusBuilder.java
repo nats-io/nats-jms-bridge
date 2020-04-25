@@ -12,7 +12,6 @@
 // limitations under the License.
 package io.nats.bridge.jms.support;
 
-
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.TimeSource;
 import io.nats.bridge.jms.JMSMessageBus;
@@ -22,6 +21,7 @@ import io.nats.bridge.metrics.MetricsDisplay;
 import io.nats.bridge.metrics.MetricsProcessor;
 import io.nats.bridge.metrics.Output;
 import io.nats.bridge.metrics.implementation.SimpleMetrics;
+import io.nats.bridge.support.MessageBusBuilder;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.bridge.util.FunctionWithException;
 import io.nats.bridge.util.SupplierWithException;
@@ -32,13 +32,14 @@ import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.Hashtable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class JMSMessageBusBuilder {
+public class JMSMessageBusBuilder implements MessageBusBuilder{
 
     private final ExceptionHandler exceptionHandler = new ExceptionHandler(LoggerFactory.getLogger(JMSMessageBusBuilder.class));
     private Logger jmsBusLogger;
@@ -130,6 +131,15 @@ public class JMSMessageBusBuilder {
 
     public JMSMessageBusBuilder withJmsMessageConverter(final FunctionWithException<Message, io.nats.bridge.messages.Message> messageConverter) {
         this.jmsMessageConverter = messageConverter;
+        return this;
+    }
+
+    public JMSMessageBusBuilder withJndiProperty(String name, String value) {
+        this.getJndiProperties().put(name, value);
+        return this;
+    }
+    public JMSMessageBusBuilder withJndiProperties(Map<String, String> props) {
+        this.getJndiProperties().putAll(props);
         return this;
     }
 

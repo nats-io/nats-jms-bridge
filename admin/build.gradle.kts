@@ -22,6 +22,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
 
+    id("maven-publish")
+
 }
 
 version = "0.2.2"
@@ -99,7 +101,7 @@ tasks {
         implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.8")
 
         //
-        implementation( "org.springframework.boot:spring-boot-starter-security")
+        implementation("org.springframework.boot:spring-boot-starter-security")
 
 
         implementation("mysql:mysql-connector-java:5.1.44")
@@ -108,6 +110,8 @@ tasks {
         // Swagger
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
+
+        implementation("io.nats.bridge:nats-jms-bridge:0.1")
 
 
         // Testing
@@ -120,7 +124,11 @@ tasks {
         implementation("io.jsonwebtoken:jjwt-api:0.11.1")
         implementation("io.jsonwebtoken:jjwt-impl:0.11.1")
         implementation("io.jsonwebtoken:jjwt-jackson:0.11.1")
+        implementation("io.nats:jnats:2.6.7")
 
+
+        // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+        testImplementation("com.squareup.okhttp3:okhttp:4.5.0")
 
 
     }
