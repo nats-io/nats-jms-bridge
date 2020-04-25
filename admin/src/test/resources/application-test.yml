@@ -17,3 +17,5 @@ spring:
 #logging.level.org.hibernate.SQL: DEBUG
 #logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 #logging.level.org.springframework.cloud: TRACE
+logging.level.io.nats: INFO
+logging.level.io.netty: INFO

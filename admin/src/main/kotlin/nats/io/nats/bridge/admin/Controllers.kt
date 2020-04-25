@@ -164,19 +164,24 @@ class UserAdminController(private val loginRepo: LoginRepo) {
 }
 
 @RestController
-@RequestMapping("/api/v1/bridge/control")
+@RequestMapping("/api/v1/control/bridges")
 class Runner(val bridgeRunner: BridgeRunnerManager) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
 
+    data class Flag(val message: String, val flag: Boolean)
+    data class Error(val name: String, val message: String)
+    data class Message(val message: String, val error: Error? = null)
+
     @GetMapping(path = ["/running"])
-    fun isRunning() = bridgeRunner.isRunning()
+    fun isRunning() = Flag("Running?", flag = bridgeRunner.isRunning())
 
     @GetMapping(path = ["/started"])
-    fun wasStarted() = bridgeRunner.wasStarted()
+    fun wasStarted() = Flag("Started?", flag = bridgeRunner.wasStarted())
+
 
     @GetMapping(path = ["/error/was-error"])
-    fun wasError() = bridgeRunner.wasError()
+    fun wasError() = Flag("Errors?", flag = bridgeRunner.wasError())
 
 
     @GetMapping(path = ["/error/last"])
@@ -190,21 +195,17 @@ class Runner(val bridgeRunner: BridgeRunnerManager) {
         }
     }
 
-    @GetMapping(path = ["/admin/clear/last/error"])
+    @PostMapping(path = ["/admin/clear/last/error"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
     fun clearLastError() = bridgeRunner.clearLastError()
 
-    @GetMapping(path = ["/admin/stop"])
+    @PostMapping(path = ["/admin/stop"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
     fun stop() = bridgeRunner.stop()
 
-    @GetMapping(path = ["/admin/restart"])
+    @PostMapping(path = ["/admin/restart"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
     fun restart() = bridgeRunner.restart()
-
-
-    data class Error(val name: String, val message: String)
-    data class Message(val message: String, val error: Error? = null)
 
 
 }

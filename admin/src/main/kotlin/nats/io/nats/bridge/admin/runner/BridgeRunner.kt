@@ -105,10 +105,10 @@ class BridgeRunner(private val bridgeLoader: MessageBridgeLoader,
                     // If none had any messages than sleep for a beat.
                     // This has not been implemented yet
                     // This is a good place for a KPI metric as well
-                    if (i % 1000 == 0) {
-                        println("running")
+                    if (i % 100_000 == 0) {
+                        Thread.sleep(10)//Temp hack to test
+                        println("running $i")
                     }
-                    Thread.sleep(10)//Temp hack to test
                 }
                 stopped.set(true)
                 logger.info("Stopped bridge runner")

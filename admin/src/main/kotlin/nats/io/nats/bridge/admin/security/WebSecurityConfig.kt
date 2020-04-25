@@ -83,7 +83,8 @@ class JWTAuthorizationFilter(private val secret: String) : Filter {
     )
     private val adminUsersMatcher = OrRequestMatcher(
             AntPathRequestMatcher("/api/v1/logins/admin/**"),
-            AntPathRequestMatcher("/api/v1/bridges/admin/**")
+            AntPathRequestMatcher("/api/v1/bridges/admin/**"),
+            AntPathRequestMatcher("/api/v1/control/bridges/admin/**")
     )
 
     override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain?) {
