@@ -24,6 +24,7 @@ import io.nats.bridge.metrics.TimeTracker;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.bridge.util.FunctionWithException;
 import org.slf4j.Logger;
+import java.time.Duration;
 
 import javax.jms.*;
 import java.util.Queue;
@@ -198,6 +199,21 @@ public class JMSMessageBus implements MessageBus {
 
     }
 
+    public Optional<Message> receive(Duration duration) {
+        return tryHandler.tryReturnOrRethrow(() -> {
+            final javax.jms.Message message = consumer().receive(duration.toMillis());
+            if (message != null) {
+                countReceived.increment();
+                return Optional.of(convertToBusMessage(message));
+            } else {
+                return Optional.empty();
+            }
+        }, e -> {
+            throw new JMSMessageBusException("Error receiving message", e);
+        });
+
+    }
+
     @Override
     public void close() {
         tryHandler.tryWithRethrow(connection::close, e -> new JMSMessageBusException("Error closing connection", e));
@@ -206,7 +222,7 @@ public class JMSMessageBus implements MessageBus {
 
     /**
      * This method gets called by bridge to process outstanding responses.
-     * If the client is Nats and the Server is JMS then there will be messages from the `responseConsumer`.
+     * If the client is NATS and the Server is JMS then there will be messages from the `responseConsumer`.
      */
     private void processResponses() {
 

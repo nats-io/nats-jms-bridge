@@ -59,9 +59,9 @@ public class JMSMessageBusBuilder implements MessageBusBuilder{
     private TimeSource timeSource;
     private Destination responseDestination;
     private MessageConsumer responseConsumer;
-    private Metrics metrics;
     private Supplier<MessageProducer> producerSupplier;
     private Supplier<MessageConsumer> consumerSupplier;
+    private Metrics metrics;
     private MetricsProcessor metricsProcessor;
     private ExceptionHandler tryHandler;
     private FunctionWithException<Message, io.nats.bridge.messages.Message> jmsMessageConverter;

@@ -1,13 +1,20 @@
 package io.nats.bridge.nats.support;
 
 import io.nats.bridge.nats.NatsMessageBus;
+import io.nats.bridge.TimeSource;
 import io.nats.bridge.support.MessageBusBuilder;
 import io.nats.bridge.util.ExceptionHandler;
+import io.nats.bridge.metrics.Metrics;
+import io.nats.bridge.metrics.MetricsDisplay;
+import io.nats.bridge.metrics.MetricsProcessor;
+import io.nats.bridge.metrics.Output;
+import io.nats.bridge.metrics.implementation.SimpleMetrics;
 import io.nats.client.Connection;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,13 +23,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.Properties;
 
-public class NatsMessageBusBuilder implements MessageBusBuilder{
+import java.util.Queue;
+import java.util.concurrent.LinkedTransferQueue;
 
+public class NatsMessageBusBuilder implements MessageBusBuilder{
 
     private List<String> servers = new ArrayList<>();
     private Connection connection;
     private String subject;
-    private ExecutorService pool;
     private ExceptionHandler tryHandler;
     private Options options;
     private Options.Builder optionsBuilder;
@@ -31,10 +39,78 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
     private char[] user;
     private char[] password; 
 
-
-
+    private TimeSource timeSource;
+    private Metrics metrics;
+    private MetricsProcessor metricsProcessor;
+ 
+    
+    private java.util.Queue<NatsMessageBus.NatsReply> replyQueue;
+    private java.util.Queue<NatsMessageBus.NatsReply> replyQueueNotDone;
+    
 
     private String queueGroup;
+
+    public Metrics getMetrics() {
+        if (metrics == null) {
+            metrics = new SimpleMetrics(System::currentTimeMillis);
+        }
+        return metrics;
+    }
+
+    public NatsMessageBusBuilder withMetrics(final Metrics metrics) {
+        this.metrics = metrics;
+        return this;
+    }
+
+
+    public MetricsProcessor getMetricsProcessor() {
+        if (metricsProcessor == null) {
+            metricsProcessor = new MetricsDisplay(new Output() {
+            }, getMetrics(), 10, Duration.ofSeconds(10), System::currentTimeMillis);
+        }
+        return metricsProcessor;
+    }
+
+    public NatsMessageBusBuilder withMetricsProcessor(MetricsProcessor metricsProcessor) {
+        this.metricsProcessor = metricsProcessor;
+        return this;
+    }
+
+    public Queue<NatsMessageBus.NatsReply> getReplyQueue() {
+        if (replyQueue == null) {
+            replyQueue = new LinkedTransferQueue<>();
+        }
+        return replyQueue;
+    }
+
+    public NatsMessageBusBuilder withReplyQueue(Queue<NatsMessageBus.NatsReply> replyQueueNotDone) {
+        this.replyQueue = replyQueue;
+        return this;
+    }
+
+    public Queue<NatsMessageBus.NatsReply> getReplyQueueNotDone() {
+        if (replyQueueNotDone == null) {
+            replyQueueNotDone = new LinkedTransferQueue<>();
+        }
+        return replyQueueNotDone;
+    }
+
+    public NatsMessageBusBuilder withReplyQueueNotDone(Queue<NatsMessageBus.NatsReply> replyQueueNotDone) {
+        this.replyQueueNotDone = replyQueueNotDone;
+        return this;
+    }
+
+    public TimeSource getTimeSource() {
+        if (timeSource == null) {
+            timeSource = System::currentTimeMillis;
+        }
+        return timeSource;
+    }
+
+    public NatsMessageBusBuilder withTimeSource(TimeSource timeSource) {
+        this.timeSource = timeSource;
+        return this;
+    }
 
     public char[] getUser() {
 
@@ -133,18 +209,6 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         return this;
     }
 
-    public ExecutorService getPool() {
-        if (pool == null) {
-            pool = Executors.newFixedThreadPool(25);
-        }
-        return pool;
-    }
-
-    public NatsMessageBusBuilder withPool(ExecutorService pool) {
-        this.pool = pool;
-        return this;
-    }
-
     public ExceptionHandler getTryHandler() {
         if (tryHandler == null) {
             tryHandler = new ExceptionHandler(LoggerFactory.getLogger(NatsMessageBus.class));
@@ -194,7 +258,12 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
     public static NatsMessageBusBuilder builder() {
         return new NatsMessageBusBuilder();
     }
+
     public NatsMessageBus build() {
-        return new NatsMessageBus(getSubject(), getConnection(), getQueueGroup(), getPool(), getTryHandler());
+        return new NatsMessageBus(getSubject(), 
+        getConnection(), 
+        getQueueGroup(),  getTryHandler(), getReplyQueue(),
+         getReplyQueueNotDone(), getTimeSource(),
+         getMetrics(), getMetricsProcessor());
     }
 }

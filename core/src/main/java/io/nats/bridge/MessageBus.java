@@ -15,6 +15,7 @@ package io.nats.bridge;
 
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
+import java.time.Duration;
 
 
 import java.io.Closeable;
@@ -70,6 +71,13 @@ public interface MessageBus extends Closeable {
      * @return a possible message.
      */
     Optional<Message> receive();
+
+    /**
+     * Receives a message. The optional is none if the message is not received.
+     *
+     * @return a possible message.
+     */
+    Optional<Message> receive(Duration duration);
 
     void close();
 

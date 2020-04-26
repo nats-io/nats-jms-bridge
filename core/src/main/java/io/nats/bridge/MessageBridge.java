@@ -19,7 +19,7 @@ import io.nats.bridge.messages.Message;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.function.Consumer;
+
 
 /**
  * A message bridge connects two MessageBuses.

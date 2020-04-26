@@ -59,7 +59,11 @@ public class NatsToJMSBridgeTest {
             resultSignal.countDown();
         });
 
-        resultSignal.await(10, TimeUnit.SECONDS);
+        for (int i =0; i < 10; i++) {
+            resultSignal.await(50, TimeUnit.MILLISECONDS);
+            clientMessageNatsBus.process();
+            resultSignal.await(1, TimeUnit.SECONDS);
+        }
 
         assertEquals("Hello RICK", responseFromServer.get());
 
