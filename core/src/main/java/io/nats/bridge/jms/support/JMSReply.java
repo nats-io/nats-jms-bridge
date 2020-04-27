@@ -2,7 +2,6 @@ package io.nats.bridge.jms.support;
 
 import io.nats.bridge.messages.Message;
 
-
 import javax.jms.Destination;
 
 public class JMSReply {

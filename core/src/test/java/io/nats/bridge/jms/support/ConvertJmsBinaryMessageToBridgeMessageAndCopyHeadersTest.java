@@ -16,8 +16,8 @@ import static org.junit.Assert.*;
 
 public class ConvertJmsBinaryMessageToBridgeMessageAndCopyHeadersTest {
 
-    private JMSMessageBusBuilder builder ;
-    private javax.jms.Message testMessage ;
+    private JMSMessageBusBuilder builder;
+    private javax.jms.Message testMessage;
     private FunctionWithException<Message, io.nats.bridge.messages.Message> messageConverter;
     private io.nats.bridge.messages.Message bridgeMessage;
 
@@ -48,7 +48,6 @@ public class ConvertJmsBinaryMessageToBridgeMessageAndCopyHeadersTest {
     }
 
 
-
     private void validateAll() throws JMSException {
         assertNotNull(bridgeMessage);
         assertTrue(bridgeMessage instanceof io.nats.bridge.messages.BaseMessageWithHeaders);
@@ -72,50 +71,54 @@ public class ConvertJmsBinaryMessageToBridgeMessageAndCopyHeadersTest {
     }
 
     @Test
-    public void apply() throws Exception{
+    public void apply() throws Exception {
 
 
-        testMessage.setJMSReplyTo(new Destination() {});
-        bridgeMessage  = messageConverter.apply(testMessage);
-        validateAll();
-
-
-    }
-    @Test
-    public void applyWithReplyTo() throws Exception{
-
-        bridgeMessage  = messageConverter.apply(testMessage);
+        testMessage.setJMSReplyTo(new Destination() {
+        });
+        bridgeMessage = messageConverter.apply(testMessage);
         validateAll();
 
 
     }
 
     @Test
-    public void applyText() throws Exception{
+    public void applyWithReplyTo() throws Exception {
+
+        bridgeMessage = messageConverter.apply(testMessage);
+        validateAll();
+
+
+    }
+
+    @Test
+    public void applyText() throws Exception {
 
         testMessage = new JMSTextMessage("Hello");
         initTestMessage();
 
-        testMessage.setJMSReplyTo(new Destination() {});
-        bridgeMessage  = messageConverter.apply(testMessage);
+        testMessage.setJMSReplyTo(new Destination() {
+        });
+        bridgeMessage = messageConverter.apply(testMessage);
         validateAll();
 
 
     }
+
     @Test
-    public void applyTextWithReplyTo() throws Exception{
+    public void applyTextWithReplyTo() throws Exception {
 
         testMessage = new JMSTextMessage("Hello");
         initTestMessage();
 
-        bridgeMessage  = messageConverter.apply(testMessage);
+        bridgeMessage = messageConverter.apply(testMessage);
         validateAll();
 
 
     }
 
     @Test
-    public void illegalMessageType() throws Exception{
+    public void illegalMessageType() throws Exception {
 
         try {
             testMessage = new JMSNoMessage();

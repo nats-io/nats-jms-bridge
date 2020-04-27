@@ -1,11 +1,11 @@
 package io.nats.bridge.integration.a;
 
 import io.nats.bridge.MessageBridge;
-import io.nats.bridge.support.MessageBridgeImpl;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.integration.TestUtils;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
+import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,16 +59,16 @@ public class NatsToJmsBridgeWithHeadersTest {
 
         final Message message = MessageBuilder.builder().withHeader("MY_HEADER", "MY_VALUE").withBody("RICK").build();
 
-        clientMessageNatsBus.request(message, reply ->  {
+        clientMessageNatsBus.request(message, reply -> {
 
-            responseHeaderFromServer.set((String)reply.headers().get("MY_HEADER"));
+            responseHeaderFromServer.set((String) reply.headers().get("MY_HEADER"));
             responseFromServer.set(reply.bodyAsString());
             resultSignal.countDown();
         });
 
 
         runClientLoop();
-        assertEquals ("Hello RICK MY_HEADER MY_VALUE", responseFromServer.get());
+        assertEquals("Hello RICK MY_HEADER MY_VALUE", responseFromServer.get());
 
         System.out.println(responseFromServer.get());
 
@@ -83,9 +83,8 @@ public class NatsToJmsBridgeWithHeadersTest {
             resultSignal.await(10, TimeUnit.SECONDS);
             clientMessageNatsBus.process();
 
-            if (responseFromServer.get()!=null) break;
+            if (responseFromServer.get() != null) break;
         }
-
 
 
     }
@@ -94,7 +93,7 @@ public class NatsToJmsBridgeWithHeadersTest {
         TestUtils.runBridgeLoop(messageBridge, stop, bridgeStopped);
     }
 
-    private void stopServerAndBridgeLoops() throws Exception{
+    private void stopServerAndBridgeLoops() throws Exception {
         TestUtils.stopServerAndBridgeLoops(stop, serverStopped, bridgeStopped);
     }
 

@@ -15,10 +15,9 @@ package io.nats.bridge;
 
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
-import java.time.Duration;
-
 
 import java.io.Closeable;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -45,7 +44,7 @@ public interface MessageBus extends Closeable {
      * @param message string message
      */
     default void publish(String message) {
-        publish( MessageBuilder.builder().withBody(message).build());
+        publish(MessageBuilder.builder().withBody(message).build());
     }
 
     /**

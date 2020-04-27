@@ -24,9 +24,9 @@ import io.nats.bridge.metrics.TimeTracker;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.bridge.util.FunctionWithException;
 import org.slf4j.Logger;
-import java.time.Duration;
 
 import javax.jms.*;
+import java.time.Duration;
 import java.util.Queue;
 import java.util.*;
 import java.util.function.Consumer;
@@ -63,10 +63,10 @@ public class JMSMessageBus implements MessageBus {
     private final MetricsProcessor metricsProcessor;
     private final ExceptionHandler tryHandler;
     private final Logger logger;
-    private MessageProducer producer;
-    private MessageConsumer consumer;
     private final java.util.Queue<JMSReply> jmsReplyQueue;
     private final FunctionWithException<javax.jms.Message, Message> jmsMessageConverter;
+    private MessageProducer producer;
+    private MessageConsumer consumer;
     private FunctionWithException<Message, javax.jms.Message> bridgeMessageConverter;
 
     public JMSMessageBus(final String name, final Destination destination, final Session session,
@@ -235,7 +235,7 @@ public class JMSMessageBus implements MessageBus {
      */
     private int processResponses() {
 
-        int []countHolder = new int[1];
+        int[] countHolder = new int[1];
 
         tryHandler.tryWithErrorCount(() -> {
             int count = 0;

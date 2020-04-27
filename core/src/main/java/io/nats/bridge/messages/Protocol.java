@@ -25,10 +25,27 @@ public class Protocol {
     public static final int HEADER_KEY_TYPE_CODE = -124;
     public static final int HEADER_KEY_PRIORITY_CODE = -123;
     public static final int HEADER_KEY_REDELIVERED_CODE = -122;
-
-
+    public static final int RESERVED_START_TYPES = -109;
+    public static final int TYPE_SHORT_STRING = -110;
+    public static final int TYPE_STRING = -111;
+    public static final int TYPE_BOOLEAN_TRUE = -112;
+    public static final int TYPE_BOOLEAN_FALSE = -113;
+    public static final int TYPE_BYTE = -114;
+    //public static final int TYPE_UNSIGNED_BYTE = -115; RESERVED
+    public static final int TYPE_SHORT = -116;
+    //public static final int TYPE_UNSIGNED_SHORT = -117;
+    public static final int TYPE_INT = -118;
+    //public static final int TYPE_UNSIGNED_INT = -119; RESERVED
+    public static final int TYPE_LONG = -120;
+    //public static final int TYPE_UNSIGNED_LONG = -121; RESERVED
+    public static final int TYPE_FLOAT = -122;
+    public static final int TYPE_DOUBLE = -123;
     //Map for now, I will change to array to avoid boxing.
     private static Map<String, Integer> commonHeaders = new HashMap<>();
+    public static final Map<String, Integer> COMMON_HEADERS = commonHeaders;
+    //Map for now, I will change to array to avoid boxing.
+    private static Map<Integer, String> commonCodesToHeaders = new HashMap<>();
+    public static final Map<Integer, String> COMMON_HEADER_CODES = commonCodesToHeaders;
 
     static {
         commonHeaders.put(HEADER_KEY_DELIVERY_TIME, HEADER_KEY_DELIVERY_TIME_CODE);
@@ -46,9 +63,6 @@ public class Protocol {
         commonHeaders.put("ENVIRONMENT", -115);
     }
 
-    //Map for now, I will change to array to avoid boxing.
-    private static Map<Integer, String> commonCodesToHeaders = new HashMap<>();
-
     static {
         commonCodesToHeaders.put(HEADER_KEY_DELIVERY_TIME_CODE, HEADER_KEY_DELIVERY_TIME);
         commonCodesToHeaders.put(HEADER_KEY_TIMESTAMP_CODE, HEADER_KEY_TIMESTAMP);
@@ -58,15 +72,12 @@ public class Protocol {
         commonCodesToHeaders.put(HEADER_KEY_PRIORITY_CODE, HEADER_KEY_PRIORITY);
         commonCodesToHeaders.put(HEADER_KEY_REDELIVERED_CODE, HEADER_KEY_REDELIVERED);
         commonCodesToHeaders.put(-121, "ENV");
-        commonCodesToHeaders.put(-120, "H1" );
-        commonCodesToHeaders.put(-119, "H2" );
-        commonCodesToHeaders.put(-117, "H3" );
-        commonCodesToHeaders.put(-116, "H4" );
+        commonCodesToHeaders.put(-120, "H1");
+        commonCodesToHeaders.put(-119, "H2");
+        commonCodesToHeaders.put(-117, "H3");
+        commonCodesToHeaders.put(-116, "H4");
         commonCodesToHeaders.put(-115, "ENVIRONMENT");
     }
-
-    public static final Map<String, Integer> COMMON_HEADERS = commonHeaders;
-    public static final Map<Integer, String> COMMON_HEADER_CODES = commonCodesToHeaders;
 
     static int getCodeFromHeader(String header) {
         return COMMON_HEADERS.getOrDefault(header, header.length());
@@ -75,25 +86,7 @@ public class Protocol {
     static String getHeaderFromCode(int headerCode) {
         return COMMON_HEADER_CODES.get(headerCode);
     }
-
-
-    public static final int RESERVED_START_TYPES = -109;
-    public static final int TYPE_SHORT_STRING = -110;
-    public static final int TYPE_STRING = -111;
-    public static final int TYPE_BOOLEAN_TRUE = -112;
-    public static final int TYPE_BOOLEAN_FALSE = -113;
-    public static final int TYPE_BYTE = -114;
-    //public static final int TYPE_UNSIGNED_BYTE = -115; RESERVED
-    public static final int TYPE_SHORT = -116;
-    //public static final int TYPE_UNSIGNED_SHORT = -117;
-    public static final int TYPE_INT = -118;
-    //public static final int TYPE_UNSIGNED_INT = -119; RESERVED
-    public static final int TYPE_LONG = -120;
-    //public static final int TYPE_UNSIGNED_LONG = -121; RESERVED
-    public static final int TYPE_FLOAT = -122;
-    public static final int TYPE_DOUBLE = -123;
     //public static final int RESERVED_END_TYPES = -128;
-
 
     public static int createHashCode(byte[] value) {
         int h = 0;

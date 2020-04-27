@@ -22,7 +22,6 @@ import io.nats.bridge.metrics.MetricsProcessor;
 import io.nats.bridge.metrics.Output;
 import io.nats.bridge.metrics.implementation.SimpleMetrics;
 import io.nats.bridge.nats.support.NatsBuilderException;
-import io.nats.bridge.nats.support.NatsMessageBusBuilder;
 import io.nats.bridge.support.MessageBusBuilder;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.bridge.util.FunctionWithException;
@@ -34,14 +33,14 @@ import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import java.time.Duration;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedTransferQueue;
-import java.util.Hashtable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class JMSMessageBusBuilder implements MessageBusBuilder{
+public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     private final ExceptionHandler exceptionHandler = new ExceptionHandler(LoggerFactory.getLogger(JMSMessageBusBuilder.class));
     private Logger jmsBusLogger;
@@ -73,6 +72,9 @@ public class JMSMessageBusBuilder implements MessageBusBuilder{
     private Hashtable<String, Object> jndiProperties = new Hashtable<>();
     private String name = "jms-no-name";
 
+    public static JMSMessageBusBuilder builder() {
+        return new JMSMessageBusBuilder();
+    }
 
     public String getName() {
         return name;
@@ -101,10 +103,6 @@ public class JMSMessageBusBuilder implements MessageBusBuilder{
     public JMSMessageBusBuilder withBridgeMessageConverter(final FunctionWithException<io.nats.bridge.messages.Message, Message> bridgeMessageConverter) {
         this.bridgeMessageConverter = bridgeMessageConverter;
         return this;
-    }
-
-    public static JMSMessageBusBuilder builder() {
-        return new JMSMessageBusBuilder();
     }
 
     public boolean isCopyHeaders() {
@@ -152,6 +150,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder{
         this.getJndiProperties().put(name, value);
         return this;
     }
+
     public JMSMessageBusBuilder withJndiProperties(Map<String, String> props) {
         this.getJndiProperties().putAll(props);
         return this;
@@ -434,9 +433,9 @@ public class JMSMessageBusBuilder implements MessageBusBuilder{
 
     public Hashtable<String, Object> getJndiProperties() {
         if (jndiProperties.size() == 0) {
-            jndiProperties.put("java.naming.factory.initial", (String) System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory"));
-            jndiProperties.put("connectionFactory.ConnectionFactory", (String) System.getenv().getOrDefault("NATS_BRIDGE_JMS_CONNECTION_FACTORY", "tcp://localhost:61616"));
-            jndiProperties.put("queue.queue/testQueue", (String) System.getenv().getOrDefault("NATS_BRIDGE_JMS_QUEUE", "queue.queue/testQueue=testQueue"));
+            jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory"));
+            jndiProperties.put("connectionFactory.ConnectionFactory", System.getenv().getOrDefault("NATS_BRIDGE_JMS_CONNECTION_FACTORY", "tcp://localhost:61616"));
+            jndiProperties.put("queue.queue/testQueue", System.getenv().getOrDefault("NATS_BRIDGE_JMS_QUEUE", "queue.queue/testQueue=testQueue"));
         }
         return jndiProperties;
     }

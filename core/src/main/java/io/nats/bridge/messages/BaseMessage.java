@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 public class BaseMessage implements BytesMessage {
 
-    private final byte [] bytes;
+    private final byte[] bytes;
 
     private final Consumer<Message> replyHandler;
 
@@ -18,7 +18,7 @@ public class BaseMessage implements BytesMessage {
         replyHandler.accept(reply);
     }
 
-    public  byte [] getBodyBytes() {
+    public byte[] getBodyBytes() {
         return bytes;
     }
 }

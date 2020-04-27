@@ -1,11 +1,11 @@
 package io.nats.bridge.integration.b;
 
-import io.nats.bridge.support.MessageBridgeImpl;
-import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.integration.TestUtils;
+import io.nats.bridge.messages.Message;
+import io.nats.bridge.messages.MessageBuilder;
+import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,6 +33,32 @@ public class JMSToNatsOneWayMessagesTest {
     private MessageBus responseBusServer;
     private MessageBus responseBusClient;
     private MessageBridge messageBridge;
+
+    public static void runServerLoop(final AtomicBoolean stop, final MessageBus serverMessageBus, final MessageBus responseBusServer,
+                                     final CountDownLatch serverStopped) {
+        final Thread thread = new Thread(() -> {
+            while (true) {
+                if (stop.get()) {
+                    serverMessageBus.close();
+                    break;
+                }
+                final Optional<Message> receive = serverMessageBus.receive();
+                receive.ifPresent(message -> {
+                    System.out.println("Handle message " + message.bodyAsString());
+                    responseBusServer.publish(MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build());
+                });
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                serverMessageBus.process();
+            }
+            serverStopped.countDown();
+        });
+        thread.start();
+
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -100,32 +126,5 @@ public class JMSToNatsOneWayMessagesTest {
 
     private void runServerLoop() {
         runServerLoop(stop, serverMessageBus, responseBusServer, serverStopped);
-    }
-
-
-    public static void runServerLoop(final AtomicBoolean stop, final MessageBus serverMessageBus, final MessageBus responseBusServer,
-                                     final CountDownLatch serverStopped) {
-        final Thread thread = new Thread(() -> {
-            while (true) {
-                if (stop.get()) {
-                    serverMessageBus.close();
-                    break;
-                }
-                final Optional<Message> receive = serverMessageBus.receive();
-                receive.ifPresent(message -> {
-                    System.out.println("Handle message " + message.bodyAsString());
-                    responseBusServer.publish(MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build());
-                });
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                serverMessageBus.process();
-            }
-            serverStopped.countDown();
-        });
-        thread.start();
-
     }
 }

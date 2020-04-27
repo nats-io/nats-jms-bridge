@@ -13,10 +13,10 @@
 
 package io.nats.bridge.integration;
 
-import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.jms.support.JMSMessageBusBuilder;
+import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.nats.support.NatsMessageBusBuilder;
 
@@ -41,7 +41,7 @@ public class TestUtils {
 
     public static MessageBus getMessageBusNats(final String topicPostFix) throws IOException, InterruptedException {
 
-        final String subject =  topicPostFix + "NatsMessageBus";
+        final String subject = topicPostFix + "NatsMessageBus";
 
         final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withSubject(subject);
         natsMessageBusBuilder.getOptionsBuilder().noReconnect();
@@ -88,7 +88,6 @@ public class TestUtils {
                     System.out.println("Handle message headers " + message.headers());
 
 
-
                     final String myHeader = (String) message.headers().get("MY_HEADER");
                     if (myHeader == null) {
                         final Message reply = MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build();
@@ -110,7 +109,6 @@ public class TestUtils {
             }
 
             serverStopped.countDown();
-
 
 
         });

@@ -1,9 +1,9 @@
 package io.nats.bridge.integration.b;
 
 import io.nats.bridge.MessageBridge;
-import io.nats.bridge.support.MessageBridgeImpl;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.integration.TestUtils;
+import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,14 +55,14 @@ public class JmsToNatsBridgeTest {
         runBridgeLoop();
 
 
-        clientMessageBus.request("RICK", s ->  {
+        clientMessageBus.request("RICK", s -> {
             responseFromServer.set(s);
             resultSignal.countDown();
         });
 
 
         runClientLoop();
-        assertEquals ("Hello RICK", responseFromServer.get());
+        assertEquals("Hello RICK", responseFromServer.get());
 
 
         stopServerAndBridgeLoops();
@@ -76,9 +76,8 @@ public class JmsToNatsBridgeTest {
             resultSignal.await(1, TimeUnit.SECONDS);
             clientMessageBus.process();
 
-            if (responseFromServer.get()!=null) break;
+            if (responseFromServer.get() != null) break;
         }
-
 
 
     }
@@ -87,7 +86,7 @@ public class JmsToNatsBridgeTest {
         TestUtils.runBridgeLoop(messageBridge, stop, bridgeStopped);
     }
 
-    private void stopServerAndBridgeLoops() throws Exception{
+    private void stopServerAndBridgeLoops() throws Exception {
         TestUtils.stopServerAndBridgeLoops(stop, serverStopped, bridgeStopped);
     }
 

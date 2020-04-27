@@ -1,36 +1,36 @@
 package io.nats.bridge.nats;
 
-import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.messages.MessageBuilder;
-import io.nats.bridge.util.ExceptionHandler;
-import io.nats.bridge.util.SupplierWithException;
-import io.nats.client.Connection;
-import io.nats.client.Subscription;
 import io.nats.bridge.TimeSource;
-
+import io.nats.bridge.messages.Message;
+import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.metrics.Counter;
 import io.nats.bridge.metrics.Metrics;
 import io.nats.bridge.metrics.MetricsProcessor;
 import io.nats.bridge.metrics.TimeTracker;
+import io.nats.bridge.util.ExceptionHandler;
+import io.nats.bridge.util.SupplierWithException;
+import io.nats.client.Connection;
+import io.nats.client.Subscription;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-//import java.util.concurrent.ExecutorService;
-import java.util.function.Consumer;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+
+//import java.util.concurrent.ExecutorService;
 
 
 public class NatsMessageBus implements MessageBus {
 
+    final Duration NOW = Duration.ofMillis(1L);
     private final Connection connection;
     private final String subject;
     private final Subscription subscription;
     //private final ExecutorService pool;
     private final ExceptionHandler tryHandler;
-
     private final Queue<NatsReply> replyQueue;
     private final Queue<NatsReply> replyQueueNotDone;
     private final Metrics metrics;
@@ -47,42 +47,22 @@ public class NatsMessageBus implements MessageBus {
     private final Counter countRequestResponsesMissing;
     private final TimeTracker timerRequestResponse;
     private final TimeTracker timerReceiveReply;
-    private final MetricsProcessor metricsProcessor;
-    
-    
+
 
     //TODO create NatsMessageBusBuilder.
-
+    private final MetricsProcessor metricsProcessor;
     private final TimeSource timeSource;
     private final String name;
 
-
-    public static class NatsReply {
-
-        private final long requestTime;
-        private final Consumer<Message> replyCallback;
-        private final CompletableFuture<io.nats.client.Message> future;
-
-        
-
-        NatsReply(final long requestTime, 
-                final Consumer<Message> replyCallback,
-                final CompletableFuture<io.nats.client.Message> future) {
-            this.requestTime = requestTime;
-            this.replyCallback = replyCallback;
-            this.future = future;
-        }
-    }
-
     public NatsMessageBus(final String name, final String subject, final Connection connection,
-                            final String queueGroup,
+                          final String queueGroup,
                           //final ExecutorService pool, 
-                          final ExceptionHandler tryHandler, 
+                          final ExceptionHandler tryHandler,
                           final Queue<NatsReply> replyQueue,
                           final Queue<NatsReply> replyQueueNotDone,
                           final TimeSource timeSource,
-                        final Metrics metrics,
-                        final MetricsProcessor metricsProcessor) {
+                          final Metrics metrics,
+                          final MetricsProcessor metricsProcessor) {
 
         //ystem.out.println("SUBJECT" + subject);
         this.connection = connection;
@@ -147,16 +127,13 @@ public class NatsMessageBus implements MessageBus {
         return doReceive(duration);
     }
 
-
-    final Duration NOW = Duration.ofMillis(1L);
     @Override
     public Optional<Message> receive() {
         return doReceive(NOW);
     }
 
-
     private Optional<Message> doReceive(final Duration duration) {
-        return tryHandler.tryReturnOrRethrow((SupplierWithException<Optional<Message>>) () -> {
+        return tryHandler.tryReturnOrRethrow(() -> {
             io.nats.client.Message message = subscription.nextMessage(duration);
 
             if (message != null) {
@@ -175,7 +152,7 @@ public class NatsMessageBus implements MessageBus {
                                     connection.publish(replyTo, reply.getMessageBytes());
                                 }
                             }).buildFromBytes(message.getData())
-                     );
+                    );
                 } else {
                     final Message bridgeMessage = MessageBuilder.builder().buildFromBytes(message.getData());
                     //ystem.out.println("## Receive MESSAGE " + bridgeMessage.bodyAsString() + " " + bridgeMessage.headers());
@@ -203,8 +180,7 @@ public class NatsMessageBus implements MessageBus {
     }
 
     private int processResponses() {
-        int []countHolder = new int[1];
-
+        int[] countHolder = new int[1];
 
 
         tryHandler.tryWithErrorCount(() -> {
@@ -214,7 +190,7 @@ public class NatsMessageBus implements MessageBus {
                 reply = replyQueue.poll();
                 if (reply != null) {
                     if (reply.future.isDone()) {
-                         count  ++;
+                        count++;
                         final io.nats.client.Message replyMessage = reply.future.get();
                         reply.replyCallback.accept(MessageBuilder.builder().buildFromBytes(replyMessage.getData()));
                         timerReceiveReply.recordTiming(timeSource.getTime() - reply.requestTime);
@@ -230,7 +206,7 @@ public class NatsMessageBus implements MessageBus {
 
             do {
                 reply = replyQueueNotDone.poll();
-                if (reply!=null) {
+                if (reply != null) {
                     if (!replyQueue.add(reply)) {
                         throw new NatsMessageBusException("Unable to add to reply queue");
                     }
@@ -244,5 +220,21 @@ public class NatsMessageBus implements MessageBus {
         }, countReceivedReplyErrors, "error processing NATS receive queue for replies");
 
         return countHolder[0];
+    }
+
+    public static class NatsReply {
+
+        private final long requestTime;
+        private final Consumer<Message> replyCallback;
+        private final CompletableFuture<io.nats.client.Message> future;
+
+
+        NatsReply(final long requestTime,
+                  final Consumer<Message> replyCallback,
+                  final CompletableFuture<io.nats.client.Message> future) {
+            this.requestTime = requestTime;
+            this.replyCallback = replyCallback;
+            this.future = future;
+        }
     }
 }

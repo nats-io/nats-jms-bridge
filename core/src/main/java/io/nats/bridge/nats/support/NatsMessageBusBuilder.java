@@ -1,32 +1,24 @@
 package io.nats.bridge.nats.support;
 
-import io.nats.bridge.nats.NatsMessageBus;
 import io.nats.bridge.TimeSource;
-import io.nats.bridge.support.MessageBusBuilder;
-import io.nats.bridge.util.ExceptionHandler;
 import io.nats.bridge.metrics.Metrics;
 import io.nats.bridge.metrics.MetricsDisplay;
 import io.nats.bridge.metrics.MetricsProcessor;
 import io.nats.bridge.metrics.Output;
 import io.nats.bridge.metrics.implementation.SimpleMetrics;
+import io.nats.bridge.nats.NatsMessageBus;
+import io.nats.bridge.support.MessageBusBuilder;
+import io.nats.bridge.util.ExceptionHandler;
 import io.nats.client.Connection;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.Properties;
-
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.LinkedTransferQueue;
 
-public class NatsMessageBusBuilder implements MessageBusBuilder{
+public class NatsMessageBusBuilder implements MessageBusBuilder {
 
     private List<String> servers = new ArrayList<>();
     private Connection connection;
@@ -36,21 +28,25 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
     private ExceptionHandler tryHandler;
     private Options options;
     private Options.Builder optionsBuilder;
-    private Properties optionProperties; 
+    private Properties optionProperties;
 
     private char[] user;
-    private char[] password; 
+    private char[] password;
 
     private TimeSource timeSource;
     private Metrics metrics;
     private MetricsProcessor metricsProcessor;
- 
-    
+
+
     private java.util.Queue<NatsMessageBus.NatsReply> replyQueue;
     private java.util.Queue<NatsMessageBus.NatsReply> replyQueueNotDone;
-    
+
 
     private String queueGroup;
+
+    public static NatsMessageBusBuilder builder() {
+        return new NatsMessageBusBuilder();
+    }
 
     public Metrics getMetrics() {
         if (metrics == null) {
@@ -63,7 +59,6 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         this.metrics = metrics;
         return this;
     }
-
 
     public MetricsProcessor getMetricsProcessor() {
         if (metricsProcessor == null) {
@@ -119,7 +114,7 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         return user;
     }
 
-    public NatsMessageBusBuilder withUser(String user ){
+    public NatsMessageBusBuilder withUser(String user) {
         this.user = user.toCharArray();
         return this;
     }
@@ -128,7 +123,7 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         return password;
     }
 
-    public NatsMessageBusBuilder withPassword(String password ){
+    public NatsMessageBusBuilder withPassword(String password) {
         this.password = password.toCharArray();
         return this;
     }
@@ -136,16 +131,15 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
     public Properties getOptionProperties() {
 
         if (optionProperties == null) {
-            optionProperties = new Properties(); 
-        } 
+            optionProperties = new Properties();
+        }
         return optionProperties;
     }
 
-    public NatsMessageBusBuilder withOptionProperties(Properties properties ){
+    public NatsMessageBusBuilder withOptionProperties(Properties properties) {
         optionProperties = properties;
         return this;
     }
-    
 
     public String getQueueGroup() {
         if (queueGroup == null) {
@@ -180,7 +174,6 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         this.servers.addAll(servers);
         return this;
     }
-
 
     public Connection getConnection() {
         if (connection == null) {
@@ -246,13 +239,13 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         if (optionsBuilder == null) {
             if (optionProperties == null) {
                 optionsBuilder = new Options.Builder()
-                    .servers(getServers().toArray(new String[1]));
+                        .servers(getServers().toArray(new String[1]));
             } else {
                 optionsBuilder = new Options.Builder(getOptionProperties())
-                .servers(getServers().toArray(new String[1]));
+                        .servers(getServers().toArray(new String[1]));
             }
-            if (password!=null && user!=null) {
-                optionsBuilder.userInfo(user, password);             
+            if (password != null && user != null) {
+                optionsBuilder.userInfo(user, password);
             }
         }
         return optionsBuilder;
@@ -263,21 +256,16 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         return this;
     }
 
-
     public NatsMessageBusBuilder withOptions(Options options) {
         this.options = options;
         return this;
     }
 
-    public static NatsMessageBusBuilder builder() {
-        return new NatsMessageBusBuilder();
-    }
-
     public NatsMessageBus build() {
         return new NatsMessageBus(getName(), getSubject(),
-        getConnection(), 
-        getQueueGroup(),  getTryHandler(), getReplyQueue(),
-         getReplyQueueNotDone(), getTimeSource(),
-         getMetrics(), getMetricsProcessor());
+                getConnection(),
+                getQueueGroup(), getTryHandler(), getReplyQueue(),
+                getReplyQueueNotDone(), getTimeSource(),
+                getMetrics(), getMetricsProcessor());
     }
 }

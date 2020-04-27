@@ -1,11 +1,11 @@
 package io.nats.bridge.integration.b;
 
 import io.nats.bridge.MessageBridge;
-import io.nats.bridge.support.MessageBridgeImpl;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.integration.TestUtils;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
+import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,16 +21,15 @@ public class JmsToNatsBridgeWithHeadersTest {
 
     private final AtomicBoolean stop = new AtomicBoolean(false);
     private final AtomicReference<String> responseFromServer = new AtomicReference<>();
+    private final AtomicReference<String> responseHeaderFromServer = new AtomicReference<>();
     private CountDownLatch resultSignal;
     private CountDownLatch serverStopped;
     private CountDownLatch bridgeStopped;
-
     private MessageBus serverMessageBus;
     private MessageBus clientMessageBus;
     private MessageBus bridgeMessageBusSource;
     private MessageBus bridgeMessageBusDestination;
     private MessageBridge messageBridge;
-    private final AtomicReference<String> responseHeaderFromServer = new AtomicReference<>();
 
     @Before
     public void setUp() throws Exception {
@@ -60,16 +59,16 @@ public class JmsToNatsBridgeWithHeadersTest {
 
         final Message message = MessageBuilder.builder().withHeader("MY_HEADER", "MY_VALUE").withBody("RICK").build();
 
-        clientMessageBus.request(message, reply ->  {
+        clientMessageBus.request(message, reply -> {
 
-            responseHeaderFromServer.set((String)reply.headers().get("MY_HEADER"));
+            responseHeaderFromServer.set((String) reply.headers().get("MY_HEADER"));
             responseFromServer.set(reply.bodyAsString());
             resultSignal.countDown();
         });
 
         runClientLoop();
         //assertEquals ("MY_VALUE", responseHeaderFromServer.get());
-        assertEquals ("Hello RICK MY_HEADER MY_VALUE", responseFromServer.get());
+        assertEquals("Hello RICK MY_HEADER MY_VALUE", responseFromServer.get());
 
 
         stopServerAndBridgeLoops();
@@ -83,9 +82,8 @@ public class JmsToNatsBridgeWithHeadersTest {
             resultSignal.await(1, TimeUnit.SECONDS);
             clientMessageBus.process();
 
-            if (responseFromServer.get()!=null) break;
+            if (responseFromServer.get() != null) break;
         }
-
 
 
     }
@@ -94,7 +92,7 @@ public class JmsToNatsBridgeWithHeadersTest {
         TestUtils.runBridgeLoop(messageBridge, stop, bridgeStopped);
     }
 
-    private void stopServerAndBridgeLoops() throws Exception{
+    private void stopServerAndBridgeLoops() throws Exception {
         TestUtils.stopServerAndBridgeLoops(stop, serverStopped, bridgeStopped);
     }
 

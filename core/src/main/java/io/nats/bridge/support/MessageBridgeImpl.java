@@ -27,7 +27,7 @@ import java.util.concurrent.LinkedTransferQueue;
 /**
  * A message bridge connects two MessageBuses.
  * A message bus is a queue or stream messaging system like Nats, Active MQ, SQS, Kinesis, Kafka, IBM MQ, RabbitMQ or JMS.
- *
+ * <p>
  * The bridge handles request/reply bridging or plain message forwarding.
  */
 public class MessageBridgeImpl implements MessageBridge {
@@ -40,20 +40,6 @@ public class MessageBridgeImpl implements MessageBridge {
     private final Queue<MessageBridgeRequestReply> replyMessageQueue;
 
 
-    public static class MessageBridgeRequestReply {
-        final Message request;
-        final Message reply;
-
-        public MessageBridgeRequestReply(Message request, Message reply) {
-            this.request = request;
-            this.reply = reply;
-        }
-
-        public void respond() {
-            request.reply(reply);
-        }
-    }
-
     public MessageBridgeImpl(final String name, final MessageBus sourceBus, final MessageBus destinationBus, boolean requestReply,
                              final Queue<MessageBridgeRequestReply> replyMessageQueue) {
         this.sourceBus = sourceBus;
@@ -62,8 +48,6 @@ public class MessageBridgeImpl implements MessageBridge {
         this.replyMessageQueue = (replyMessageQueue != null) ? replyMessageQueue : new LinkedTransferQueue<>();
         this.name = "bridge-" + name;
     }
-
-
 
     @Override
     public String name() {
@@ -76,9 +60,9 @@ public class MessageBridgeImpl implements MessageBridge {
         int count = 0;
 
         if (requestReply) {
-            if(receiveMessageFromSourceOption.isPresent()) count++;
+            if (receiveMessageFromSourceOption.isPresent()) count++;
             receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
-                destinationBus.request(receiveMessageFromSource, replyMessage -> {
+                        destinationBus.request(receiveMessageFromSource, replyMessage -> {
                             replyMessageQueue.add(new MessageBridgeRequestReply(receiveMessageFromSource, replyMessage));
                         });
                     }
@@ -95,7 +79,7 @@ public class MessageBridgeImpl implements MessageBridge {
     private int processReplies() {
         int i = 0;
         MessageBridgeRequestReply requestReply = replyMessageQueue.poll();
-        while (requestReply!=null) {
+        while (requestReply != null) {
             i++;
             requestReply.respond();
             requestReply = replyMessageQueue.poll();
@@ -103,10 +87,23 @@ public class MessageBridgeImpl implements MessageBridge {
         return i;
     }
 
-
     @Override
     public void close() throws IOException {
         sourceBus.close();
         destinationBus.close();
+    }
+
+    public static class MessageBridgeRequestReply {
+        final Message request;
+        final Message reply;
+
+        public MessageBridgeRequestReply(Message request, Message reply) {
+            this.request = request;
+            this.reply = reply;
+        }
+
+        public void respond() {
+            request.reply(reply);
+        }
     }
 }

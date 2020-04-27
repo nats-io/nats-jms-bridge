@@ -15,8 +15,8 @@ import java.util.function.Consumer;
 import static io.nats.bridge.messages.Protocol.*;
 
 public class MessageBuilder {
+    private final static ObjectMapper mapper = new ObjectMapper();
     static Logger logger = LoggerFactory.getLogger(MessageBuilder.class);
-
     private long timestamp = -1;
     //TTL plus timestamp
     private long expirationTime = -1;
@@ -28,12 +28,15 @@ public class MessageBuilder {
     private int priority = -1;
     private Map<String, Object> headers;
     private byte[] body;
-    private final static ObjectMapper mapper = new ObjectMapper();
     private String correlationID;
 
     private Consumer<Message> replyHandler;
 
     public MessageBuilder() {
+    }
+
+    public static MessageBuilder builder() {
+        return new MessageBuilder();
     }
 
     public String getCorrelationID() {
@@ -55,10 +58,6 @@ public class MessageBuilder {
     public MessageBuilder withReplyHandler(Consumer<Message> replyHandler) {
         this.replyHandler = replyHandler;
         return this;
-    }
-
-    public static MessageBuilder builder() {
-        return new MessageBuilder();
     }
 
     public long getTimestamp() {

@@ -13,21 +13,25 @@ public class JMSMessage implements javax.jms.Message {
 
     private final Map<String, Object> map = new HashMap<>();
 
-    private  Object body;
+    private Object body;
 
-    private  long timestamp;
+    private long timestamp;
     //TTL plus timestamp
-    private  long expirationTime;
+    private long expirationTime;
     //Delivery time is not instant
-    private  long deliveryTime;
-    private  int mode;
-    private  String type;
-    private  boolean redelivered;
-    private  int priority;
+    private long deliveryTime;
+    private int mode;
+    private String type;
+    private boolean redelivered;
+    private int priority;
     private Destination destination;
     private Destination replyDest;
     private String correlationID;
 
+
+    public JMSMessage(Object body) {
+        this.body = body;
+    }
 
     public Map<String, Object> getMap() {
         return map;
@@ -105,10 +109,6 @@ public class JMSMessage implements javax.jms.Message {
         return this;
     }
 
-    public JMSMessage(Object body) {
-        this.body = body;
-    }
-
     @Override
     public String getJMSMessageID() throws JMSException {
         return (String) map.get("MessageID");
@@ -126,7 +126,7 @@ public class JMSMessage implements javax.jms.Message {
 
     @Override
     public void setJMSTimestamp(long timestamp) throws JMSException {
-      this. timestamp = timestamp;
+        this.timestamp = timestamp;
     }
 
     @Override
@@ -140,13 +140,13 @@ public class JMSMessage implements javax.jms.Message {
     }
 
     @Override
-    public void setJMSCorrelationID(String correlationID) throws JMSException {
-            this.correlationID = correlationID;
+    public String getJMSCorrelationID() throws JMSException {
+        return correlationID;
     }
 
     @Override
-    public String getJMSCorrelationID() throws JMSException {
-        return correlationID;
+    public void setJMSCorrelationID(String correlationID) throws JMSException {
+        this.correlationID = correlationID;
     }
 
     @Override
@@ -176,7 +176,7 @@ public class JMSMessage implements javax.jms.Message {
 
     @Override
     public void setJMSDeliveryMode(int deliveryMode) throws JMSException {
-       this.mode = deliveryMode;
+        this.mode = deliveryMode;
     }
 
     @Override
@@ -186,7 +186,7 @@ public class JMSMessage implements javax.jms.Message {
 
     @Override
     public void setJMSRedelivered(boolean redelivered) throws JMSException {
-       this.redelivered = redelivered;
+        this.redelivered = redelivered;
     }
 
     @Override
@@ -216,7 +216,7 @@ public class JMSMessage implements javax.jms.Message {
 
     @Override
     public void setJMSDeliveryTime(long deliveryTime) throws JMSException {
-       this.deliveryTime = deliveryTime;
+        this.deliveryTime = deliveryTime;
     }
 
     @Override
@@ -357,7 +357,6 @@ public class JMSMessage implements javax.jms.Message {
 
         body = null;
     }
-
 
 
     @Override
