@@ -65,7 +65,7 @@ public class ExceptionHandlerTest {
     @Test
     public void tryFunctionOrRethrow() {
         try {
-            exceptionHandler.tryFunctionOrRethrow("hi",  (String var) -> {
+            exceptionHandler.tryFunctionOrRethrow("hi", (String var) -> {
                 throw new Exception("test");
             }, e -> new JMSMessageBusException("error", e));
             fail();
@@ -82,7 +82,7 @@ public class ExceptionHandlerTest {
         try {
             exceptionHandler.tryWithRethrow(() -> {
                 throw new Exception();
-            },count, e -> new NatsMessageBusException("error", e));
+            }, count, e -> new NatsMessageBusException("error", e));
             fail();
         } catch (NatsMessageBusException ex) {
             assertEquals("error", ex.getMessage());

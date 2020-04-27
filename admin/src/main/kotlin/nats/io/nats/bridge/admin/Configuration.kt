@@ -1,5 +1,6 @@
 package nats.io.nats.bridge.admin
 
+import io.micrometer.core.instrument.MeterRegistry
 import nats.io.nats.bridge.admin.repos.ConfigRepoFromFiles
 import nats.io.nats.bridge.admin.repos.LoginRepoFromFiles
 import nats.io.nats.bridge.admin.runner.BridgeRunnerManager
@@ -31,8 +32,8 @@ class Configuration {
     }
 
     @Bean
-    fun bridgeRunnerManager(repo: ConfigRepo): BridgeRunnerManager {
-        return BridgeRunnerManager(repo)
+    fun bridgeRunnerManager(repo: ConfigRepo, metricsRegistry: MeterRegistry): BridgeRunnerManager {
+        return BridgeRunnerManager(repo, metricsRegistry = metricsRegistry)
     }
 
     @Bean

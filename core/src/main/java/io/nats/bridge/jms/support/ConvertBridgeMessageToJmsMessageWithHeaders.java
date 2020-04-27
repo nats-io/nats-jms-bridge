@@ -58,7 +58,7 @@ public class ConvertBridgeMessageToJmsMessageWithHeaders implements FunctionWith
         if (message.priority() != -1)
             bytesMessage.setJMSPriority(message.priority());
 
-        if (message.correlationID() != null && message.correlationID().trim().length()>0)
+        if (message.correlationID() != null && message.correlationID().trim().length() > 0)
             bytesMessage.setJMSCorrelationID(bytesMessage.getJMSCorrelationID());
     }
 }

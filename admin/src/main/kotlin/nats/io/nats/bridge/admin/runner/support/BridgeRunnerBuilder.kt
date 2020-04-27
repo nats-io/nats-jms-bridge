@@ -5,12 +5,16 @@ import nats.io.nats.bridge.admin.runner.BridgeRunner
 import nats.io.nats.bridge.admin.runner.support.impl.EndProcessSignalImpl
 import nats.io.nats.bridge.admin.runner.support.impl.MessageBridgeLoaderImpl
 import nats.io.nats.bridge.admin.runner.support.impl.SendEndProcessSignalImpl
+import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 
 class BridgeRunnerBuilder {
     var repo: ConfigRepo? = null
         private set
     var stop: AtomicBoolean? = null
+        private set
+
+    var duration: Duration? = null
         private set
 
     var endProcessSignal: EndProcessSignal? = null
@@ -49,6 +53,7 @@ class BridgeRunnerBuilder {
         }
 
 
-        return BridgeRunner(messageLoader!!, endProcessSignal!!, sendEndProcessSignal!!)
+        return BridgeRunner(messageLoader!!, endProcessSignal!!, sendEndProcessSignal!!, duration = duration
+                ?: Duration.ofMillis(100))
     }
 }

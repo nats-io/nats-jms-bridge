@@ -90,8 +90,8 @@ tasks {
 
         // Spring Boot
         implementation("org.springframework.boot:spring-boot-starter-web")
-        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
         implementation("org.springframework.boot:spring-boot-starter-actuator")
+        //implementation( "org.springframework.metrics:spring-metrics")
 
         // Jackson
         implementation("com.fasterxml.jackson.module:jackson-module-parameter-names")
@@ -100,18 +100,16 @@ tasks {
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
         implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.8")
 
-        //
+        // Security
         implementation("org.springframework.boot:spring-boot-starter-security")
-
-
-        implementation("mysql:mysql-connector-java:5.1.44")
-        implementation("com.h2database:h2")
 
         // Swagger
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
 
         implementation("io.nats.bridge:nats-jms-bridge:0.1")
+
+        implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
 
         // Testing

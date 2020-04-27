@@ -1,12 +1,15 @@
 package nats.io.nats.bridge.admin.runner
 
+import io.micrometer.core.instrument.MeterRegistry
 import io.nats.bridge.MessageBridge
 import nats.io.nats.bridge.admin.ConfigRepo
 import nats.io.nats.bridge.admin.runner.support.BridgeRunnerBuilder
 import nats.io.nats.bridge.admin.runner.support.EndProcessSignal
 import nats.io.nats.bridge.admin.runner.support.MessageBridgeLoader
 import nats.io.nats.bridge.admin.runner.support.SendEndProcessSignal
+import nats.io.nats.bridge.admin.runner.support.impl.MessageBridgeLoaderImpl
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -16,7 +19,8 @@ import javax.annotation.PreDestroy
 
 
 class BridgeRunnerManager(private val repo: ConfigRepo,
-                          private val bridgeRunnerRef: AtomicReference<BridgeRunner> = AtomicReference()) {
+                          private val bridgeRunnerRef: AtomicReference<BridgeRunner> = AtomicReference(),
+                          private val metricsRegistry: MeterRegistry?=null) {
 
     fun endProcessSignal() = endProcessSignalRef.get()!!
     fun sendEndProcessSignal() = sendEndProcessSignalRef.get()!!
@@ -51,7 +55,10 @@ class BridgeRunnerManager(private val repo: ConfigRepo,
     private fun bridgeRunner(): BridgeRunner {
         if (bridgeRunnerRef.get() == null) {
             val builder = BridgeRunnerBuilder()
+
             builder.withRepo(repo)
+            builder.withMessageBridgeLoader(MessageBridgeLoaderImpl(repo, metricsRegistry))
+
             if (bridgeRunnerRef.compareAndSet(null, builder.build())) {
                 endProcessSignalRef.set(builder.endProcessSignal)
                 sendEndProcessSignalRef.set(builder.sendEndProcessSignal)
@@ -66,7 +73,8 @@ class BridgeRunner(private val bridgeLoader: MessageBridgeLoader,
                    private val endProcessSignal: EndProcessSignal,
                    private val sendEndProcessSignal: SendEndProcessSignal,
                    private val stopped: AtomicBoolean = AtomicBoolean(),
-                   private val wasStarted: AtomicBoolean = AtomicBoolean()) {
+                   private val wasStarted: AtomicBoolean = AtomicBoolean(),
+                   private val duration: Duration) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -89,25 +97,17 @@ class BridgeRunner(private val bridgeLoader: MessageBridgeLoader,
 
 
     fun initRunner() {
-        val messageBridge = loadMessageBridge()
+        val messageBridges = loadMessageBridges()
         executors = Executors.newFixedThreadPool(1)
 
-        //Working on this, TODO flag it to stop
         executors?.submit(Runnable {
             wasStarted.set(true)
             try {
-                var i = 0
                 while (endProcessSignal.keepRunning()) {
-                    i++
-                    messageBridge.process()
-                    // TODO I need a way to chain a bunch of bridges and know if any had messages or requests to process
-                    // Iterate through the list.
-                    // If none had any messages than sleep for a beat.
-                    // This has not been implemented yet
-                    // This is a good place for a KPI metric as well
-                    if (i % 100_000 == 0) {
-                        Thread.sleep(10)//Temp hack to test
-                        println("running $i")
+                    val count = messageBridges.map { messageBridge -> messageBridge.process() }.sum()
+                    if (count == 0) {
+                        messageBridges[0].process(duration)
+                        messageBridges.subList(1, messageBridges.size).forEach { it.process() }
                     }
                 }
                 stopped.set(true)
@@ -116,11 +116,19 @@ class BridgeRunner(private val bridgeLoader: MessageBridgeLoader,
                 stopped.set(true)
                 lastErrorRef.set(ex)
                 logger.warn("Stopped bridge runner with error", ex)
+
+            }
+            messageBridges.forEach{ mb ->
+                try {
+                    mb.close()
+                } catch (ex:Exception) {
+                    logger.warn("error shutting down bridge ${mb.name()}", ex)
+                }
             }
         })
     }
 
-    private fun loadMessageBridge(): MessageBridge = bridgeLoader.loadBridges()[0]
+    private fun loadMessageBridges(): List<MessageBridge> = bridgeLoader.loadBridges()
 
 
 }

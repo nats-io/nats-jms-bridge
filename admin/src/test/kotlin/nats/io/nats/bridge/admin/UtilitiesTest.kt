@@ -12,9 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class UtilitiesTest(
-        //@Autowired val kinesisService: KinesisService
-) {
+class UtilitiesTest {
 //    @Test
 //    fun putRecord() {
 //        val mockedRecordResult = PutRecordsResult()

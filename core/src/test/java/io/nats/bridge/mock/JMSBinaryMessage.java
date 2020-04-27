@@ -28,7 +28,7 @@ public class JMSBinaryMessage extends JMSMessage implements javax.jms.BytesMessa
 
     @Override
     public boolean readBoolean() throws JMSException {
-        return  byteBuffer.get()!=0;
+        return byteBuffer.get() != 0;
     }
 
     @Override
@@ -80,15 +80,15 @@ public class JMSBinaryMessage extends JMSMessage implements javax.jms.BytesMessa
     public String readUTF() throws JMSException {
 
         final int length = byteBuffer.getInt();
-        byte [] utfBytes = new byte[length];
+        byte[] utfBytes = new byte[length];
         byteBuffer.get(utfBytes);
         return new String(utfBytes, StandardCharsets.UTF_8);
     }
 
     @Override
     public int readBytes(byte[] value) throws JMSException {
-         byteBuffer.get(value); //ok this is does not really work
-         return value.length;
+        byteBuffer.get(value); //ok this is does not really work
+        return value.length;
     }
 
     @Override

@@ -3,8 +3,6 @@ package io.nats.bridge.integration.jms.support;
 import io.nats.bridge.jms.support.JMSMessageBusBuilder;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class JMSMessageBusBuilderTest {
 
     @Test

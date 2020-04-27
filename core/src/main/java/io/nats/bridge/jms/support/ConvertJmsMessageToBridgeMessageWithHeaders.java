@@ -73,7 +73,7 @@ public class ConvertJmsMessageToBridgeMessageWithHeaders implements FunctionWith
             //ystem.out.println("JMS HEADER ---------------------------------------->" + propertyName);
 
             if (!propertyName.startsWith("JMS"))
-            builder.withHeader(propertyName, jmsMessage.getObjectProperty(propertyName));
+                builder.withHeader(propertyName, jmsMessage.getObjectProperty(propertyName));
         }
 
         builder.withRedelivered(jmsMessage.getJMSRedelivered());

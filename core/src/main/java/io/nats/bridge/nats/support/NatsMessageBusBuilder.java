@@ -1,5 +1,11 @@
 package io.nats.bridge.nats.support;
 
+import io.nats.bridge.TimeSource;
+import io.nats.bridge.metrics.Metrics;
+import io.nats.bridge.metrics.MetricsDisplay;
+import io.nats.bridge.metrics.MetricsProcessor;
+import io.nats.bridge.metrics.Output;
+import io.nats.bridge.metrics.implementation.SimpleMetrics;
 import io.nats.bridge.nats.NatsMessageBus;
 import io.nats.bridge.support.MessageBusBuilder;
 import io.nats.bridge.util.ExceptionHandler;
@@ -8,40 +14,107 @@ import io.nats.client.Nats;
 import io.nats.client.Options;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.Properties;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.LinkedTransferQueue;
 
-public class NatsMessageBusBuilder implements MessageBusBuilder{
-
+public class NatsMessageBusBuilder implements MessageBusBuilder {
 
     private List<String> servers = new ArrayList<>();
     private Connection connection;
     private String subject;
-    private ExecutorService pool;
+
+    private String name = "nats-no-name";
     private ExceptionHandler tryHandler;
     private Options options;
     private Options.Builder optionsBuilder;
-    private Properties optionProperties; 
+    private Properties optionProperties;
 
     private char[] user;
-    private char[] password; 
+    private char[] password;
+
+    private TimeSource timeSource;
+    private Metrics metrics;
+    private MetricsProcessor metricsProcessor;
 
 
+    private java.util.Queue<NatsMessageBus.NatsReply> replyQueue;
+    private java.util.Queue<NatsMessageBus.NatsReply> replyQueueNotDone;
 
 
     private String queueGroup;
+
+    public static NatsMessageBusBuilder builder() {
+        return new NatsMessageBusBuilder();
+    }
+
+    public Metrics getMetrics() {
+        if (metrics == null) {
+            metrics = new SimpleMetrics(System::currentTimeMillis);
+        }
+        return metrics;
+    }
+
+    public NatsMessageBusBuilder withMetrics(final Metrics metrics) {
+        this.metrics = metrics;
+        return this;
+    }
+
+    public MetricsProcessor getMetricsProcessor() {
+        if (metricsProcessor == null) {
+            metricsProcessor = new MetricsDisplay(new Output() {
+            }, getMetrics(), 10, Duration.ofSeconds(10), System::currentTimeMillis);
+        }
+        return metricsProcessor;
+    }
+
+    public NatsMessageBusBuilder withMetricsProcessor(MetricsProcessor metricsProcessor) {
+        this.metricsProcessor = metricsProcessor;
+        return this;
+    }
+
+    public Queue<NatsMessageBus.NatsReply> getReplyQueue() {
+        if (replyQueue == null) {
+            replyQueue = new LinkedTransferQueue<>();
+        }
+        return replyQueue;
+    }
+
+    public NatsMessageBusBuilder withReplyQueue(Queue<NatsMessageBus.NatsReply> replyQueueNotDone) {
+        this.replyQueue = replyQueue;
+        return this;
+    }
+
+    public Queue<NatsMessageBus.NatsReply> getReplyQueueNotDone() {
+        if (replyQueueNotDone == null) {
+            replyQueueNotDone = new LinkedTransferQueue<>();
+        }
+        return replyQueueNotDone;
+    }
+
+    public NatsMessageBusBuilder withReplyQueueNotDone(Queue<NatsMessageBus.NatsReply> replyQueueNotDone) {
+        this.replyQueueNotDone = replyQueueNotDone;
+        return this;
+    }
+
+    public TimeSource getTimeSource() {
+        if (timeSource == null) {
+            timeSource = System::currentTimeMillis;
+        }
+        return timeSource;
+    }
+
+    public NatsMessageBusBuilder withTimeSource(TimeSource timeSource) {
+        this.timeSource = timeSource;
+        return this;
+    }
 
     public char[] getUser() {
 
         return user;
     }
 
-    public NatsMessageBusBuilder withUser(String user ){
+    public NatsMessageBusBuilder withUser(String user) {
         this.user = user.toCharArray();
         return this;
     }
@@ -50,7 +123,7 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         return password;
     }
 
-    public NatsMessageBusBuilder withPassword(String password ){
+    public NatsMessageBusBuilder withPassword(String password) {
         this.password = password.toCharArray();
         return this;
     }
@@ -58,16 +131,15 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
     public Properties getOptionProperties() {
 
         if (optionProperties == null) {
-            optionProperties = new Properties(); 
-        } 
+            optionProperties = new Properties();
+        }
         return optionProperties;
     }
 
-    public NatsMessageBusBuilder withOptionProperties(Properties properties ){
+    public NatsMessageBusBuilder withOptionProperties(Properties properties) {
         optionProperties = properties;
         return this;
     }
-    
 
     public String getQueueGroup() {
         if (queueGroup == null) {
@@ -103,7 +175,6 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         return this;
     }
 
-
     public Connection getConnection() {
         if (connection == null) {
             try {
@@ -121,6 +192,18 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         return this;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public NatsMessageBusBuilder withName(String name) {
+        if (name == null) {
+            throw new NatsBuilderException("Name must be set");
+        }
+        this.name = name;
+        return this;
+    }
+
     public String getSubject() {
         return subject;
     }
@@ -130,18 +213,6 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
             throw new NatsBuilderException("Subject must be set");
         }
         this.subject = subject;
-        return this;
-    }
-
-    public ExecutorService getPool() {
-        if (pool == null) {
-            pool = Executors.newFixedThreadPool(25);
-        }
-        return pool;
-    }
-
-    public NatsMessageBusBuilder withPool(ExecutorService pool) {
-        this.pool = pool;
         return this;
     }
 
@@ -168,13 +239,13 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         if (optionsBuilder == null) {
             if (optionProperties == null) {
                 optionsBuilder = new Options.Builder()
-                    .servers(getServers().toArray(new String[1]));
+                        .servers(getServers().toArray(new String[1]));
             } else {
                 optionsBuilder = new Options.Builder(getOptionProperties())
-                .servers(getServers().toArray(new String[1]));
+                        .servers(getServers().toArray(new String[1]));
             }
-            if (password!=null && user!=null) {
-                optionsBuilder.userInfo(user, password);             
+            if (password != null && user != null) {
+                optionsBuilder.userInfo(user, password);
             }
         }
         return optionsBuilder;
@@ -185,16 +256,16 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         return this;
     }
 
-
     public NatsMessageBusBuilder withOptions(Options options) {
         this.options = options;
         return this;
     }
 
-    public static NatsMessageBusBuilder builder() {
-        return new NatsMessageBusBuilder();
-    }
     public NatsMessageBus build() {
-        return new NatsMessageBus(getSubject(), getConnection(), getQueueGroup(), getPool(), getTryHandler());
+        return new NatsMessageBus(getName(), getSubject(),
+                getConnection(),
+                getQueueGroup(), getTryHandler(), getReplyQueue(),
+                getReplyQueueNotDone(), getTimeSource(),
+                getMetrics(), getMetricsProcessor());
     }
 }

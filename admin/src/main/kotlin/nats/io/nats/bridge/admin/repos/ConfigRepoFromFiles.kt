@@ -30,7 +30,7 @@ class ConfigRepoFromFiles(private val configFile: File = File("./config/nats-bri
     override fun readClusterConfigs() = readConfig().clusters
 
     override fun addBridge(messageBridge: MessageBridgeInfo) {
-        logger.info("Adding Bridge: ${messageBridge.name ?: "noName"} ...")
+        logger.info("Adding Bridge: ${messageBridge.name} ...")
 
         /* Read in the whole config file. */
         val readConfig = this.readConfig()
@@ -52,13 +52,13 @@ class ConfigRepoFromFiles(private val configFile: File = File("./config/nats-bri
                     messageBridge), dateTime = LocalDateTime.now())
             saveConfig(newConfig)
         } else {
-            logger.info("Adding Bridge: Name already found ${messageBridge.name ?: "noName"} ...")
+            logger.info("Adding Bridge: Name already found ${messageBridge.name} ...")
         }
     }
 
     override fun saveConfig(conf: NatsBridgeConfig) {
         logger.info("Saving Nats Bridge config... " + LocalDateTime.now())
-        configFile.parentFile.mkdirs();
+        configFile.parentFile.mkdirs()
         mapper.writeValue(configFile, conf)
     }
 
