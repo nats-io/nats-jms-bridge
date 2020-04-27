@@ -7,6 +7,7 @@ import nats.io.nats.bridge.admin.runner.support.BridgeRunnerBuilder
 import nats.io.nats.bridge.admin.runner.support.EndProcessSignal
 import nats.io.nats.bridge.admin.runner.support.MessageBridgeLoader
 import nats.io.nats.bridge.admin.runner.support.SendEndProcessSignal
+import nats.io.nats.bridge.admin.runner.support.impl.MessageBridgeLoaderImpl
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.concurrent.ExecutorService
@@ -18,7 +19,8 @@ import javax.annotation.PreDestroy
 
 
 class BridgeRunnerManager(private val repo: ConfigRepo,
-                          private val bridgeRunnerRef: AtomicReference<BridgeRunner> = AtomicReference()) {
+                          private val bridgeRunnerRef: AtomicReference<BridgeRunner> = AtomicReference(),
+                          private val metricsRegistry: MeterRegistry?=null) {
 
     fun endProcessSignal() = endProcessSignalRef.get()!!
     fun sendEndProcessSignal() = sendEndProcessSignalRef.get()!!
@@ -53,7 +55,10 @@ class BridgeRunnerManager(private val repo: ConfigRepo,
     private fun bridgeRunner(): BridgeRunner {
         if (bridgeRunnerRef.get() == null) {
             val builder = BridgeRunnerBuilder()
+
             builder.withRepo(repo)
+            builder.withMessageBridgeLoader(MessageBridgeLoaderImpl(repo, metricsRegistry))
+
             if (bridgeRunnerRef.compareAndSet(null, builder.build())) {
                 endProcessSignalRef.set(builder.endProcessSignal)
                 sendEndProcessSignalRef.set(builder.sendEndProcessSignal)

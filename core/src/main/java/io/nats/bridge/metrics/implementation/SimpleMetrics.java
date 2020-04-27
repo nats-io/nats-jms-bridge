@@ -26,7 +26,7 @@ public class SimpleMetrics implements Metrics {
             throw new IllegalStateException("Tags must be key value pairs so must be an even number");
         }
 
-        Map<String, String> map = new HashMap<>(tags.length / 2);
+        Map<String, String> map = new TreeMap<>();
 
         for (int i = 0; i < tags.length - 1; i += 2) {
             map.put(tags[i], tags[i + 1]);
@@ -38,24 +38,37 @@ public class SimpleMetrics implements Metrics {
 
     @Override
     public Gauge createGauge(final String name, String... tags) {
-
-
-        final Gauge gauge = new SimpleGauge(name, convertToMap(tags));
+        final Map<String, String> map = convertToMap(tags);
+        final String id = generateId(name, map);
+        final Gauge gauge = new SimpleGauge(name, map, id);
         gauges.add(gauge);
         return gauge;
     }
 
+    private String generateId(String name, Map<String, String> map) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(name);
+        builder.append('_');
+        for (String key : map.keySet()) {
+           builder.append(key).append('_').append(map.get(key));
+        }
+        return builder.toString();
+    }
+
+
     @Override
     public Counter createCounter(final String name, String... tags) {
 
-        final Counter counter = new SimpleCounter(name, convertToMap(tags));
+        final Map<String, String> map =convertToMap(tags);
+        final Counter counter = new SimpleCounter(name, map, generateId(name, map));
         counters.add(counter);
         return counter;
     }
 
     @Override
     public TimeTracker createTimeTracker(final String name, String... tags) {
-        final TimeTracker tt = new SimpleTimeTracker(name, timeSource, convertToMap(tags));
+        final Map<String, String> map =convertToMap(tags);
+        final TimeTracker tt = new SimpleTimeTracker(name, timeSource, map, generateId(name, map));
         timers.add(tt);
         return tt;
     }

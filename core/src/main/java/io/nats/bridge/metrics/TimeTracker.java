@@ -1,6 +1,6 @@
 package io.nats.bridge.metrics;
 
-public interface TimeTracker {
+public interface TimeTracker extends MetricId, GetMetric {
 
     /**
      * This is used to record timings.

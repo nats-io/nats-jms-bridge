@@ -2,16 +2,16 @@ package nats.io.nats.bridge.admin.runner.support.impl
 
 import io.micrometer.core.instrument.MeterRegistry
 import io.nats.bridge.jms.support.JMSMessageBusBuilder
-import io.nats.bridge.metrics.MetricsProcessor
 import io.nats.bridge.nats.support.NatsMessageBusBuilder
 import io.nats.bridge.support.MessageBusBuilder
 import nats.io.nats.bridge.admin.ConfigRepo
 import nats.io.nats.bridge.admin.models.bridges.*
 import nats.io.nats.bridge.admin.runner.support.MessageBridgeBuilder
 import nats.io.nats.bridge.admin.runner.support.MessageBridgeLoader
+import java.time.Duration
 import java.util.*
 
-class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsRegistry: MeterRegistry?=null) : MessageBridgeLoader {
+class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsRegistry: MeterRegistry? = null) : MessageBridgeLoader {
 
 
     override fun loadBridgeBuilders(): List<MessageBridgeBuilder> = doLoadMessageBridge(repo.readConfig())
@@ -76,11 +76,10 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
         val builder = JMSMessageBusBuilder.builder()
                 .withDestinationName(busInfo.subject).withName(busInfo.name)
 
+        if (metricsRegistry != null)
+            builder.withMetricsProcessor(SpringMetricsProcessor(metricsRegistry, builder.metrics, 10,
+                    Duration.ofSeconds(30), builder.timeSource, {builder.name}))
 
-        if (metricsRegistry!=null)
-        builder.withMetricsProcessor(MetricsProcessor {
-            //TODO left off here add metrics
-        });
         if (config.userName != null) {
             builder.withUserNameConnection(config.userName)
         }
@@ -100,10 +99,9 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
         val builder = NatsMessageBusBuilder.builder()
                 .withSubject(busInfo.subject).withName(busInfo.name)
 
-        if (metricsRegistry!=null)
-        builder.withMetricsProcessor(MetricsProcessor {
-            //TODO left off here add metrics
-        });
+        if (metricsRegistry != null)
+            builder.withMetricsProcessor(SpringMetricsProcessor(metricsRegistry, builder.metrics, 10,
+                    Duration.ofSeconds(30), builder.timeSource,{builder.name}))
 
         val port = clusterConfig.port ?: 4222
         if (clusterConfig.host != null && port > 0) {

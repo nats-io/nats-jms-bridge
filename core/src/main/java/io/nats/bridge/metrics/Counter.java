@@ -5,7 +5,7 @@ package io.nats.bridge.metrics;
  * Collects runtime metrics.
  * This collects key performance indicators (KPI): timings, counts and levels/gauges.
  */
-public interface Counter {
+public interface Counter extends MetricId, GetMetric{
 
 
     /**

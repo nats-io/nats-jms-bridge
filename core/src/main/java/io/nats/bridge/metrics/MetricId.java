@@ -7,5 +7,7 @@ public interface MetricId {
 
     String metricName();
 
+    String id();
+
     Map<String, String> dimensions();
 }

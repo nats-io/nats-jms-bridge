@@ -109,7 +109,7 @@ tasks {
 
         implementation("io.nats.bridge:nats-jms-bridge:0.1")
 
-
+        implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
 
         // Testing
