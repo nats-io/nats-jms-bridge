@@ -9,7 +9,6 @@ import io.nats.bridge.metrics.Metrics;
 import io.nats.bridge.metrics.MetricsProcessor;
 import io.nats.bridge.metrics.TimeTracker;
 import io.nats.bridge.util.ExceptionHandler;
-import io.nats.bridge.util.SupplierWithException;
 import io.nats.client.Connection;
 import io.nats.client.Subscription;
 
@@ -18,6 +17,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedTransferQueue;
 import java.util.function.Consumer;
 
 //import java.util.concurrent.ExecutorService;
@@ -33,18 +33,16 @@ public class NatsMessageBus implements MessageBus {
     private final ExceptionHandler tryHandler;
     private final Queue<NatsReply> replyQueue;
     private final Queue<NatsReply> replyQueueNotDone;
+
+    private final Queue<ReplyTo> replyToQueue;
     private final Metrics metrics;
-    private final Counter countRequestResponseErrors;
+
     private final Counter countReceivedReply;
     private final Counter countReceivedReplyErrors;
     private final Counter countPublish;
     private final Counter countReceived;
-    private final Counter countPublishErrors;
-    private final Counter messageConvertErrors;
     private final Counter countRequest;
-    private final Counter countRequestErrors;
     private final Counter countRequestResponses;
-    private final Counter countRequestResponsesMissing;
     private final TimeTracker timerRequestResponse;
     private final TimeTracker timerReceiveReply;
 
@@ -75,21 +73,17 @@ public class NatsMessageBus implements MessageBus {
         this.replyQueueNotDone = replyQueueNotDone;
         this.metrics = metrics;
         this.metricsProcessor = metricsProcessor;
-        this.name = "nats-bus-" + name;
+        this.name = "nats-bus-" + name.toLowerCase().replace(".", "-").replace(" ", "-");
 
-        countPublish = metrics.createCounter(name + "-publish-count");
-        countPublishErrors = metrics.createCounter(name + "-publish-count-errors");
-        countRequest = metrics.createCounter(name + "-request-count");
-        countRequestErrors = metrics.createCounter(name + "-request-count-errors");
-        countRequestResponses = metrics.createCounter(name + "-request-response-count");
-        countRequestResponseErrors = metrics.createCounter(name + "-request-response-count-errors");
-        countRequestResponsesMissing = metrics.createCounter(name + "-request-response-missing-count");
-        timerRequestResponse = metrics.createTimeTracker(name + "-request-response-timing");
-        countReceived = metrics.createCounter(name + "-received-count");
-        countReceivedReply = metrics.createCounter(name + "-received-reply-count");
-        timerReceiveReply = metrics.createTimeTracker(name + "-receive-reply-timing");
-        countReceivedReplyErrors = metrics.createCounter(name + "-received-reply-count-errors");
-        messageConvertErrors = metrics.createCounter(name + "-message-convert-count-errors");
+        countPublish = metrics.createCounter(this.name + "-publish-count");
+        countRequest = metrics.createCounter(this.name + "-request-count");
+        countRequestResponses = metrics.createCounter(this.name + "-request-response-count");
+        timerRequestResponse = metrics.createTimeTracker(this.name + "-request-response-timing");
+        countReceived = metrics.createCounter(this.name + "-received-count");
+        countReceivedReply = metrics.createCounter(this.name + "-received-reply-count");
+        timerReceiveReply = metrics.createTimeTracker(this.name + "-receive-reply-timing");
+        countReceivedReplyErrors = metrics.createCounter(this.name + "-received-reply-count-errors");
+        replyToQueue = new LinkedTransferQueue<>();
 
     }
 
@@ -140,24 +134,7 @@ public class NatsMessageBus implements MessageBus {
 
                 countReceived.increment();
 
-                final String replyTo = message.getReplyTo();
-
-                if (replyTo != null) {
-                    return Optional.of(
-                            MessageBuilder.builder().withReplyHandler(new Consumer<Message>() {
-                                @Override
-                                public void accept(final Message reply) {
-
-                                    //ystem.out.println("REPLY MESSAGE " + reply.bodyAsString() + "HEADERS" + reply.headers());
-                                    connection.publish(replyTo, reply.getMessageBytes());
-                                }
-                            }).buildFromBytes(message.getData())
-                    );
-                } else {
-                    final Message bridgeMessage = MessageBuilder.builder().buildFromBytes(message.getData());
-                    //ystem.out.println("## Receive MESSAGE " + bridgeMessage.bodyAsString() + " " + bridgeMessage.headers());
-                    return Optional.of(bridgeMessage);
-                }
+                return convertMessage(message);
             } else {
                 return Optional.empty();
             }
@@ -165,6 +142,25 @@ public class NatsMessageBus implements MessageBus {
             throw new NatsMessageBusException("unable to get next message from nats bus", e);
         });
 
+    }
+
+    private void replyUsingReplyTo(long startTime, final String replyTo, final Message reply) {
+
+        replyToQueue.add(new ReplyTo(startTime, replyTo, reply));
+    }
+
+    private Optional<Message> convertMessage(io.nats.client.Message message) {
+        final String replyTo = message.getReplyTo();
+
+        if (replyTo != null) {
+            final long startTime = timeSource.getTime();
+            return Optional.of(
+                    MessageBuilder.builder().withReplyHandler(reply -> replyUsingReplyTo(startTime, replyTo, reply)).buildFromBytes(message.getData())
+            );
+        } else {
+            final Message bridgeMessage = MessageBuilder.builder().buildFromBytes(message.getData());
+            return Optional.of(bridgeMessage);
+        }
     }
 
     @Override
@@ -176,7 +172,21 @@ public class NatsMessageBus implements MessageBus {
     @Override
     public int process() {
         metricsProcessor.process();
-        return processResponses();
+        int count = processReplyToQueue();
+        return count + processResponses();
+    }
+
+    private int processReplyToQueue() {
+        int count = 0;
+        ReplyTo reply = replyToQueue.poll();
+        while (reply != null) {
+            connection.publish(reply.replyTo, reply.reply.getMessageBytes());
+            count++;
+            timerReceiveReply.recordTiming(timeSource.getTime() - reply.startTime);
+            countReceivedReply.increment();
+            reply = replyToQueue.poll();
+        }
+        return count;
     }
 
     private int processResponses() {
@@ -193,8 +203,8 @@ public class NatsMessageBus implements MessageBus {
                         count++;
                         final io.nats.client.Message replyMessage = reply.future.get();
                         reply.replyCallback.accept(MessageBuilder.builder().buildFromBytes(replyMessage.getData()));
-                        timerReceiveReply.recordTiming(timeSource.getTime() - reply.requestTime);
-                        countReceivedReply.increment();
+                        timerRequestResponse.recordTiming(timeSource.getTime() - reply.requestTime);
+                        countRequestResponses.increment();
                     } else {
                         if (!replyQueueNotDone.add(reply)) {
                             throw new NatsMessageBusException("Unable to add to reply queue");
@@ -220,6 +230,18 @@ public class NatsMessageBus implements MessageBus {
         }, countReceivedReplyErrors, "error processing NATS receive queue for replies");
 
         return countHolder[0];
+    }
+
+    private static class ReplyTo {
+        private final String replyTo;
+        private final Message reply;
+        private final long startTime;
+
+        ReplyTo(long startTime, String replyTo, Message reply) {
+            this.replyTo = replyTo;
+            this.reply = reply;
+            this.startTime = startTime;
+        }
     }
 
     public static class NatsReply {

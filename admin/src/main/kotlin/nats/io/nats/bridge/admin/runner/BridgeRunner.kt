@@ -7,6 +7,7 @@ import nats.io.nats.bridge.admin.runner.support.EndProcessSignal
 import nats.io.nats.bridge.admin.runner.support.MessageBridgeLoader
 import nats.io.nats.bridge.admin.runner.support.SendEndProcessSignal
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -66,7 +67,8 @@ class BridgeRunner(private val bridgeLoader: MessageBridgeLoader,
                    private val endProcessSignal: EndProcessSignal,
                    private val sendEndProcessSignal: SendEndProcessSignal,
                    private val stopped: AtomicBoolean = AtomicBoolean(),
-                   private val wasStarted: AtomicBoolean = AtomicBoolean()) {
+                   private val wasStarted: AtomicBoolean = AtomicBoolean(),
+                   private val duration: Duration) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -89,25 +91,18 @@ class BridgeRunner(private val bridgeLoader: MessageBridgeLoader,
 
 
     fun initRunner() {
-        val messageBridge = loadMessageBridge()
+        val messageBridges = loadMessageBridges()
         executors = Executors.newFixedThreadPool(1)
 
         //Working on this, TODO flag it to stop
         executors?.submit(Runnable {
             wasStarted.set(true)
             try {
-                var i = 0
                 while (endProcessSignal.keepRunning()) {
-                    i++
-                    messageBridge.process()
-                    // TODO I need a way to chain a bunch of bridges and know if any had messages or requests to process
-                    // Iterate through the list.
-                    // If none had any messages than sleep for a beat.
-                    // This has not been implemented yet
-                    // This is a good place for a KPI metric as well
-                    if (i % 100_000 == 0) {
-                        Thread.sleep(10)//Temp hack to test
-                        println("running $i")
+                    val count = messageBridges.map { messageBridge -> messageBridge.process() }.sum()
+                    if (count == 0) {
+                        messageBridges[0].process(duration)
+                        messageBridges.subList(1, messageBridges.size).forEach { it.process() }
                     }
                 }
                 stopped.set(true)
@@ -120,7 +115,7 @@ class BridgeRunner(private val bridgeLoader: MessageBridgeLoader,
         })
     }
 
-    private fun loadMessageBridge(): MessageBridge = bridgeLoader.loadBridges()[0]
+    private fun loadMessageBridges(): List<MessageBridge> = bridgeLoader.loadBridges()
 
 
 }

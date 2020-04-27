@@ -1,6 +1,7 @@
 package nats.io.nats.bridge.admin.runner.support
 
 import io.nats.bridge.MessageBridge
+import io.nats.bridge.support.MessageBridgeImpl
 import io.nats.bridge.support.MessageBusBuilder
 
 
@@ -18,7 +19,7 @@ class MessageBridgeBuilder {
     fun withName(name: String) = apply { this.name = name }
 
     fun build(): MessageBridge {
-        return MessageBridge(name, sourceBusBuilder!!.build(), destBusBuilder!!.build(), requestReply)
+        return MessageBridgeImpl(name, sourceBusBuilder!!.build(), destBusBuilder!!.build(), requestReply, null)
     }
 
 }

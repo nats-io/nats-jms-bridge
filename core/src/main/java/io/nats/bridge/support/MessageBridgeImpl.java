@@ -19,6 +19,7 @@ import io.nats.bridge.MessageBus;
 import io.nats.bridge.messages.Message;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.LinkedTransferQueue;
@@ -46,7 +47,7 @@ public class MessageBridgeImpl implements MessageBridge {
         this.destinationBus = destinationBus;
         this.requestReply = requestReply;
         this.replyMessageQueue = (replyMessageQueue != null) ? replyMessageQueue : new LinkedTransferQueue<>();
-        this.name = "bridge-" + name;
+        this.name = "bridge-" + name.toLowerCase().replace(".", "-").replace(" ", "-");
     }
 
     @Override
@@ -57,6 +58,10 @@ public class MessageBridgeImpl implements MessageBridge {
     @Override
     public int process() {
         final Optional<Message> receiveMessageFromSourceOption = sourceBus.receive();
+        return doProcess(receiveMessageFromSourceOption);
+    }
+
+    private int doProcess(Optional<Message> receiveMessageFromSourceOption) {
         int count = 0;
 
         if (requestReply) {
@@ -74,6 +79,12 @@ public class MessageBridgeImpl implements MessageBridge {
         count += destinationBus.process();
         count += processReplies();
         return count;
+    }
+
+    @Override
+    public int process(final Duration duration) {
+        final Optional<Message> receiveMessageFromSourceOption = sourceBus.receive(duration);
+        return doProcess(receiveMessageFromSourceOption);
     }
 
     private int processReplies() {

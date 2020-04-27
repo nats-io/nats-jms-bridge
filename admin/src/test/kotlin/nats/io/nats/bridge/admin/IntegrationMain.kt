@@ -27,6 +27,7 @@ import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 
@@ -179,17 +180,20 @@ class Main {
 
         natsService.run()
         val ref: AtomicReference<String> = AtomicReference()
+        val count = AtomicInteger()
 
         for (a in 0..100) {
             val latch = CountDownLatch(90)
             for (x in 0..100) {
                 jmsClient.request("Rick") { response ->
                     ref.set(response)
+                    count.incrementAndGet()
                     latch.countDown()
                 }
             }
             jmsClient.process()
-            latch.await(1, TimeUnit.SECONDS)
+            latch.await(10, TimeUnit.MILLISECONDS)
+            println("REPLY COUNT " + count.get())
             displayFlag(readFlag("$bridgeControlURL/running"))
             displayFlag(readFlag("$bridgeControlURL/started"))
             displayFlag(readFlag("$bridgeControlURL/error/was-error"))

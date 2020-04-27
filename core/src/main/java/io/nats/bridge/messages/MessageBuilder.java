@@ -50,7 +50,10 @@ public class MessageBuilder {
 
     public Consumer<Message> getReplyHandler() {
         if (replyHandler == null) {
-            replyHandler = message -> System.out.println("DEFAULT HANDLER CALLED ");
+            replyHandler = message -> {
+                new Exception().fillInStackTrace().printStackTrace();
+                System.out.println("DEFAULT HANDLER CALLED ");
+            };
         }
         return replyHandler;
     }
