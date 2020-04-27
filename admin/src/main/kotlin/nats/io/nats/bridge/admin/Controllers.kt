@@ -1,6 +1,8 @@
 package nats.io.nats.bridge.admin
 
 
+import io.micrometer.core.annotation.Timed
+import io.micrometer.core.instrument.MeterRegistry
 import io.swagger.annotations.ApiImplicitParam
 import nats.io.nats.bridge.admin.models.bridges.MessageBridgeInfo
 import nats.io.nats.bridge.admin.models.bridges.NatsBridgeConfig
@@ -18,36 +20,47 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
+import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 
 @RestController
 @RequestMapping("/api/v1/login")
 class LoginController(@Value("\${security.secretKey}") private val adminSecretKey: String,
                       @Value("\${jwt.algo}") private val jwtAlgorithm: String,
-                      private val longRepo: LoginRepo) {
+                      private val longRepo: LoginRepo,
+                      registry: MeterRegistry) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
+    private val generateTokenCount = registry.counter("token_count", "module", "security")
+    private val tokenErrorCount = registry.counter("token_error", "module", "security")
 
 
     @PostMapping("/generateToken")
+    @Timed
     @ApiImplicitParam(name = "Content-Type", value = "application/json", dataType = "string", paramType = "header")
     fun generateToken(@RequestHeader headers: Map<String, String>, @RequestBody tokenRequest: LoginRequest) = doGenerateToken(headers, tokenRequest)
 
 
     fun doGenerateToken(headers: Map<String, String>, tokenRequest: LoginRequest): TokenResponse {
+
         val authLogin = longRepo.loadLogin(tokenRequest)
         if (authLogin != null) {
             val pwd: String = if (authLogin.secret.startsWith("pk-")) authLogin.secret else {
+                logger.warn("Read auth Login that was not encrypted")
                 val encryptUtils = EncryptUtils.createEncrypt(authLogin.genKey(adminSecretKey))
                 encryptUtils.decrypt(authLogin.secret)
             }
             if (tokenRequest.secret == pwd) {
                 val token = JwtUtils.generateToken("LOGIN_TOKEN", authLogin.genToken().toMap(),
                         adminSecretKey + adminSecretKey, jwtAlgorithm)
+                generateTokenCount.increment()
                 return TokenResponse(token, authLogin.publicKey, authLogin.subject)
             } else {
+                tokenErrorCount.increment()
                 throw ResponseStatusException(HttpStatus.FORBIDDEN, "Bad Token Request")
             }
         } else {
+            tokenErrorCount.increment()
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Login not found")
         }
     }
@@ -57,11 +70,19 @@ class LoginController(@Value("\${security.secretKey}") private val adminSecretKe
 
 @RestController
 @RequestMapping("/")
-class RootController {
+class RootController(registry: MeterRegistry) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
+    private val pingCounter = registry.counter("ping_count", "module", "root")
+
+
     @GetMapping(path = ["/ping"])
-    fun ping() = "pong"
+    @Timed
+    fun ping(): String {
+        pingCounter.increment()
+        logger.info("Ping was called at " + Date())
+        return "pong"
+    }
 
     @RequestMapping(value = ["/"], produces = ["text/html"])
     fun index(): String? {
@@ -117,17 +138,25 @@ class AdminController(private val config: ConfigRepo) {
 
 @RestController
 @RequestMapping("/api/v1/logins")
-class UserAdminController(private val loginRepo: LoginRepo) {
+class UserAdminController(private val loginRepo: LoginRepo, registry: MeterRegistry) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
+    private val loginCount = AtomicInteger()
+    private val loginsLevel = registry.gauge("login_level", loginCount);
 
     @PostMapping(path = ["/admin/login"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
-    fun addLogin(login: Login) = loginRepo.addLogin(login)
+    fun addLogin(login: Login) {
+        logger.info("New Login Added ${login.subject}")
+        loginRepo.addLogin(login)
+    }
 
     @DeleteMapping(path = ["/admin/login"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
-    fun removeLogin(@RequestParam subject: String) = loginRepo.removeLogin(subject)
+    fun removeLogin(@RequestParam subject: String) {
+        logger.info("Login Removed $subject")
+        loginRepo.removeLogin(subject)
+    }
 
     @PutMapping(path = ["/admin/login/role"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
@@ -139,7 +168,11 @@ class UserAdminController(private val loginRepo: LoginRepo) {
 
     @GetMapping(path = ["/admin/login"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
-    fun listLogins(): List<String> = loginRepo.listLogins()
+    fun listLogins(): List<String>  {
+        val logins =  loginRepo.listLogins()
+        loginCount.set(logins.size)
+        return logins;
+    }
 
     @GetMapping(path = ["/admin/login/by/role"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")

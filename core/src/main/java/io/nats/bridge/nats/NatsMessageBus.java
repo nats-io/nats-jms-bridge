@@ -73,16 +73,16 @@ public class NatsMessageBus implements MessageBus {
         this.replyQueueNotDone = replyQueueNotDone;
         this.metrics = metrics;
         this.metricsProcessor = metricsProcessor;
-        this.name = "nats-bus-" + name.toLowerCase().replace(".", "-").replace(" ", "-");
+        this.name = name.toLowerCase().replace(".", "_").replace(" ", "_").replace("-", "_");
 
-        countPublish = metrics.createCounter(this.name + "-publish-count");
-        countRequest = metrics.createCounter(this.name + "-request-count");
-        countRequestResponses = metrics.createCounter(this.name + "-request-response-count");
-        timerRequestResponse = metrics.createTimeTracker(this.name + "-request-response-timing");
-        countReceived = metrics.createCounter(this.name + "-received-count");
-        countReceivedReply = metrics.createCounter(this.name + "-received-reply-count");
-        timerReceiveReply = metrics.createTimeTracker(this.name + "-receive-reply-timing");
-        countReceivedReplyErrors = metrics.createCounter(this.name + "-received-reply-count-errors");
+        countPublish = metrics.createCounter( "publish_count", "name_" + this.name, "nats_mb");
+        countRequest = metrics.createCounter("request_count","name_" + this.name, "nats_mb");
+        countRequestResponses = metrics.createCounter( "request_response_count","name_" + this.name, "nats_mb");
+        timerRequestResponse = metrics.createTimeTracker("request_response_timing","name_" + this.name, "nats_mb");
+        countReceived = metrics.createCounter( "received_count","name_" + this.name, "nats_mb");
+        countReceivedReply = metrics.createCounter("received_reply_count","name_" + this.name, "nats_mb");
+        timerReceiveReply = metrics.createTimeTracker("receive_reply_timing","name_" + this.name, "nats_mb");
+        countReceivedReplyErrors = metrics.createCounter("received_reply_count_errors","name_" + this.name, "nats_mb");
         replyToQueue = new LinkedTransferQueue<>();
 
     }
@@ -91,6 +91,11 @@ public class NatsMessageBus implements MessageBus {
     @Override
     public String name() {
         return name;
+    }
+
+    @Override
+    public Metrics metrics() {
+        return metrics;
     }
 
     @Override

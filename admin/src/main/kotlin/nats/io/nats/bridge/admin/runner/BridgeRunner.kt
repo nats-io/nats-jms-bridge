@@ -1,5 +1,6 @@
 package nats.io.nats.bridge.admin.runner
 
+import io.micrometer.core.instrument.MeterRegistry
 import io.nats.bridge.MessageBridge
 import nats.io.nats.bridge.admin.ConfigRepo
 import nats.io.nats.bridge.admin.runner.support.BridgeRunnerBuilder
@@ -94,7 +95,6 @@ class BridgeRunner(private val bridgeLoader: MessageBridgeLoader,
         val messageBridges = loadMessageBridges()
         executors = Executors.newFixedThreadPool(1)
 
-        //Working on this, TODO flag it to stop
         executors?.submit(Runnable {
             wasStarted.set(true)
             try {
@@ -111,6 +111,14 @@ class BridgeRunner(private val bridgeLoader: MessageBridgeLoader,
                 stopped.set(true)
                 lastErrorRef.set(ex)
                 logger.warn("Stopped bridge runner with error", ex)
+
+            }
+            messageBridges.forEach{ mb ->
+                try {
+                    mb.close()
+                } catch (ex:Exception) {
+                    logger.warn("error shutting down bridge ${mb.name()}", ex)
+                }
             }
         })
     }

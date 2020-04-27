@@ -80,7 +80,7 @@ public class JMSMessageBus implements MessageBus {
                          final Queue<JMSReply> jmsReplyQueue,
                          final FunctionWithException<javax.jms.Message, Message> jmsMessageConverter,
                          final FunctionWithException<Message, javax.jms.Message> bridgeMessageConverter) {
-        this.name = "jms-bus-" + name.toLowerCase().replace(".", "-").replace(" ", "-");
+        this.name =  name.toLowerCase().replace(".", "_").replace(" ", "_").replace("-", "_");
         this.destination = destination;
         this.session = session;
         this.connection = connection;
@@ -94,19 +94,19 @@ public class JMSMessageBus implements MessageBus {
         this.metrics = metrics;
 
 
-        countPublish = metrics.createCounter(this.name + "-publish-count");
-        countPublishErrors = metrics.createCounter(this.name + "-publish-count-errors");
-        countRequest = metrics.createCounter(this.name + "-request-count");
-        countRequestErrors = metrics.createCounter(this.name + "-request-count-errors");
-        countRequestResponses = metrics.createCounter(this.name + "-request-response-count");
-        countRequestResponseErrors = metrics.createCounter(this.name + "-request-response-count-errors");
-        countRequestResponsesMissing = metrics.createCounter(this.name + "-request-response-missing-count");
-        timerRequestResponse = metrics.createTimeTracker(this.name + "-request-response-timing");
-        countReceived = metrics.createCounter(this.name + "-received-count");
-        countReceivedReply = metrics.createCounter(this.name + "-received-reply-count");
-        timerReceiveReply = metrics.createTimeTracker(this.name + "-receive-reply-timing");
-        countReceivedReplyErrors = metrics.createCounter(this.name + "-received-reply-count-errors");
-        messageConvertErrors = metrics.createCounter(this.name + "-message-convert-count-errors");
+        countPublish = metrics.createCounter( "publish_count", "name_" + this.name, "jms_mb");
+        countPublishErrors = metrics.createCounter("publish_count_errors","name_" + this.name, "jms_mb");
+        countRequest = metrics.createCounter("request_count","name_" + this.name, "jms_mb");
+        countRequestErrors = metrics.createCounter( "request_count_errors","name_" + this.name, "jms_mb");
+        countRequestResponses = metrics.createCounter( "request_response_count","name_" + this.name, "jms_mb");
+        countRequestResponseErrors = metrics.createCounter( "request_response_count_errors","name_" + this.name, "jms_mb");
+        countRequestResponsesMissing = metrics.createCounter(  "request_response_missing_count","name_" + this.name, "jms_mb");
+        timerRequestResponse = metrics.createTimeTracker("request_response_timing","name_" + this.name, "jms_mb");
+        countReceived = metrics.createCounter( "received_count","name_" + this.name, "jms_mb");
+        countReceivedReply = metrics.createCounter("received_reply_count","name_" + this.name, "jms_mb");
+        timerReceiveReply = metrics.createTimeTracker("receive_reply_timing","name_" + this.name, "jms_mb");
+        countReceivedReplyErrors = metrics.createCounter("received_reply_count_errors","name_" + this.name, "jms_mb");
+        messageConvertErrors = metrics.createCounter("message_convert_count_errors","name_" + this.name, "jms_mb");
 
 
         this.producerSupplier = producerSupplier;
@@ -136,6 +136,11 @@ public class JMSMessageBus implements MessageBus {
     @Override
     public String name() {
         return name;
+    }
+
+    @Override
+    public Metrics metrics() {
+        return metrics;
     }
 
     @Override

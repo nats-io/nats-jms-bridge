@@ -17,6 +17,7 @@ package io.nats.bridge.support;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.messages.Message;
+import io.nats.bridge.metrics.Metrics;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -102,6 +103,16 @@ public class MessageBridgeImpl implements MessageBridge {
     public void close() throws IOException {
         sourceBus.close();
         destinationBus.close();
+    }
+
+    @Override
+    public Metrics sourceMetrics() {
+        return sourceBus.metrics();
+    }
+
+    @Override
+    public Metrics destinationMetrics() {
+        return destinationBus.metrics();
     }
 
     public static class MessageBridgeRequestReply {

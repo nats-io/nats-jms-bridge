@@ -15,6 +15,7 @@ package io.nats.bridge;
 
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
+import io.nats.bridge.metrics.Metrics;
 
 import java.io.Closeable;
 import java.time.Duration;
@@ -30,6 +31,9 @@ import java.util.function.Consumer;
 public interface MessageBus extends Closeable {
 
     String name();
+
+
+    Metrics metrics();
 
     /**
      * Publish a message.
