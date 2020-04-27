@@ -26,7 +26,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo) : MessageBridgeLoade
                     .withRequestReply(bridge.bridgeType == BridgeType.REQUEST_REPLY)
                     .withName(bridge.name))
         } else {
-            (1..bridge.workers!!).map{bridgeNum ->
+            (1..bridge.workers!!).map { bridgeNum ->
 
                 val b = MessageBridgeBuilder()
                         .withDestinationBusBuilder(createMessageBusBuilder(bridge.destination, details.destinationCluster, bridge))
@@ -36,14 +36,14 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo) : MessageBridgeLoade
 
                 val src = b.sourceBusBuilder
                 val dst = b.destBusBuilder
-                if ( src is JMSMessageBusBuilder) {
+                if (src is JMSMessageBusBuilder) {
                     src.withName(src.name + bridgeNum)
-                }else if (src is NatsMessageBusBuilder) {
+                } else if (src is NatsMessageBusBuilder) {
                     src.withName(src.name + bridgeNum)
                 }
-                if ( dst is JMSMessageBusBuilder) {
+                if (dst is JMSMessageBusBuilder) {
                     dst.withName(dst.name + bridgeNum)
-                }else if (dst is NatsMessageBusBuilder) {
+                } else if (dst is NatsMessageBusBuilder) {
                     dst.withName(dst.name + bridgeNum)
                 }
                 b
@@ -66,7 +66,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo) : MessageBridgeLoade
             configureNatsBusBuilder(busInfo, bridge, natsClusterConfig)
         } else {
             val jmsClusterConfig = cluster.properties as JmsClusterConfig
-            configureJmsBusBuilder(busInfo, bridge, jmsClusterConfig )
+            configureJmsBusBuilder(busInfo, bridge, jmsClusterConfig)
         }
     }
 

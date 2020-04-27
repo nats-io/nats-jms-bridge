@@ -58,7 +58,7 @@ class ConfigRepoFromFiles(private val configFile: File = File("./config/nats-bri
 
     override fun saveConfig(conf: NatsBridgeConfig) {
         logger.info("Saving Nats Bridge config... " + LocalDateTime.now())
-        configFile.parentFile.mkdirs();
+        configFile.parentFile.mkdirs()
         mapper.writeValue(configFile, conf)
     }
 
