@@ -54,6 +54,7 @@ public class NatsMessageBus implements MessageBus {
     //TODO create NatsMessageBusBuilder.
 
     private final TimeSource timeSource;
+    private final String name;
 
 
     public static class NatsReply {
@@ -73,7 +74,7 @@ public class NatsMessageBus implements MessageBus {
         }
     }
 
-    public NatsMessageBus(final String subject, final Connection connection, 
+    public NatsMessageBus(final String name, final String subject, final Connection connection,
                             final String queueGroup,
                           //final ExecutorService pool, 
                           final ExceptionHandler tryHandler, 
@@ -94,23 +95,29 @@ public class NatsMessageBus implements MessageBus {
         this.replyQueueNotDone = replyQueueNotDone;
         this.metrics = metrics;
         this.metricsProcessor = metricsProcessor;
+        this.name = "nats-bus-" + name;
 
-        countPublish = metrics.createCounter("publish-count");
-        countPublishErrors = metrics.createCounter("publish-count-errors");
-        countRequest = metrics.createCounter("request-count");
-        countRequestErrors = metrics.createCounter("request-count-errors");
-        countRequestResponses = metrics.createCounter("request-response-count");
-        countRequestResponseErrors = metrics.createCounter("request-response-count-errors");
-        countRequestResponsesMissing = metrics.createCounter("request-response-missing-count");
-        timerRequestResponse = metrics.createTimeTracker("request-response-timing");
-        countReceived = metrics.createCounter("received-count");
-        countReceivedReply = metrics.createCounter("received-reply-count");
-        timerReceiveReply = metrics.createTimeTracker("receive-reply-timing");
-        countReceivedReplyErrors = metrics.createCounter("received-reply-count-errors");
-        messageConvertErrors = metrics.createCounter("message-convert-count-errors");
+        countPublish = metrics.createCounter(name + "-publish-count");
+        countPublishErrors = metrics.createCounter(name + "-publish-count-errors");
+        countRequest = metrics.createCounter(name + "-request-count");
+        countRequestErrors = metrics.createCounter(name + "-request-count-errors");
+        countRequestResponses = metrics.createCounter(name + "-request-response-count");
+        countRequestResponseErrors = metrics.createCounter(name + "-request-response-count-errors");
+        countRequestResponsesMissing = metrics.createCounter(name + "-request-response-missing-count");
+        timerRequestResponse = metrics.createTimeTracker(name + "-request-response-timing");
+        countReceived = metrics.createCounter(name + "-received-count");
+        countReceivedReply = metrics.createCounter(name + "-received-reply-count");
+        timerReceiveReply = metrics.createTimeTracker(name + "-receive-reply-timing");
+        countReceivedReplyErrors = metrics.createCounter(name + "-received-reply-count-errors");
+        messageConvertErrors = metrics.createCounter(name + "-message-convert-count-errors");
 
     }
 
+
+    @Override
+    public String name() {
+        return name;
+    }
 
     @Override
     public void publish(final Message message) {
@@ -190,14 +197,24 @@ public class NatsMessageBus implements MessageBus {
     }
 
     @Override
-    public void process() {
+    public int process() {
+        metricsProcessor.process();
+        return processResponses();
+    }
+
+    private int processResponses() {
+        int []countHolder = new int[1];
+
+
 
         tryHandler.tryWithErrorCount(() -> {
             NatsReply reply = null;
+            int count = 0;
             do {
                 reply = replyQueue.poll();
                 if (reply != null) {
                     if (reply.future.isDone()) {
+                         count  ++;
                         final io.nats.client.Message replyMessage = reply.future.get();
                         reply.replyCallback.accept(MessageBuilder.builder().buildFromBytes(replyMessage.getData()));
                         timerReceiveReply.recordTiming(timeSource.getTime() - reply.requestTime);
@@ -222,7 +239,10 @@ public class NatsMessageBus implements MessageBus {
             while (reply != null);
             replyQueueNotDone.clear();
 
+            countHolder[0] = count;
+
         }, countReceivedReplyErrors, "error processing NATS receive queue for replies");
 
+        return countHolder[0];
     }
 }

@@ -30,6 +30,8 @@ import java.util.function.Consumer;
  */
 public interface MessageBus extends Closeable {
 
+    String name();
+
     /**
      * Publish a message.
      *
@@ -81,7 +83,7 @@ public interface MessageBus extends Closeable {
 
     void close();
 
-    void process();
+    int process();
 
 
 }

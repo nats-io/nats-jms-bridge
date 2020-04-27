@@ -54,7 +54,7 @@ public class TestUtils {
         final Thread thread = new Thread(() -> {
             try {
                 while (!stop.get()) {
-                    Thread.sleep(1000);
+                    Thread.sleep(50);
                     messageBridge.process();
                 }
                 messageBridge.close();

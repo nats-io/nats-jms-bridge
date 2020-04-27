@@ -1,6 +1,7 @@
 package io.nats.bridge.integration.a;
 
 import io.nats.bridge.MessageBridge;
+import io.nats.bridge.support.MessageBridgeImpl;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.integration.TestUtils;
 import org.junit.After;
@@ -39,7 +40,7 @@ public class NatsToJMSBridgeTest {
         bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("A");
         bridgeMessageBusJMSDestination = TestUtils.getMessageBusJms("A");
 
-        messageBridgeFomrNatsToJMS = new MessageBridge(bridgeMessageBusNatsSource, bridgeMessageBusJMSDestination, true);
+        messageBridgeFomrNatsToJMS = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJMSDestination, true, null);
 
     }
 

@@ -31,6 +31,8 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
     private List<String> servers = new ArrayList<>();
     private Connection connection;
     private String subject;
+
+    private String name = "nats-no-name";
     private ExceptionHandler tryHandler;
     private Options options;
     private Options.Builder optionsBuilder;
@@ -197,6 +199,18 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
         return this;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public NatsMessageBusBuilder withName(String name) {
+        if (name == null) {
+            throw new NatsBuilderException("Name must be set");
+        }
+        this.name = name;
+        return this;
+    }
+
     public String getSubject() {
         return subject;
     }
@@ -260,7 +274,7 @@ public class NatsMessageBusBuilder implements MessageBusBuilder{
     }
 
     public NatsMessageBus build() {
-        return new NatsMessageBus(getSubject(), 
+        return new NatsMessageBus(getName(), getSubject(),
         getConnection(), 
         getQueueGroup(),  getTryHandler(), getReplyQueue(),
          getReplyQueueNotDone(), getTimeSource(),

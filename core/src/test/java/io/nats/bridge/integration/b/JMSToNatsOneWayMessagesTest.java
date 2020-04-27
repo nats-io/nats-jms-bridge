@@ -1,5 +1,6 @@
 package io.nats.bridge.integration.b;
 
+import io.nats.bridge.support.MessageBridgeImpl;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
@@ -49,7 +50,7 @@ public class JMSToNatsOneWayMessagesTest {
 
         responseBusServer = TestUtils.getMessageBusNats(responseName);
         responseBusClient = TestUtils.getMessageBusNats(responseName);
-        messageBridge = new MessageBridge(bridgeMessageBusSource, bridgeMessageBusDestination, false);
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, false, null);
 
     }
 

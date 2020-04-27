@@ -14,6 +14,7 @@
 package io.nats.bridge.example.a;
 
 import io.nats.bridge.MessageBridge;
+import io.nats.bridge.support.MessageBridgeImpl;
 import io.nats.bridge.MessageBus;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,7 +28,7 @@ public class BridgeManagerProtoMain {
         try {
             final MessageBus messageBusSource = ServiceAUtil.getMessageBusNats();
             final MessageBus messageBusDestination = ServiceAUtil.getMessageBusJms();
-            final MessageBridge messageBridge = new MessageBridge(messageBusSource, messageBusDestination, true);
+            final MessageBridge messageBridge = new MessageBridgeImpl("", messageBusSource, messageBusDestination, true, null);
 
             final AtomicBoolean stop = new AtomicBoolean(false);
 

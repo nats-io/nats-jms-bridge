@@ -1,6 +1,7 @@
 package io.nats.bridge.integration.a;
 
 import io.nats.bridge.MessageBridge;
+import io.nats.bridge.support.MessageBridgeImpl;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.integration.TestUtils;
 import io.nats.bridge.messages.Message;
@@ -41,7 +42,7 @@ public class NatsToJmsBridgeWithHeadersTest {
 
         bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("A");
         bridgeMessageBusJmsDestination = TestUtils.getMessageBusJmsWithHeaders("A");
-        messageBridge = new MessageBridge(bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true);
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true, null);
 
     }
 

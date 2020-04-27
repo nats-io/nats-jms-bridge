@@ -1,5 +1,6 @@
 package io.nats.bridge.integration.a;
 
+import io.nats.bridge.support.MessageBridgeImpl;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
@@ -49,7 +50,7 @@ public class NatsToJMSOneWayMessagesTest {
 
         responseBusServer = TestUtils.getMessageBusJms(responseName);
         responseBusClient = TestUtils.getMessageBusJms(responseName);
-        messageBridge = new MessageBridge(bridgeMessageBusSource, bridgeMessageBusDestination, false);
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, false, null);
 
     }
 
@@ -82,7 +83,7 @@ public class NatsToJMSOneWayMessagesTest {
                     break;
                 }
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -125,7 +126,7 @@ public class NatsToJMSOneWayMessagesTest {
 
                 });
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

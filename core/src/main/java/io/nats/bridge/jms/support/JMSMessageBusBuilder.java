@@ -21,6 +21,8 @@ import io.nats.bridge.metrics.MetricsDisplay;
 import io.nats.bridge.metrics.MetricsProcessor;
 import io.nats.bridge.metrics.Output;
 import io.nats.bridge.metrics.implementation.SimpleMetrics;
+import io.nats.bridge.nats.support.NatsBuilderException;
+import io.nats.bridge.nats.support.NatsMessageBusBuilder;
 import io.nats.bridge.support.MessageBusBuilder;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.bridge.util.FunctionWithException;
@@ -69,8 +71,20 @@ public class JMSMessageBusBuilder implements MessageBusBuilder{
     private java.util.Queue<JMSReply> jmsReplyQueue;
     private boolean copyHeaders = false;
     private Hashtable<String, Object> jndiProperties = new Hashtable<>();
+    private String name = "jms-no-name";
 
 
+    public String getName() {
+        return name;
+    }
+
+    public JMSMessageBusBuilder withName(String name) {
+        if (name == null) {
+            throw new NatsBuilderException("Name must be set");
+        }
+        this.name = name;
+        return this;
+    }
 
     public FunctionWithException<io.nats.bridge.messages.Message, Message> getBridgeMessageConverter() {
 
@@ -412,7 +426,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder{
     }
 
     public MessageBus build() {
-        return new JMSMessageBus(getDestination(), getSession(), getConnection(), getResponseDestination(),
+        return new JMSMessageBus(getName(), getDestination(), getSession(), getConnection(), getResponseDestination(),
                 getResponseConsumer(), getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(),
                 getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(), getBridgeMessageConverter());
     }

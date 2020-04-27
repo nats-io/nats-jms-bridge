@@ -38,6 +38,7 @@ public class JMSMessageBus implements MessageBus {
     private final Destination destination;
     private final Session session;
     private final Connection connection;
+    private final String name;
 
     private final Destination responseDestination;
     private final MessageConsumer responseConsumer;
@@ -68,7 +69,7 @@ public class JMSMessageBus implements MessageBus {
     private final FunctionWithException<javax.jms.Message, Message> jmsMessageConverter;
     private FunctionWithException<Message, javax.jms.Message> bridgeMessageConverter;
 
-    public JMSMessageBus(final Destination destination, final Session session,
+    public JMSMessageBus(final String name, final Destination destination, final Session session,
                          final Connection connection, final Destination responseDestination,
                          final MessageConsumer responseConsumer, final TimeSource timeSource, final Metrics metrics,
                          final Supplier<MessageProducer> producerSupplier,
@@ -79,6 +80,7 @@ public class JMSMessageBus implements MessageBus {
                          final Queue<JMSReply> jmsReplyQueue,
                          final FunctionWithException<javax.jms.Message, Message> jmsMessageConverter,
                          final FunctionWithException<Message, javax.jms.Message> bridgeMessageConverter) {
+        this.name = "jms-bus-" + name;
         this.destination = destination;
         this.session = session;
         this.connection = connection;
@@ -90,19 +92,21 @@ public class JMSMessageBus implements MessageBus {
 
 
         this.metrics = metrics;
-        countPublish = metrics.createCounter("publish-count");
-        countPublishErrors = metrics.createCounter("publish-count-errors");
-        countRequest = metrics.createCounter("request-count");
-        countRequestErrors = metrics.createCounter("request-count-errors");
-        countRequestResponses = metrics.createCounter("request-response-count");
-        countRequestResponseErrors = metrics.createCounter("request-response-count-errors");
-        countRequestResponsesMissing = metrics.createCounter("request-response-missing-count");
-        timerRequestResponse = metrics.createTimeTracker("request-response-timing");
-        countReceived = metrics.createCounter("received-count");
-        countReceivedReply = metrics.createCounter("received-reply-count");
-        timerReceiveReply = metrics.createTimeTracker("receive-reply-timing");
-        countReceivedReplyErrors = metrics.createCounter("received-reply-count-errors");
-        messageConvertErrors = metrics.createCounter("message-convert-count-errors");
+
+
+        countPublish = metrics.createCounter(name + "-publish-count");
+        countPublishErrors = metrics.createCounter(name + "-publish-count-errors");
+        countRequest = metrics.createCounter(name + "-request-count");
+        countRequestErrors = metrics.createCounter(name + "-request-count-errors");
+        countRequestResponses = metrics.createCounter(name + "-request-response-count");
+        countRequestResponseErrors = metrics.createCounter(name + "-request-response-count-errors");
+        countRequestResponsesMissing = metrics.createCounter(name + "-request-response-missing-count");
+        timerRequestResponse = metrics.createTimeTracker(name + "-request-response-timing");
+        countReceived = metrics.createCounter(name + "-received-count");
+        countReceivedReply = metrics.createCounter(name + "-received-reply-count");
+        timerReceiveReply = metrics.createTimeTracker(name + "-receive-reply-timing");
+        countReceivedReplyErrors = metrics.createCounter(name + "-received-reply-count-errors");
+        messageConvertErrors = metrics.createCounter(name + "-message-convert-count-errors");
 
 
         this.producerSupplier = producerSupplier;
@@ -127,6 +131,11 @@ public class JMSMessageBus implements MessageBus {
             consumer = consumerSupplier.get();
         }
         return consumer;
+    }
+
+    @Override
+    public String name() {
+        return name;
     }
 
     @Override
@@ -224,13 +233,17 @@ public class JMSMessageBus implements MessageBus {
      * This method gets called by bridge to process outstanding responses.
      * If the client is NATS and the Server is JMS then there will be messages from the `responseConsumer`.
      */
-    private void processResponses() {
+    private int processResponses() {
+
+        int []countHolder = new int[1];
 
         tryHandler.tryWithErrorCount(() -> {
+            int count = 0;
             javax.jms.Message message;
             do {
                 message = responseConsumer.receiveNoWait();
                 if (message != null) {
+                    count++;
                     final String correlationID = message.getJMSCorrelationID();
                     if (logger.isDebugEnabled())
                         logger.debug(String.format("Process JMS Message Consumer %s \n", correlationID));
@@ -249,16 +262,18 @@ public class JMSMessageBus implements MessageBus {
                 }
             }
             while (message != null);
+            countHolder[0] = count;
+
         }, countRequestResponseErrors, "Error Processing Responses");
 
+        return countHolder[0];
     }
 
     @Override
-    public void process() {
-        processResponses();
+    public int process() {
         processReplies();
-
         metricsProcessor.process();
+        return processResponses();
     }
 
     /**
