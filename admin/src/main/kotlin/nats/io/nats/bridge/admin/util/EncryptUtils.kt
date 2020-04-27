@@ -13,7 +13,7 @@ object EncryptUtils {
         return SecretKeySpec(key, "AES")
     }
 
-    fun createEncrypt(secret:String) = Encrypt(createSecretKey(secret))
+    fun createEncrypt(secret: String) = Encrypt(createSecretKey(secret))
 
 
 }

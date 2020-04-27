@@ -45,6 +45,7 @@ To deploy to local repo to integrate with admin use:
 
 ```sh
 ./gradlew clean build publishToMavenLocal
+./gradlew clean build publishToMavenLocal -x test
 ```
 
 ## The bridge can encode headers

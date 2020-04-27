@@ -15,6 +15,7 @@ import static io.nats.bridge.messages.Protocol.*;
 
 public class BaseMessageWithHeaders implements BytesMessage {
 
+    private final static ObjectMapper mapper = new ObjectMapper();
     private final long timestamp;
     //TTL plus timestamp
     private final long expirationTime;
@@ -24,15 +25,9 @@ public class BaseMessageWithHeaders implements BytesMessage {
     private final String type;
     private final boolean redelivered;
     private final int priority;
-
     private final String correlationID;
-
-
     private final Map<String, Object> headers;
-
     private final byte[] bodyBytes;
-
-    private final static ObjectMapper mapper = new ObjectMapper();
     private final Consumer<Message> replyHandler;
 
 
@@ -103,6 +98,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
 
     /**
      * Convert byte representation of Message
+     *
      * @return bytes of message
      */
     public byte[] getMessageAsBytes() {
@@ -132,14 +128,15 @@ public class BaseMessageWithHeaders implements BytesMessage {
             if (expirationTime > 0) headerSize++;
             if (timestamp > 0) headerSize++;
             if (type != null && !NO_TYPE.equals(type)) headerSize++;
-            if (priority != -1)headerSize++;
+            if (priority != -1) headerSize++;
             if (redelivered) headerSize++;
 
             headerSize += outputHeaders.size();
             streamOut.writeByte(headerSize);
 
             /* Limit headers we are sending to the size of 1 unsigned byte. */
-            if (headerSize > 255) throw new MessageException("Can't write out the message as there are too many headers");
+            if (headerSize > 255)
+                throw new MessageException("Can't write out the message as there are too many headers");
 
             if (deliveryTime() > 0) {
                 streamOut.writeByte(HEADER_KEY_DELIVERY_TIME_CODE);
@@ -183,7 +180,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
 
                 int codeFromHeader = getCodeFromHeader(kv.getKey());
                 // If the headers is under 0, it is a header with a code. */
-                if (codeFromHeader>0) {
+                if (codeFromHeader > 0) {
                     streamOut.writeByte(kv.getKey().length());
                     streamOut.write(kv.getKey().getBytes(StandardCharsets.UTF_8));
                 } else {
@@ -220,7 +217,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
                         break;
                     case "Integer":
                         int value = (int) kv.getValue();
-                        if (value < RESERVED_START_TYPES &&  value > Byte.MIN_VALUE) {
+                        if (value < RESERVED_START_TYPES && value > Byte.MIN_VALUE) {
                             streamOut.write(value);
                         } else {
                             streamOut.writeByte(TYPE_INT);

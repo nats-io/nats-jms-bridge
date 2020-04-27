@@ -1,10 +1,11 @@
 package io.nats.bridge.integration.a;
 
-import io.nats.bridge.messages.Message;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.integration.TestUtils;
+import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
+import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,6 +34,38 @@ public class NatsToJMSOneWayMessagesTest {
     private MessageBus responseBusClient;
     private MessageBridge messageBridge;
 
+    public static void runServerLoop(final AtomicBoolean stop, final MessageBus serverMessageBus, final MessageBus responseBusServer,
+                                     final CountDownLatch serverStopped) {
+        final Thread thread = new Thread(() -> {
+            while (true) {
+                if (stop.get()) {
+                    serverMessageBus.close();
+                    break;
+                }
+                final Optional<Message> receive = serverMessageBus.receive();
+
+                if (!receive.isPresent()) {
+                    System.out.println("SERVER NO MESSAGE");
+                }
+                receive.ifPresent(message -> {
+
+                    System.out.println("Handle message " + message.bodyAsString() + "....................");
+                    responseBusServer.publish(MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build());
+
+                });
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                serverMessageBus.process();
+            }
+            serverStopped.countDown();
+        });
+        thread.start();
+
+    }
+
     @Before
     public void setUp() throws Exception {
 
@@ -49,7 +82,7 @@ public class NatsToJMSOneWayMessagesTest {
 
         responseBusServer = TestUtils.getMessageBusJms(responseName);
         responseBusClient = TestUtils.getMessageBusJms(responseName);
-        messageBridge = new MessageBridge(bridgeMessageBusSource, bridgeMessageBusDestination, false);
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, false, null);
 
     }
 
@@ -82,7 +115,7 @@ public class NatsToJMSOneWayMessagesTest {
                     break;
                 }
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -102,38 +135,5 @@ public class NatsToJMSOneWayMessagesTest {
 
     private void runServerLoop() {
         runServerLoop(stop, serverMessageBus, responseBusServer, serverStopped);
-    }
-
-
-    public static void runServerLoop(final AtomicBoolean stop, final MessageBus serverMessageBus, final MessageBus responseBusServer,
-                                     final CountDownLatch serverStopped) {
-        final Thread thread = new Thread(() -> {
-            while (true) {
-                if (stop.get()) {
-                    serverMessageBus.close();
-                    break;
-                }
-                final Optional<Message> receive = serverMessageBus.receive();
-
-                if (!receive.isPresent()) {
-                    System.out.println("SERVER NO MESSAGE");
-                }
-                receive.ifPresent(message -> {
-
-                    System.out.println("Handle message " + message.bodyAsString() + "....................");
-                    responseBusServer.publish(MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build());
-
-                });
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                serverMessageBus.process();
-            }
-            serverStopped.countDown();
-        });
-        thread.start();
-
     }
 }

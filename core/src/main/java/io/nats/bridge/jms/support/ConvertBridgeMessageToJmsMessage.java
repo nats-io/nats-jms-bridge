@@ -6,7 +6,7 @@ import io.nats.bridge.util.FunctionWithException;
 import javax.jms.BytesMessage;
 import javax.jms.Session;
 
-public class ConvertBridgeMessageToJmsMessage  implements FunctionWithException<Message, javax.jms.Message> {
+public class ConvertBridgeMessageToJmsMessage implements FunctionWithException<Message, javax.jms.Message> {
 
     private final Session session;
 

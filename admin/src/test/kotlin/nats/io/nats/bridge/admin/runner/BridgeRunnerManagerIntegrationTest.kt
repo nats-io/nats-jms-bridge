@@ -1,111 +1,70 @@
 package nats.io.nats.bridge.admin.runner
 
-import io.nats.bridge.jms.support.JMSMessageBusBuilder
-import io.nats.bridge.nats.support.NatsMessageBusBuilder
 import nats.io.nats.bridge.admin.ConfigRepo
 import nats.io.nats.bridge.admin.repos.ConfigRepoFromFiles
-import nats.io.nats.bridge.admin.runner.support.impl.MessageBridgeLoaderImpl
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 import java.util.*
 
-internal class MessageBridgeLoaderTest {
+internal class BridgeRunnerManagerIntegrationTest {
 
     var fileConf: File? = null
     var configRepo: ConfigRepo? = null
 
+    var manager: BridgeRunnerManager? = null
+
     @BeforeEach
     fun before() {
+        createYamlFile()
+        configRepo = ConfigRepoFromFiles(fileConf!!)
+        manager = BridgeRunnerManager(configRepo!!)
+    }
+
+
+    @AfterEach
+    fun after() {
+        fileConf?.delete()
+        manager?.stop()
+    }
+
+    @Test
+    fun testRunnerManager() {
+        val m: BridgeRunnerManager = manager!!
+
+        m.init()
+
+        for (x in 0..100) {
+            Thread.sleep(100)
+            if (m.wasStarted()) break
+        }
+
+        assertFalse(m.isStopped())
+        assertTrue(m.isRunning())
+        assertEquals(null, m.getLastError())
+        assertFalse(m.wasError())
+
+        m.stop()
+
+        for (x in 0..100) {
+            Thread.sleep(100)
+            if (m.isStopped()) break
+        }
+        assertTrue(m.isStopped())
+        assertFalse(m.isRunning())
+
+    }
+
+
+    private fun createYamlFile() {
         fileConf?.delete()
         bridge0 = bridge0Template()
         clusters = runClusterTemplate()
         configYamlContents = runTemplate()
         fileConf = File("./data/" + UUID.randomUUID().toString() + "+.yaml")
         fileConf?.writeText(configYamlContents)
-        configRepo = ConfigRepoFromFiles(fileConf!!)
-    }
-
-    @AfterEach
-    fun after() {
-        fileConf?.delete()
-    }
-
-    @Test
-    fun testLoadWithUsersServersAndPwd() {
-
-        natsCluster = """
-# NATS      
-  natsTest:
-    name: "natsTest"
-    properties: !<nats>
-      host: "localhost"
-      port: 4222
-      servers: []
-      config: {"foo":"bar"}    
-      password: 
-        abc123
-      userName:
-        RickHightower
-    """.trimIndent()
-
-        before()
-        val bridgeBuilders = MessageBridgeLoaderImpl(configRepo!!).loadBridgeBuilders()
-
-        val mb = bridgeBuilders[0].destBusBuilder
-        assertTrue(mb is NatsMessageBusBuilder)
-        if (mb is NatsMessageBusBuilder) {
-            assertEquals("RickHightower", mb.options.username)
-        }
-
-    }
-
-    @Test
-    fun testLoad() {
-        val bridgeBuilders = MessageBridgeLoaderImpl(configRepo!!).loadBridgeBuilders()
-
-        assertEquals(2, bridgeBuilders.size)
-
-        /*
-            - name: "jmsToNatsSample"
-            bridgeType: "REQUEST_REPLY"
-         */
-        val bridge0 = bridgeBuilders[0]
-        assertEquals("jmsToNatsSample", bridge0.name)
-        assertTrue(bridge0.requestReply)
-
-        /*
-            source:
-            name: "jms"
-            busType: "JMS"
-            subject: "dynamicQueues/sample-jms-queue"
-            clusterName: "activeMQTest"
-            copyHeaders : true
-         */
-        val src = bridge0.sourceBusBuilder
-        assertTrue(src is JMSMessageBusBuilder)
-        if (src is JMSMessageBusBuilder) {
-            assertEquals("dynamicQueues/sample-jms-queue", src.destinationName)
-            assertTrue(src.isCopyHeaders)
-        }
-
-
-        /*
-            destination:
-            name: "Nats Sample"
-            busType: "NATS"
-            subject: "sample-nats-subject"
-            clusterName: "natsTest"
-         */
-        val dest = bridge0.destBusBuilder
-        assertTrue(dest is NatsMessageBusBuilder)
-        if (dest is NatsMessageBusBuilder) {
-            assertEquals("sample-nats-subject", dest.subject)
-            assertEquals("bar", dest.optionProperties.getProperty("foo"))
-        }
     }
 
 

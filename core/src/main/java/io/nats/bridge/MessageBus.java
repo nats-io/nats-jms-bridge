@@ -15,9 +15,10 @@ package io.nats.bridge;
 
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
-
+import io.nats.bridge.metrics.Metrics;
 
 import java.io.Closeable;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -28,6 +29,11 @@ import java.util.function.Consumer;
  * A message bus is a queue or stream messaging system like Nats, Active MQ, SQS, Kinesis, Kafka, IBM MQ, RabbitMQ or JMS.
  */
 public interface MessageBus extends Closeable {
+
+    String name();
+
+
+    Metrics metrics();
 
     /**
      * Publish a message.
@@ -42,7 +48,7 @@ public interface MessageBus extends Closeable {
      * @param message string message
      */
     default void publish(String message) {
-        publish( MessageBuilder.builder().withBody(message).build());
+        publish(MessageBuilder.builder().withBody(message).build());
     }
 
     /**
@@ -71,9 +77,16 @@ public interface MessageBus extends Closeable {
      */
     Optional<Message> receive();
 
+    /**
+     * Receives a message. The optional is none if the message is not received.
+     *
+     * @return a possible message.
+     */
+    Optional<Message> receive(Duration duration);
+
     void close();
 
-    void process();
+    int process();
 
 
 }

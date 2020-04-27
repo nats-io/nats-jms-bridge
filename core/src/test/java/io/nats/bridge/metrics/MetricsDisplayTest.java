@@ -1,6 +1,5 @@
 package io.nats.bridge.metrics;
 
-import io.nats.bridge.TimeSource;
 import io.nats.bridge.metrics.implementation.SimpleMetrics;
 import org.junit.Test;
 
@@ -17,7 +16,8 @@ public class MetricsDisplayTest {
         metrics.createCounter("count2").recordCount(10);
         metrics.createGauge("gauge").recordLevel(10);
         metrics.createTimeTracker("timer").recordTiming(10);
-        metrics.createTimeTracker("timer2").recordTiming(() -> {});
+        metrics.createTimeTracker("timer2").recordTiming(() -> {
+        });
 
 
         final Output output = new Output() {

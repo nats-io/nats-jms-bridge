@@ -25,8 +25,8 @@ object BridgeFileDelimImporterUtils {
     private const val BRIDGE_TYPE_NATS = "n"
     private val VALID_BUS_TYPES = setOf(BRIDGE_TYPE_JMS, BRIDGE_TYPE_NATS)
 
-    fun parseLine(line: String, clusterConfigs: Map<String, Cluster>, delim: String="\t"): MessageBridgeInfo {
-        val parts = line.split(delim).map{it.trim()}.filter { !it.isBlank() }.toList()
+    fun parseLine(line: String, clusterConfigs: Map<String, Cluster>, delim: String = "\t"): MessageBridgeInfo {
+        val parts = line.split(delim).map { it.trim() }.filter { !it.isBlank() }.toList()
         if (parts.size != 10) throw BridgeDelimImporterException("Line must have ten cells but only has a size of ${parts.size}")
         val name = parts[BRIDGE_NAME]
         val sBridgeType = parts[BRIDGE_TYPE]
@@ -65,14 +65,15 @@ object BridgeFileDelimImporterUtils {
 }
 
 
-class BridgeFileDelimImporter(private val configRepo: ConfigRepo, private val delim: String="\t") : BridgeFileImporter {
+class BridgeFileDelimImporter(private val configRepo: ConfigRepo, private val delim: String = "\t") : BridgeFileImporter {
 
-    fun transform (inputFile:File, clusterConfigs: Map<String, Cluster>) : List<MessageBridgeInfo> {
-        return inputFile.readLines().toList().map{it.trim()}.filter { !it.startsWith("#") }.map {
+    fun transform(inputFile: File, clusterConfigs: Map<String, Cluster>): List<MessageBridgeInfo> {
+        return inputFile.readLines().toList().map { it.trim() }.filter { !it.startsWith("#") }.map {
             BridgeFileDelimImporterUtils.parseLine(it, clusterConfigs, delim)
         }
     }
+
     override fun import(inputFile: File) = transform(inputFile, configRepo.readClusterConfigs())
-                 .forEach { configRepo.addBridge(it) }
+            .forEach { configRepo.addBridge(it) }
 
 }

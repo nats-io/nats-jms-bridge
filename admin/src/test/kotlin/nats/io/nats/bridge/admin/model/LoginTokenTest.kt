@@ -2,9 +2,8 @@ package nats.io.nats.bridge.admin.model
 
 import nats.io.nats.bridge.admin.models.logins.LoginToken
 import nats.io.nats.bridge.admin.models.logins.Role
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 
 internal class LoginTokenTest {
 

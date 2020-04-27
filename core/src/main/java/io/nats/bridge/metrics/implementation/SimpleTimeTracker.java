@@ -2,25 +2,29 @@ package io.nats.bridge.metrics.implementation;
 
 import io.nats.bridge.TimeSource;
 import io.nats.bridge.metrics.GetMetric;
-import io.nats.bridge.metrics.MetricName;
+import io.nats.bridge.metrics.MetricId;
 import io.nats.bridge.metrics.TimeTracker;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Map;
 
-public class SimpleTimeTracker implements MetricName, TimeTracker, GetMetric {
+public class SimpleTimeTracker implements MetricId, TimeTracker, GetMetric {
 
     private final String name;
-    private final AtomicLong timeHolder = new AtomicLong();
+    private long timeHolder;
     private final TimeSource timeSource;
+    private final Map<String, String> tags;
+    private final String id;
 
-    public SimpleTimeTracker(final String name, final TimeSource timeSource) {
+    public SimpleTimeTracker(final String name, final TimeSource timeSource, Map<String, String> tags, String id) {
         this.name = name;
         this.timeSource = timeSource;
+        this.tags = tags;
+        this.id = id;
     }
 
     @Override
     public long getValue() {
-        return timeHolder.get();
+        return timeHolder;
     }
 
     @Override
@@ -29,8 +33,18 @@ public class SimpleTimeTracker implements MetricName, TimeTracker, GetMetric {
     }
 
     @Override
+    public String id() {
+        return id;
+    }
+
+    @Override
+    public Map<String, String> dimensions() {
+        return tags;
+    }
+
+    @Override
     public void recordTiming(long duration) {
-        timeHolder.set(duration);
+        timeHolder = duration;
     }
 
     @Override

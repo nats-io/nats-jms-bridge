@@ -14,13 +14,13 @@ public class JMSTextMessage extends JMSMessage implements TextMessage {
     }
 
     @Override
-    public void setText(String string) throws JMSException {
-        super.setBody(text.getBytes(StandardCharsets.UTF_8));
-        text = string;
+    public String getText() throws JMSException {
+        return text;
     }
 
     @Override
-    public String getText() throws JMSException {
-        return text;
+    public void setText(String string) throws JMSException {
+        super.setBody(text.getBytes(StandardCharsets.UTF_8));
+        text = string;
     }
 }

@@ -28,7 +28,8 @@ data class MessageBusInfo(val name: String, val busType: BusType, val subject: S
  *
  */
 data class MessageBridgeInfo(val name: String, val bridgeType: BridgeType,
-                             val source: MessageBusInfo, val destination: MessageBusInfo, val copyHeaders: Boolean? = false)
+                             val source: MessageBusInfo, val destination: MessageBusInfo, val copyHeaders: Boolean? = false,
+                             val workers: Int? = 1)
 
 /**
  * Two supported message bus types are JMS and NATS.

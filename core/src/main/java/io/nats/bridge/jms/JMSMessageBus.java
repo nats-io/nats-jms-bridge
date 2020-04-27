@@ -26,6 +26,7 @@ import io.nats.bridge.util.FunctionWithException;
 import org.slf4j.Logger;
 
 import javax.jms.*;
+import java.time.Duration;
 import java.util.Queue;
 import java.util.*;
 import java.util.function.Consumer;
@@ -37,6 +38,7 @@ public class JMSMessageBus implements MessageBus {
     private final Destination destination;
     private final Session session;
     private final Connection connection;
+    private final String name;
 
     private final Destination responseDestination;
     private final MessageConsumer responseConsumer;
@@ -61,13 +63,13 @@ public class JMSMessageBus implements MessageBus {
     private final MetricsProcessor metricsProcessor;
     private final ExceptionHandler tryHandler;
     private final Logger logger;
-    private MessageProducer producer;
-    private MessageConsumer consumer;
     private final java.util.Queue<JMSReply> jmsReplyQueue;
     private final FunctionWithException<javax.jms.Message, Message> jmsMessageConverter;
+    private MessageProducer producer;
+    private MessageConsumer consumer;
     private FunctionWithException<Message, javax.jms.Message> bridgeMessageConverter;
 
-    public JMSMessageBus(final Destination destination, final Session session,
+    public JMSMessageBus(final String name, final Destination destination, final Session session,
                          final Connection connection, final Destination responseDestination,
                          final MessageConsumer responseConsumer, final TimeSource timeSource, final Metrics metrics,
                          final Supplier<MessageProducer> producerSupplier,
@@ -78,6 +80,7 @@ public class JMSMessageBus implements MessageBus {
                          final Queue<JMSReply> jmsReplyQueue,
                          final FunctionWithException<javax.jms.Message, Message> jmsMessageConverter,
                          final FunctionWithException<Message, javax.jms.Message> bridgeMessageConverter) {
+        this.name =  name.toLowerCase().replace(".", "_").replace(" ", "_").replace("-", "_");
         this.destination = destination;
         this.session = session;
         this.connection = connection;
@@ -89,19 +92,21 @@ public class JMSMessageBus implements MessageBus {
 
 
         this.metrics = metrics;
-        countPublish = metrics.createCounter("publish-count");
-        countPublishErrors = metrics.createCounter("publish-count-errors");
-        countRequest = metrics.createCounter("request-count");
-        countRequestErrors = metrics.createCounter("request-count-errors");
-        countRequestResponses = metrics.createCounter("request-response-count");
-        countRequestResponseErrors = metrics.createCounter("request-response-count-errors");
-        countRequestResponsesMissing = metrics.createCounter("request-response-missing-count");
-        timerRequestResponse = metrics.createTimeTracker("request-response-timing");
-        countReceived = metrics.createCounter("received-count");
-        countReceivedReply = metrics.createCounter("received-reply-count");
-        timerReceiveReply = metrics.createTimeTracker("receive-reply-timing");
-        countReceivedReplyErrors = metrics.createCounter("received-reply-count-errors");
-        messageConvertErrors = metrics.createCounter("message-convert-count-errors");
+
+
+        countPublish = metrics.createCounter( "publish_count", "name_" + this.name, "jms_mb");
+        countPublishErrors = metrics.createCounter("publish_count_errors","name_" + this.name, "jms_mb");
+        countRequest = metrics.createCounter("request_count","name_" + this.name, "jms_mb");
+        countRequestErrors = metrics.createCounter( "request_count_errors","name_" + this.name, "jms_mb");
+        countRequestResponses = metrics.createCounter( "request_response_count","name_" + this.name, "jms_mb");
+        countRequestResponseErrors = metrics.createCounter( "request_response_count_errors","name_" + this.name, "jms_mb");
+        countRequestResponsesMissing = metrics.createCounter(  "request_response_missing_count","name_" + this.name, "jms_mb");
+        timerRequestResponse = metrics.createTimeTracker("request_response_timing","name_" + this.name, "jms_mb");
+        countReceived = metrics.createCounter( "received_count","name_" + this.name, "jms_mb");
+        countReceivedReply = metrics.createCounter("received_reply_count","name_" + this.name, "jms_mb");
+        timerReceiveReply = metrics.createTimeTracker("receive_reply_timing","name_" + this.name, "jms_mb");
+        countReceivedReplyErrors = metrics.createCounter("received_reply_count_errors","name_" + this.name, "jms_mb");
+        messageConvertErrors = metrics.createCounter("message_convert_count_errors","name_" + this.name, "jms_mb");
 
 
         this.producerSupplier = producerSupplier;
@@ -129,9 +134,19 @@ public class JMSMessageBus implements MessageBus {
     }
 
     @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public Metrics metrics() {
+        return metrics;
+    }
+
+    @Override
     public void publish(final Message message) {
 
-        if (logger.isInfoEnabled()) logger.info("publish called " + message);
+        if (logger.isDebugEnabled()) logger.debug("publish called " + message);
         tryHandler.tryWithErrorCount(() -> {
             producer().send(convertToJMSMessage(message));
             countPublish.increment();
@@ -143,7 +158,7 @@ public class JMSMessageBus implements MessageBus {
     @Override
     public void request(final Message message, final Consumer<Message> replyCallback) {
 
-        if (logger.isInfoEnabled()) logger.info("request called " + message);
+        if (logger.isDebugEnabled()) logger.debug("request called " + message);
 
         //TODO to get this to be more generic as part of builder pass a createDestination Function<Session, Destination> that calls session.createTemporaryQueue() or session.createTemporaryTopic()
         final javax.jms.Message jmsMessage = convertToJMSMessage(message);
@@ -198,6 +213,21 @@ public class JMSMessageBus implements MessageBus {
 
     }
 
+    public Optional<Message> receive(Duration duration) {
+        return tryHandler.tryReturnOrRethrow(() -> {
+            final javax.jms.Message message = consumer().receive(duration.toMillis());
+            if (message != null) {
+                countReceived.increment();
+                return Optional.of(convertToBusMessage(message));
+            } else {
+                return Optional.empty();
+            }
+        }, e -> {
+            throw new JMSMessageBusException("Error receiving message", e);
+        });
+
+    }
+
     @Override
     public void close() {
         tryHandler.tryWithRethrow(connection::close, e -> new JMSMessageBusException("Error closing connection", e));
@@ -206,15 +236,19 @@ public class JMSMessageBus implements MessageBus {
 
     /**
      * This method gets called by bridge to process outstanding responses.
-     * If the client is Nats and the Server is JMS then there will be messages from the `responseConsumer`.
+     * If the client is NATS and the Server is JMS then there will be messages from the `responseConsumer`.
      */
-    private void processResponses() {
+    private int processResponses() {
+
+        int[] countHolder = new int[1];
 
         tryHandler.tryWithErrorCount(() -> {
+            int count = 0;
             javax.jms.Message message;
             do {
                 message = responseConsumer.receiveNoWait();
                 if (message != null) {
+                    count++;
                     final String correlationID = message.getJMSCorrelationID();
                     if (logger.isDebugEnabled())
                         logger.debug(String.format("Process JMS Message Consumer %s \n", correlationID));
@@ -233,28 +267,33 @@ public class JMSMessageBus implements MessageBus {
                 }
             }
             while (message != null);
+            countHolder[0] = count;
+
         }, countRequestResponseErrors, "Error Processing Responses");
 
+        return countHolder[0];
     }
 
     @Override
-    public void process() {
-        processResponses();
-        processReplies();
-
+    public int process() {
         metricsProcessor.process();
+        int count = processReplies();
+        return count + processResponses();
     }
 
     /**
      * This method gets called to process replies.
      * If the client is JMS and the Server is Nats then there will be replies to process.
      */
-    private void processReplies() {
+    private int processReplies() {
+        int[] countHolder = new int[1];
         tryHandler.tryWithErrorCount(() -> {
             JMSReply reply = null;
+            int count = 0;
             do {
                 reply = jmsReplyQueue.poll();
                 if (reply != null) {
+                    count++;
                     final byte[] messageBody = reply.getReply().getBodyBytes();
                     final String correlationId = reply.getCorrelationID();
                     final MessageProducer replyProducer = session.createProducer(reply.getJmsReplyTo());
@@ -270,6 +309,8 @@ public class JMSMessageBus implements MessageBus {
                 }
             }
             while (reply != null);
+            countHolder[0] = count;
         }, countReceivedReplyErrors, "error processing JMS receive queue for replies");
+        return countHolder[0];
     }
 }

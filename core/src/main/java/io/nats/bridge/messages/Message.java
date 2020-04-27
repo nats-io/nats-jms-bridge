@@ -22,23 +22,48 @@ public interface Message {
 
     String NO_TYPE = "NO_TYPE";
 
-    default long timestamp() {return -1L;}
+    default long timestamp() {
+        return -1L;
+    }
+
     //TTL plus timestamp
-    default long expirationTime() {return -1L;}
+    default long expirationTime() {
+        return -1L;
+    }
+
     //Delivery time is not instant
-    default long deliveryTime() {return -1L;}
-    default int deliveryMode() {return -1;}
-    default String type() {return NO_TYPE;}
-    default boolean redelivered() {return false;}
-    default int priority() {return -1;}
+    default long deliveryTime() {
+        return -1L;
+    }
 
-    default String correlationID() {return "";}
+    default int deliveryMode() {
+        return -1;
+    }
 
-    default Map<String, Object> headers() {return Collections.emptyMap();}
+    default String type() {
+        return NO_TYPE;
+    }
 
-    default void reply(Message reply) {}
+    default boolean redelivered() {
+        return false;
+    }
 
-    default byte [] getBodyBytes() {
+    default int priority() {
+        return -1;
+    }
+
+    default String correlationID() {
+        return "";
+    }
+
+    default Map<String, Object> headers() {
+        return Collections.emptyMap();
+    }
+
+    default void reply(Message reply) {
+    }
+
+    default byte[] getBodyBytes() {
         return new byte[0];
     }
 
@@ -46,7 +71,7 @@ public interface Message {
         return new String(getBodyBytes(), StandardCharsets.UTF_8);
     }
 
-    default byte [] getMessageBytes() {
+    default byte[] getMessageBytes() {
         return getBodyBytes();
     }
 }

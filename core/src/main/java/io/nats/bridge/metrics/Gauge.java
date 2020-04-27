@@ -1,6 +1,6 @@
 package io.nats.bridge.metrics;
 
-public interface Gauge {
+public interface Gauge extends MetricId, GetMetric{
 
 
     /**

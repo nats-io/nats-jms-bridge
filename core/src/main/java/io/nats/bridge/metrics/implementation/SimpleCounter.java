@@ -2,38 +2,54 @@ package io.nats.bridge.metrics.implementation;
 
 import io.nats.bridge.metrics.Counter;
 import io.nats.bridge.metrics.GetMetric;
-import io.nats.bridge.metrics.MetricName;
+import io.nats.bridge.metrics.MetricId;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Map;
 
-public class SimpleCounter implements Counter, GetMetric, MetricName {
+public class SimpleCounter implements Counter, GetMetric, MetricId {
 
     private final String name;
-    private final AtomicLong levelHolder = new AtomicLong();
+    private long count = 0;
+    private final Map<String, String> tags;
+    private final String id;
 
 
-    public SimpleCounter(String name) {
+    public SimpleCounter(String name, Map<String, String> tags, String id) {
         this.name = name;
+        this.tags = tags;
+        this.id = id;
     }
 
     @Override
     public long getValue() {
-        return levelHolder.get();
+        long c = count;
+        count = 0L;
+        return c;
     }
 
     @Override
     public void increment() {
-        levelHolder.incrementAndGet();
+        count++;
     }
 
     @Override
     public void recordCount(long count) {
-        levelHolder.addAndGet(count);
+        this.count += count;
     }
 
     @Override
     public String metricName() {
         return name;
+    }
+
+    @Override
+    public String id() {
+        return id;
+    }
+
+    @Override
+    public Map<String, String> dimensions() {
+        return tags;
     }
 
     @Override

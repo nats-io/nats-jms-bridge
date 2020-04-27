@@ -29,8 +29,8 @@ public class BaseMessageWithHeadersTest {
         builder.withHeader("header5", 1.1);
         builder.withHeader("header6", 12f);
 
-        builder.withHeader("header7", (short)12);
-        builder.withHeader("header7", (byte)12);
+        builder.withHeader("header7", (short) 12);
+        builder.withHeader("header7", (byte) 12);
 
 
         final BaseMessageWithHeaders message1 = (BaseMessageWithHeaders) builder.build();
@@ -87,15 +87,15 @@ public class BaseMessageWithHeadersTest {
 
         StringBuilder builder1 = new StringBuilder();
 
-        for (int index =0; index < 513; index++) {
+        for (int index = 0; index < 513; index++) {
             builder1.append('a');
         }
         builder.withHeader("header4", builder1.toString());
         builder.withHeader("header5", 1.1);
         builder.withHeader("header6", 12f);
 
-        builder.withHeader("header7-short", (short)-5);
-        builder.withHeader("header8", (byte)12);
+        builder.withHeader("header7-short", (short) -5);
+        builder.withHeader("header8", (byte) 12);
 
 
         final BaseMessageWithHeaders message1 = (BaseMessageWithHeaders) builder.build();
@@ -115,7 +115,7 @@ public class BaseMessageWithHeadersTest {
 
 
         final MessageBuilder builder = MessageBuilder.builder();
-        builder.withHeader("header7-short", (short)500);
+        builder.withHeader("header7-short", (short) 500);
 
 
         final BaseMessageWithHeaders message1 = (BaseMessageWithHeaders) builder.build();
@@ -194,7 +194,7 @@ public class BaseMessageWithHeadersTest {
 
         StringBuilder builder1 = new StringBuilder();
 
-        for (int index =0; index < 513; index++) {
+        for (int index = 0; index < 513; index++) {
             builder1.append('a');
         }
         builder.withHeader("header-str", builder1.toString());
@@ -240,9 +240,9 @@ public class BaseMessageWithHeadersTest {
 
         final byte[] bytes = message.getBodyBytes();
 
-        final Message message2 =  MessageBuilder.builder().buildFromBytes(bytes);
+        final Message message2 = MessageBuilder.builder().buildFromBytes(bytes);
 
-        assertTrue(message2 instanceof BytesMessage );
+        assertTrue(message2 instanceof BytesMessage);
         assertEquals("hi", message2.bodyAsString());
 
     }
@@ -255,10 +255,10 @@ public class BaseMessageWithHeadersTest {
 
         StringBuilder builder1 = new StringBuilder();
 
-        for (int index =0; index < 513; index++) {
+        for (int index = 0; index < 513; index++) {
             builder1.append('a');
         }
-        String longMessage =  builder1.toString();
+        String longMessage = builder1.toString();
         builder.withHeader("header-str", builder1.toString());
         builder.withBody(longMessage);
 
@@ -266,9 +266,9 @@ public class BaseMessageWithHeadersTest {
 
         final byte[] bytes = message.getBodyBytes();
 
-        final Message message2 =  MessageBuilder.builder().buildFromBytes(bytes);
+        final Message message2 = MessageBuilder.builder().buildFromBytes(bytes);
 
-        assertTrue(message2 instanceof BytesMessage );
+        assertTrue(message2 instanceof BytesMessage);
         assertEquals(longMessage, message2.bodyAsString());
 
     }
