@@ -1,36 +1,133 @@
 package io.nats.bridge.ibmmq;
 
-import javax.naming.*;
-import javax.naming.spi.InitialContextFactory;
-import java.util.Hashtable;
-
+import com.ibm.msg.client.jms.JmsConnectionFactory;
 import com.ibm.msg.client.jms.JmsFactoryFactory;
 import com.ibm.msg.client.wmq.WMQConstants;
-import javax.jms.*;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSContext;
+import javax.jms.JMSException;
+import javax.naming.*;
+import javax.naming.spi.InitialContextFactory;
+import java.net.URI;
+import java.util.*;
+//import java.util.function.Consumer;
+//import java.util.function.Function;
+//import java.util.function.Predicate;
+//import java.util.stream.Collectors;
+//import java.util.stream.Stream;
 
 
 public class IbmMqInitialContextFactory implements InitialContextFactory {
 
+    private final Map<String, Object> contextMap = new HashMap<String, Object>();
+    private final static String CONNECTION_FACTORY = "ConnectionFactory";
+    private final static String PREFIX = "nats.ibm.mq.";
+    private final static String HOST = PREFIX + "host";
+    private final static String CHANNEL = PREFIX + "channel";
+    private final static String QUEUE_MANAGER = PREFIX + "queueManager";
+    //private final static String QUEUE =  "queue.";
+
+
     @Override
-    public Context getInitialContext(Hashtable<?, ?> hashtable) throws NamingException {
+    public Context getInitialContext(final Hashtable<?, ?> jndiProperties) throws NamingException {
 
         try {
-            JmsFactoryFactory instance = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
+            final JmsFactoryFactory factoryFactory = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
 
-            return null;
+
+            final JmsConnectionFactory connectionFactory = factoryFactory.createConnectionFactory();
+
+            final String hostURL = getStringProp(jndiProperties, HOST);
+            final URI uri = new URI(hostURL);
+            final String host = uri.getHost();
+            final int port = uri.getPort();
+            final String channel = getStringProp(jndiProperties, CHANNEL);
+            final String queueManagerName = getStringProp(jndiProperties, QUEUE_MANAGER);
+
+            connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
+            connectionFactory.setIntProperty(WMQConstants.WMQ_PORT, port);
+            connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
+            connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
+            connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
+            connectionFactory.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
+            contextMap.put(CONNECTION_FACTORY, factoryFactory.createConnectionFactory());
+
+//            final Set<String> queues = jndiProperties.keySet().stream().map(Object::toString)
+//                    .filter(s -> s.startsWith(QUEUE)).collect(Collectors.toSet());
+
+
+            return new MQContext(contextMap);
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw new NamingException("Name not found"); //TODO something better than this
+            throw new NamingException(ex.getLocalizedMessage()); //TODO something better than this
+        }
+    }
+
+
+    private String getStringProp(Hashtable<?, ?> jndiProperties, String key) {
+        if (!jndiProperties.containsKey(key)) throw new IllegalStateException("REQ KEY IS MISSING");
+        return (String) jndiProperties.get(key);
+    }
+
+    private static class MQConnectionFactory implements ConnectionFactory {
+
+        private final JmsConnectionFactory connectionFactory;
+
+
+        private MQConnectionFactory(final JmsConnectionFactory connectionFactory) {
+            this.connectionFactory = connectionFactory;
+
+        }
+
+        @Override
+        public Connection createConnection() throws JMSException {
+            return connectionFactory.createConnection();
+        }
+
+        @Override
+        public Connection createConnection(final String userName, final String password) throws JMSException {
+            connectionFactory.setStringProperty(WMQConstants.USERID, userName);
+            connectionFactory.setStringProperty(WMQConstants.PASSWORD, password);
+            return connectionFactory.createConnection();
+        }
+
+        @Override
+        public JMSContext createContext() {
+            throw new UnsupportedOperationException("Not supported");
+        }
+
+        @Override
+        public JMSContext createContext(int sessionMode) {
+            throw new UnsupportedOperationException("Not supported");
+        }
+
+        @Override
+        public JMSContext createContext(String userName, String password) {
+            throw new UnsupportedOperationException("Not supported");
+        }
+
+        @Override
+        public JMSContext createContext(String userName, String password, int sessionMode) {
+            throw new UnsupportedOperationException("Not supported");
         }
     }
 
     private static class MQContext implements Context {
 
 
+        final Map<String, Object> contextMap;
+
+        private MQContext(Map<String, Object> contextMap) {
+            this.contextMap = contextMap;
+        }
+
         @Override
-        public Object lookup(String s) throws NamingException {
-            return null;
+        public Object lookup(final String name) throws NamingException {
+            if (name == null || !contextMap.containsKey(name)) throw new NamingException("Name " + name + " not found");
+
+            return contextMap.get(name);
         }
 
         @Override

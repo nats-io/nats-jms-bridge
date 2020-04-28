@@ -71,6 +71,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     private boolean copyHeaders = false;
     private Hashtable<String, Object> jndiProperties = new Hashtable<>();
     private String name = "jms-no-name";
+    private boolean ibmMQ = false;
 
     public static JMSMessageBusBuilder builder() {
         return new JMSMessageBusBuilder();
@@ -364,8 +365,13 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     public Destination getDestination() {
         if (destination == null) {
-            destination = exceptionHandler.tryReturnOrRethrow(() -> (Destination) getContext().lookup(getDestinationName()),
-                    e -> new JMSMessageBusBuilderException("Unable to lookup destination " + getDestinationName(), e));
+            if (!ibmMQ)
+                destination = exceptionHandler.tryReturnOrRethrow(() -> (Destination) getContext().lookup(getDestinationName()),
+                        e -> new JMSMessageBusBuilderException("Unable to lookup destination " + getDestinationName(), e));
+            else
+                destination = exceptionHandler.tryReturnOrRethrow(() ->
+                                getSessionCreator().apply(getConnection()).createQueue(getDestinationName()),
+                        e -> new JMSMessageBusBuilderException("Unable to lookup destination " + getDestinationName(), e));
         }
         return destination;
     }
@@ -437,6 +443,27 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
                 getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(), getBridgeMessageConverter());
     }
 
+
+    public JMSMessageBusBuilder useIBMMQ(Hashtable<String, Object> jndiProperties) {
+
+        getJmsBusLogger().info("CLEARING JNDI PROPERTIES");
+        ibmMQ = true;
+        this.jndiProperties.clear();
+        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.ibmmq.IbmMqInitialContextFactory"));
+        this.jndiProperties.putAll(jndiProperties);
+        return this;
+    }
+
+    public JMSMessageBusBuilder useIBMMQ() {
+        getJmsBusLogger().info("CLEARING JNDI PROPERTIES");
+        ibmMQ = true;
+        jndiProperties.clear();
+        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.ibmmq.IbmMqInitialContextFactory"));
+        jndiProperties.put("nats.ibm.mq.host", System.getenv().getOrDefault("NATS_BRIDGE_JMS_CONNECTION_FACTORY", "tcp://localhost:1414"));
+        jndiProperties.put("nats.ibm.mq.channel", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_CHANNEL", "DEV.APP.SVRCONN"));
+        jndiProperties.put("nats.ibm.mq.queueManagerName", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER", "QM1"));
+        return this;
+    }
 
     public Hashtable<String, Object> getJndiProperties() {
         if (jndiProperties.size() == 0) {
