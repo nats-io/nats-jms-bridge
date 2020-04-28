@@ -88,6 +88,10 @@ info)
   curl -s  "$NATS_ADMIN_HOST/manage/info"  | jq .
   ;;
 
+kpi)
+  curl -s  "$NATS_ADMIN_HOST/manage/prometheus"
+  ;;
+
 help)
 cat << EndOfMessage
 
