@@ -174,6 +174,7 @@ https://stedolan.github.io/jq/
 
 EndOfMessage
   ;;
+
 *)
   echo -n "use help $ admin help"
   ;;

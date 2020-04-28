@@ -1,0 +1,37 @@
+# Use an existing docker image as a base
+#FROM gradle
+FROM ubuntu
+
+#Copying files
+COPY . ./usr/app
+
+WORKDIR /usr/app
+
+#Install some dependencies
+RUN apt-get update
+RUN apt-get -y install curl unzip zip
+RUN chmod +x cicd/sdkman.sh
+RUN exec cicd/sdkman.sh
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install java 14.0.1.hs-adpt"
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install gradle"
+#RUN cd /usr/app
+ENV JAVA_HOME /root/.sdkman/candidates/java/current
+
+#RUN bash -c "./gradlew build"
+#RUN bash -c "NATS_BRIDGE_JMS_USER=cloudurable NATS_BRIDGE_JMS_PWD=cloudurable NATS_BRIDGE_NATS_SERVERS=nats://172.26.0.2:4222 NATS_BRIDGE_JMS_CONNECTION_FACTORY=tcp://172.26.0.3:61616 ./gradlew clean test"
+WORKDIR /usr/app/core
+#RUN bash -c "ls"
+RUN bash -c "NATS_BRIDGE_JMS_USER=cloudurable NATS_BRIDGE_JMS_PWD=cloudurable NATS_BRIDGE_NATS_SERVERS=nats://172.17.0.3:4222 NATS_BRIDGE_JMS_CONNECTION_FACTORY=tcp://172.17.0.2:61616 ./gradlew clean test"
+WORKDIR /usr/app
+#RUN bash -c "NATS_BRIDGE_JMS_USER=cloudurable NATS_BRIDGE_JMS_PWD=cloudurable NATS_BRIDGE_NATS_SERVERS=nats://nats-server:4222 NATS_BRIDGE_JMS_CONNECIN_FACTORY=tcp://artemis-server:61616 ./gradlew clean test
+#artemis-server
+#nats-server
+
+#RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk current"
+
+# ADD command is used to copy files/directories into a Docker image.
+# We are copying files to the container
+
+#CMD command is used to execute a command inside the container
+# This command execute our Hello Word App
+#CMD ["NATS_BRIDGE_JMS_USER=cloudurable", "NATS_BRIDGE_JMS_PWD=cloudurable NATS_BRIDGE_NATS_SERVERS=nats://nats-server:4222 NATS_BRIDGE_JMS_CONNECTION_FACTORY=tcp://artemis-server:61616 ./usr/app/gradlew clean test"]
