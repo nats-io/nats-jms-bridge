@@ -203,7 +203,7 @@ class Runner(val bridgeRunner: BridgeRunnerManager) {
 
 
     data class Flag(val message: String, val flag: Boolean)
-    data class Error(val name: String, val message: String)
+    data class Error(val name: String, val message: String, val root:String?=null)
     data class Message(val message: String, val error: Error? = null)
 
     @GetMapping(path = ["/running"])
@@ -222,7 +222,8 @@ class Runner(val bridgeRunner: BridgeRunnerManager) {
     fun getLastError(): Message {
         val lastError = bridgeRunner.getLastError()
         return if (lastError != null) {
-            Message("ERROR", Error(message = lastError.localizedMessage, name = lastError.javaClass.simpleName))
+            Message("ERROR", Error(message = lastError.localizedMessage,
+                    name = lastError.javaClass.simpleName, root = lastError.cause?.localizedMessage))
         } else {
             Message("NO ERRORS")
         }
