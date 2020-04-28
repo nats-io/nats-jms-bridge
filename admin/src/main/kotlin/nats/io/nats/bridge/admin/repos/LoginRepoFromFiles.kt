@@ -1,6 +1,7 @@
 package nats.io.nats.bridge.admin.repos
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import nats.io.nats.bridge.admin.LoginRepo
 import nats.io.nats.bridge.admin.RepoException
@@ -25,6 +26,7 @@ class LoginRepoFromFiles(private val configFile: File = File("./config/nats-brid
         if (!configFile.exists()) {
             saveConfig(defaultLoginConfig)
             val backup = LoginRepoFromFiles(configFile = File(configFile.parentFile, "initial-nats-bridge-logins.yaml"), mapper = mapper, systemSecret = "")
+            jacksonObjectMapper().writeValue(File(configFile.parentFile, "initial-nats-bridge-logins.json"), defaultLoginConfig)
             backup.saveConfig(defaultLoginConfig)
         }
         return mapper.readValue(configFile)
