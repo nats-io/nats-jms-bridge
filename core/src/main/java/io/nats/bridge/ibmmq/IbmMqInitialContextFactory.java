@@ -67,7 +67,7 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
 
 
     private String getStringProp(Hashtable<?, ?> jndiProperties, String key) {
-        if (!jndiProperties.containsKey(key)) throw new IllegalStateException("REQ KEY IS MISSING");
+        if (!jndiProperties.containsKey(key)) throw new IllegalStateException("REQ KEY IS MISSING KEY " + key);
         return (String) jndiProperties.get(key);
     }
 

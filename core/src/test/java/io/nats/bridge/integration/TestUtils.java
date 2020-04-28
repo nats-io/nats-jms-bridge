@@ -30,13 +30,20 @@ public class TestUtils {
     public static MessageBus getMessageBusJms(final String topicPostFix) {
         final String queueName = "dynamicQueues/message-only-" + topicPostFix;
         final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName);
-        return jmsMessageBusBuilder.build();
+
+        return jmsMessageBusBuilder.withUserNameConnection("cloudurable").withPasswordConnection("cloudurable").build();
     }
+
+    public static MessageBus getMessageBusIbmMQ() {
+        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName("DEV.QUEUE.1").useIBMMQ();
+        return jmsMessageBusBuilder.withUserNameConnection("app").withPasswordConnection("passw0rd").build();
+    }
+
 
     public static MessageBus getMessageBusJmsWithHeaders(final String topicPostFix) {
         final String queueName = "dynamicQueues/headers-message-only-" + topicPostFix;
         final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().turnOnCopyHeaders().withDestinationName(queueName);
-        return jmsMessageBusBuilder.build();
+        return jmsMessageBusBuilder.withUserNameConnection("cloudurable").withPasswordConnection("cloudurable").build();
     }
 
     public static MessageBus getMessageBusNats(final String topicPostFix) throws IOException, InterruptedException {

@@ -440,11 +440,11 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     public MessageBus build() {
         return new JMSMessageBus(getName(), getDestination(), getSession(), getConnection(), getResponseDestination(),
                 getResponseConsumer(), getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(),
-                getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(), getBridgeMessageConverter());
+                getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(), getBridgeMessageConverter(), getDestinationName());
     }
 
 
-    public JMSMessageBusBuilder useIBMMQ(Hashtable<String, Object> jndiProperties) {
+    public JMSMessageBusBuilder useIBMMQ(final Hashtable<String, Object> jndiProperties) {
 
         getJmsBusLogger().info("CLEARING JNDI PROPERTIES");
         ibmMQ = true;
@@ -461,7 +461,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.ibmmq.IbmMqInitialContextFactory"));
         jndiProperties.put("nats.ibm.mq.host", System.getenv().getOrDefault("NATS_BRIDGE_JMS_CONNECTION_FACTORY", "tcp://localhost:1414"));
         jndiProperties.put("nats.ibm.mq.channel", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_CHANNEL", "DEV.APP.SVRCONN"));
-        jndiProperties.put("nats.ibm.mq.queueManagerName", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER", "QM1"));
+        jndiProperties.put("nats.ibm.mq.queueManager", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER", "QM1"));
         return this;
     }
 

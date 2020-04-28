@@ -4,6 +4,10 @@ import java.util.Collection;
 
 public interface Metrics {
 
+    static String[] tags (String... tags) {
+        return tags;
+    }
+
     Gauge createGauge(String name, String... tags);
 
     Counter createCounter(String name, String... tags);
