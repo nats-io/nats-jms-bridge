@@ -111,6 +111,8 @@ tasks {
 
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
+        // https://mvnrepository.com/artifact/com.ibm.mq/com.ibm.mq.allclient
+        implementation("com.ibm.mq:com.ibm.mq.allclient:9.1.5.0")
 
         // Testing
         testImplementation("org.springframework.boot:spring-boot-starter-test") {

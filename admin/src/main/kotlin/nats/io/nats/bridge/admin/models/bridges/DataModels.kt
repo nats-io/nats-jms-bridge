@@ -100,33 +100,35 @@ val defaultDataModel = NatsBridgeConfig(
                         bridgeType = BridgeType.REQUEST_REPLY,
                         source = MessageBusInfo(name = "jms",
                                 busType = BusType.JMS,
-                                subject = "dynamicQueues/sample-jms-queue",
-                                clusterName = "activeMQTest"
+                                subject = "dynamicQueues/a-queue",
+                                clusterName = "jmsCluster"
                         ),
-                        destination = MessageBusInfo(name = "Nats Sample",
+                        destination = MessageBusInfo(name = "nats",
                                 busType = BusType.NATS,
-                                subject = "sample-nats-subject",
-                                clusterName = "natsTest"
+                                subject = "a-subject",
+                                clusterName = "natsCluster"
                         )
                 ),
                 MessageBridgeInfo("natsToJMS",
-                        bridgeType = BridgeType.FORWARD,
-                        source = MessageBusInfo(name = "Nats Sample",
+                        bridgeType = BridgeType.REQUEST_REPLY,
+                        source = MessageBusInfo(name = "nats",
                                 busType = BusType.NATS,
-                                subject = "sample-nats-subject",
-                                clusterName = "natsTest"
+                                subject = "b-subject",
+                                clusterName = "natsCluster"
                         ),
                         destination = MessageBusInfo(name = "jms",
                                 busType = BusType.JMS,
-                                subject = "dynamicQueues/sample-jms-queue",
-                                clusterName = "activeMQTest"
+                                subject = "dynamicQueues/b-queue",
+                                clusterName = "jmsCluster"
                         )
                 )
         ),
         clusters = mapOf(
-                "activeMQTest" to Cluster(
-                        name = "activeMQTest",
+                "jmsCluster" to Cluster(
+                        name = "jmsCluster",
                         properties = JmsClusterConfig(
+                                userName = "cloudurable",
+                                password = "cloudurable",
                                 config = mapOf("java.naming.factory.initial" to
                                         "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory",
                                         "connectionFactory.ConnectionFactory" to "tcp://localhost:61616",
@@ -134,8 +136,9 @@ val defaultDataModel = NatsBridgeConfig(
                                 )
                         )
                 ),
-                "natsTest" to Cluster(
-                        name = "natsTest",
+                "natsCluster" to Cluster(
+                        name = "natsCluster",
+
                         properties = NatsClusterConfig(
                                 host = "localhost",
                                 port = 4222

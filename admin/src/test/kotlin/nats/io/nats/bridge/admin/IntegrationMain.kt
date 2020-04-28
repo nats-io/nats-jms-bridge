@@ -180,9 +180,9 @@ class Main {
         val ref: AtomicReference<String> = AtomicReference()
         val count = AtomicInteger()
 
-        for (a in 0..100) {
-            val latch = CountDownLatch(90)
-            for (x in 0..100) {
+        for (a in 0..9) {
+            val latch = CountDownLatch(10)
+            for (x in 0..9) {
                 jmsClient.request("Rick") { response ->
                     ref.set(response)
                     count.incrementAndGet()
@@ -190,7 +190,7 @@ class Main {
                 }
             }
             jmsClient.process()
-            latch.await(10, TimeUnit.MILLISECONDS)
+            latch.await(500, TimeUnit.MILLISECONDS)
             println("REPLY COUNT " + count.get())
             displayFlag(readFlag("$bridgeControlURL/running"))
             displayFlag(readFlag("$bridgeControlURL/started"))
