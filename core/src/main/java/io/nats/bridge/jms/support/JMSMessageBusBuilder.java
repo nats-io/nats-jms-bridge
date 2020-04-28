@@ -270,6 +270,10 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     }
 
     public String getUserNameConnection() {
+        if (userNameConnection == null || userNameConnection.trim().isEmpty()) {
+            userNameConnection = System.getenv("NATS_BRIDGE_JMS_USER");
+        }
+
         return userNameConnection;
     }
 
@@ -279,6 +283,9 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     }
 
     public String getPasswordConnection() {
+        if (passwordConnection == null) {
+            passwordConnection = System.getenv("NATS_BRIDGE_JMS_PWD");
+        }
         return passwordConnection;
     }
 
