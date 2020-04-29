@@ -461,6 +461,10 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     public MessageBus build() {
 
+        if (getConnectionFactory() != null && getConnectionFactory().getClass().getPackage().getName().contains("io.nats.bridge.ibmmq")) {
+            ibmMQ = true;
+        }
+
         final Connection connection = getConnection();
         final Session session = getSession();
         final Destination destination = getDestination();
