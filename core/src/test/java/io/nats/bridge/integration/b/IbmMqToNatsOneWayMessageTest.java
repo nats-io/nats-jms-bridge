@@ -9,6 +9,7 @@ import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +43,7 @@ public class IbmMqToNatsOneWayMessageTest  {
                     serverMessageBus.close();
                     break;
                 }
-                final Optional<Message> receive = serverMessageBus.receive();
+                final Optional<Message> receive = serverMessageBus.receive(Duration.ofSeconds(10));
                 receive.ifPresent(message -> {
                     System.out.println("Handle message " + message.bodyAsString());
                     responseBusServer.publish(MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build());
@@ -66,17 +67,17 @@ public class IbmMqToNatsOneWayMessageTest  {
 
         final String busName = "MessagesOnlyB";
         final String responseName = "RESPONSEB";
-        clientMessageBusForIbmMQ = TestUtils.getMessageBusIbmMQ();
-        serverMessageBusForNats = TestUtils.getMessageBusNats(busName);
+        clientMessageBusForIbmMQ = TestUtils.getMessageBusIbmMQ("");
+        serverMessageBusForNats = TestUtils.getMessageBusNats("",busName);
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSourceForIbmMQ = TestUtils.getMessageBusIbmMQ();
-        bridgeMessageBusDestinationForNats = TestUtils.getMessageBusNats(busName);
+        bridgeMessageBusSourceForIbmMQ = TestUtils.getMessageBusIbmMQ("");
+        bridgeMessageBusDestinationForNats = TestUtils.getMessageBusNats("",busName);
 
-        responseBusServer = TestUtils.getMessageBusNats(responseName);
-        responseBusClient = TestUtils.getMessageBusNats(responseName);
+        responseBusServer = TestUtils.getMessageBusNats("",responseName);
+        responseBusClient = TestUtils.getMessageBusNats("",responseName);
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusSourceForIbmMQ, bridgeMessageBusDestinationForNats, false, null);
 
     }

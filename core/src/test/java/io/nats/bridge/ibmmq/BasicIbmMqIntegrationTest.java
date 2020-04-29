@@ -14,6 +14,7 @@ import javax.naming.InitialContext;
 import java.time.Duration;
 import java.util.Hashtable;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -86,6 +87,7 @@ public class BasicIbmMqIntegrationTest {
         connection.start();
         final Session session = connection.createSession();
         final Destination destination = session.createQueue("DEV.QUEUE.1");
+        final Destination responseDestination = session.createQueue("DEV.QUEUE.2");
         final MessageProducer producer = session.createProducer(destination);
         final MessageConsumer consumer = session.createConsumer(destination);
 
@@ -104,6 +106,28 @@ public class BasicIbmMqIntegrationTest {
 
         assertEquals("Hello", textMessage.getText());
 
+
+        final String correlationID = UUID.randomUUID().toString();
+        final TextMessage requestMessage = session.createTextMessage("REQUEST");
+        requestMessage.setJMSReplyTo(responseDestination);
+        requestMessage.setJMSCorrelationID(correlationID);
+        producer.send(requestMessage);
+
+        //Act like Server
+        final MessageConsumer serverConsumer = session.createConsumer(destination);
+        final TextMessage requestFromClient = (TextMessage) serverConsumer.receive(5000);
+        assertEquals("REQUEST", requestFromClient.getText());
+        final Destination replyToDestination = requestFromClient.getJMSReplyTo();
+        final TextMessage replyMessage = session.createTextMessage("RESPONSE_FROM_SERVER");
+        replyMessage.setJMSCorrelationID(requestFromClient.getJMSCorrelationID());
+        session.createProducer(replyToDestination).send(replyMessage);
+
+
+        //Act like original client
+        final TextMessage replyFromServer = (TextMessage) session.createConsumer(responseDestination).receive(5000);
+        assertEquals("RESPONSE_FROM_SERVER", replyFromServer.getText());
+
+
         connection.stop();
 
     }
@@ -111,8 +135,8 @@ public class BasicIbmMqIntegrationTest {
     @Test
     public void test() throws Exception {
 
-        clientMessageBus = TestUtils.getMessageBusIbmMQ();
-        serverMessageBus = TestUtils.getMessageBusIbmMQ();
+        clientMessageBus = TestUtils.getMessageBusIbmMQ("");
+        serverMessageBus = TestUtils.getMessageBusIbmMQ("");
 
         clientMessageBus.publish("hello");
 

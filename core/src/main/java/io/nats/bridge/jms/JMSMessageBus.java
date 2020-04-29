@@ -297,6 +297,7 @@ public class JMSMessageBus implements MessageBus {
             do {
                 reply = jmsReplyQueue.poll();
                 if (reply != null) {
+                    System.out.println("REPLY FROM SERVER IN JMS MESSAGE BUS " + reply.getReply().bodyAsString());
                     count++;
                     final byte[] messageBody = reply.getReply().getBodyBytes();
                     final String correlationId = reply.getCorrelationID();

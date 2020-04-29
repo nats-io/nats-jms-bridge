@@ -31,14 +31,14 @@ public class JmsToNatsBridgeTest {
 
     @Before
     public void setUp() throws Exception {
-        clientMessageBus = TestUtils.getMessageBusJms("B");
-        serverMessageBus = TestUtils.getMessageBusNats("B");
+        clientMessageBus = TestUtils.getMessageBusJms("","B");
+        serverMessageBus = TestUtils.getMessageBusNats("","B");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSource = TestUtils.getMessageBusJms("B");
-        bridgeMessageBusDestination = TestUtils.getMessageBusNats("B");
+        bridgeMessageBusSource = TestUtils.getMessageBusJms("","B");
+        bridgeMessageBusDestination = TestUtils.getMessageBusNats("","B");
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null);
 
     }

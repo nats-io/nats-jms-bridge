@@ -34,14 +34,14 @@ public class NatsToJmsBridgeWithHeadersTest {
 
     @Before
     public void setUp() throws Exception {
-        clientMessageNatsBus = TestUtils.getMessageBusNats("A");
-        serverJMSMessageBus = TestUtils.getMessageBusJmsWithHeaders("A");
+        clientMessageNatsBus = TestUtils.getMessageBusNats("CLIENT","A");
+        serverJMSMessageBus = TestUtils.getMessageBusJmsWithHeaders("SERVER","A");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("A");
-        bridgeMessageBusJmsDestination = TestUtils.getMessageBusJmsWithHeaders("A");
+        bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE","A");
+        bridgeMessageBusJmsDestination = TestUtils.getMessageBusJmsWithHeaders("BRIDGE_DEST","A");
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true, null);
 
     }

@@ -31,14 +31,14 @@ public class JmsIbmMqToNatsBridgeTest {
 
     @Before
     public void setUp() throws Exception {
-        clientMessageBus = TestUtils.getMessageBusIbmMQ();
-        serverMessageBus = TestUtils.getMessageBusNats("B");
+        clientMessageBus = TestUtils.getMessageBusIbmMQ("CLIENT");
+        serverMessageBus = TestUtils.getMessageBusNats("SERVER", "B");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSource = TestUtils.getMessageBusIbmMQ();
-        bridgeMessageBusDestination = TestUtils.getMessageBusNats("B");
+        bridgeMessageBusSource = TestUtils.getMessageBusIbmMQ("BRIDGE_SRC");
+        bridgeMessageBusDestination = TestUtils.getMessageBusNats("BRIDGE_DST","B");
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null);
 
     }
@@ -47,7 +47,7 @@ public class JmsIbmMqToNatsBridgeTest {
     public void tearDown() throws Exception {
     }
 
-    //@Test
+    @Test
     public void test() throws Exception {
         runServerLoop();
         runBridgeLoop();

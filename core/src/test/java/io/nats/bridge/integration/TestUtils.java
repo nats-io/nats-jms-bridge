@@ -27,16 +27,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TestUtils {
-    public static MessageBus getMessageBusJms(final String topicPostFix) {
+    public static MessageBus getMessageBusJms(final String name, final String topicPostFix) {
         final String queueName = "dynamicQueues/message-only-" + topicPostFix;
-        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName);
+        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName).withName("JMS_" + name);
 
         return jmsMessageBusBuilder.withUserNameConnection("cloudurable").withPasswordConnection("cloudurable").build();
     }
 
-    public static MessageBus getMessageBusIbmMQ() {
+    public static MessageBus getMessageBusIbmMQ(final String name) {
         try {
-            final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().useIBMMQ().withDestinationName("DEV.QUEUE.1")
+            final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder()
+                    .withName("IBM_MQ_" + name).useIBMMQ().withDestinationName("DEV.QUEUE.1")
                     .withReplyDestinationName("DEV.QUEUE.2");
             return jmsMessageBusBuilder.withUserNameConnection("app").withPasswordConnection("passw0rd").build();
         } catch (Exception ex) {
@@ -46,17 +47,18 @@ public class TestUtils {
     }
 
 
-    public static MessageBus getMessageBusJmsWithHeaders(final String topicPostFix) {
+    public static MessageBus getMessageBusJmsWithHeaders(final String name, final String topicPostFix) {
         final String queueName = "dynamicQueues/headers-message-only-" + topicPostFix;
-        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().turnOnCopyHeaders().withDestinationName(queueName);
+        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder()
+                .withName("JMS_W_HEADERS_" + name).turnOnCopyHeaders().withDestinationName(queueName);
         return jmsMessageBusBuilder.withUserNameConnection("cloudurable").withPasswordConnection("cloudurable").build();
     }
 
-    public static MessageBus getMessageBusNats(final String topicPostFix) throws IOException, InterruptedException {
+    public static MessageBus getMessageBusNats(final String name, final String topicPostFix) throws IOException, InterruptedException {
 
         final String subject = topicPostFix + "NatsMessageBus";
 
-        final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withSubject(subject);
+        final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withName("NATS_" + name).withSubject(subject);
         natsMessageBusBuilder.getOptionsBuilder().noReconnect();
         return natsMessageBusBuilder.build();
     }
@@ -67,11 +69,11 @@ public class TestUtils {
         final Thread thread = new Thread(() -> {
             try {
                 while (!stop.get()) {
-                    Thread.sleep(50);
+                    Thread.sleep(25);
 
                     int process = messageBridge.process();
                     if (process > 0) {
-                        System.out.println("Messages sent or received " + process);
+                        System.out.println("Bridge Loop: Messages sent or received " + process);
                     }
                 }
                 messageBridge.close();
@@ -101,8 +103,8 @@ public class TestUtils {
                 }
                 final Optional<Message> receive = serverMessageBus.receive();
                 receive.ifPresent(message -> {
-                    System.out.println("Handle message " + message.bodyAsString());
-                    System.out.println("Handle message headers " + message.headers());
+                    System.out.println("Server Loop: Handle message " + message.bodyAsString());
+                    System.out.println("Server Loop: Handle message headers " + message.headers());
 
 
                     final String myHeader = (String) message.headers().get("MY_HEADER");
@@ -118,7 +120,7 @@ public class TestUtils {
 
 
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
