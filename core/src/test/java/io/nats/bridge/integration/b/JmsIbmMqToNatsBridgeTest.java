@@ -47,7 +47,7 @@ public class JmsIbmMqToNatsBridgeTest {
     public void tearDown() throws Exception {
     }
 
-    //@Test
+    @Test
     public void test() throws Exception {
         runServerLoop();
         runBridgeLoop();

@@ -67,7 +67,9 @@ public class MessageBridgeImpl implements MessageBridge {
 
         if (requestReply) {
             if (receiveMessageFromSourceOption.isPresent()) count++;
+
             receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
+                        System.out.println("GOT MESSAGE " + receiveMessageFromSource.bodyAsString());
                         destinationBus.request(receiveMessageFromSource, replyMessage -> {
                             replyMessageQueue.add(new MessageBridgeRequestReply(receiveMessageFromSource, replyMessage));
                         });
@@ -92,6 +94,10 @@ public class MessageBridgeImpl implements MessageBridge {
         int i = 0;
         MessageBridgeRequestReply requestReply = replyMessageQueue.poll();
         while (requestReply != null) {
+
+
+            System.out.printf("PROCESS REPLIES FROM MESSAGE BRIDGE request %s reply %s \n", requestReply.request.bodyAsString(), requestReply.reply.bodyAsString());
+            System.out.flush();
             i++;
             requestReply.respond();
             requestReply = replyMessageQueue.poll();

@@ -9,6 +9,7 @@ import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +43,7 @@ public class IbmMqToNatsOneWayMessageTest  {
                     serverMessageBus.close();
                     break;
                 }
-                final Optional<Message> receive = serverMessageBus.receive();
+                final Optional<Message> receive = serverMessageBus.receive(Duration.ofSeconds(10));
                 receive.ifPresent(message -> {
                     System.out.println("Handle message " + message.bodyAsString());
                     responseBusServer.publish(MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build());

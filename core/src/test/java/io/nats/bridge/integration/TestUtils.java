@@ -21,6 +21,7 @@ import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.nats.support.NatsMessageBusBuilder;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -67,11 +68,11 @@ public class TestUtils {
         final Thread thread = new Thread(() -> {
             try {
                 while (!stop.get()) {
-                    Thread.sleep(50);
+                    Thread.sleep(1000);
 
-                    int process = messageBridge.process();
+                    int process = messageBridge.process(Duration.ofSeconds(10));
                     if (process > 0) {
-                        System.out.println("Messages sent or received " + process);
+                        System.out.println("Bridge Loop: Messages sent or received " + process);
                     }
                 }
                 messageBridge.close();
@@ -101,8 +102,8 @@ public class TestUtils {
                 }
                 final Optional<Message> receive = serverMessageBus.receive();
                 receive.ifPresent(message -> {
-                    System.out.println("Handle message " + message.bodyAsString());
-                    System.out.println("Handle message headers " + message.headers());
+                    System.out.println("Server Loop: Handle message " + message.bodyAsString());
+                    System.out.println("Server Loop: Handle message headers " + message.headers());
 
 
                     final String myHeader = (String) message.headers().get("MY_HEADER");
@@ -118,7 +119,7 @@ public class TestUtils {
 
 
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
