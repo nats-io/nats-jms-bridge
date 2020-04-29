@@ -67,17 +67,17 @@ public class IbmMqToNatsOneWayMessageTest  {
 
         final String busName = "MessagesOnlyB";
         final String responseName = "RESPONSEB";
-        clientMessageBusForIbmMQ = TestUtils.getMessageBusIbmMQ();
-        serverMessageBusForNats = TestUtils.getMessageBusNats(busName);
+        clientMessageBusForIbmMQ = TestUtils.getMessageBusIbmMQ("");
+        serverMessageBusForNats = TestUtils.getMessageBusNats("",busName);
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSourceForIbmMQ = TestUtils.getMessageBusIbmMQ();
-        bridgeMessageBusDestinationForNats = TestUtils.getMessageBusNats(busName);
+        bridgeMessageBusSourceForIbmMQ = TestUtils.getMessageBusIbmMQ("");
+        bridgeMessageBusDestinationForNats = TestUtils.getMessageBusNats("",busName);
 
-        responseBusServer = TestUtils.getMessageBusNats(responseName);
-        responseBusClient = TestUtils.getMessageBusNats(responseName);
+        responseBusServer = TestUtils.getMessageBusNats("",responseName);
+        responseBusClient = TestUtils.getMessageBusNats("",responseName);
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusSourceForIbmMQ, bridgeMessageBusDestinationForNats, false, null);
 
     }

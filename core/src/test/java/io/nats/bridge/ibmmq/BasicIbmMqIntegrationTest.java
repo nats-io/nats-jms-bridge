@@ -135,8 +135,8 @@ public class BasicIbmMqIntegrationTest {
     @Test
     public void test() throws Exception {
 
-        clientMessageBus = TestUtils.getMessageBusIbmMQ();
-        serverMessageBus = TestUtils.getMessageBusIbmMQ();
+        clientMessageBus = TestUtils.getMessageBusIbmMQ("");
+        serverMessageBus = TestUtils.getMessageBusIbmMQ("");
 
         clientMessageBus.publish("hello");
 

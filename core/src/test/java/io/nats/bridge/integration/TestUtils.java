@@ -21,23 +21,23 @@ import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.nats.support.NatsMessageBusBuilder;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TestUtils {
-    public static MessageBus getMessageBusJms(final String topicPostFix) {
+    public static MessageBus getMessageBusJms(final String name, final String topicPostFix) {
         final String queueName = "dynamicQueues/message-only-" + topicPostFix;
-        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName);
+        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName).withName("JMS_" + name);
 
         return jmsMessageBusBuilder.withUserNameConnection("cloudurable").withPasswordConnection("cloudurable").build();
     }
 
-    public static MessageBus getMessageBusIbmMQ() {
+    public static MessageBus getMessageBusIbmMQ(final String name) {
         try {
-            final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().useIBMMQ().withDestinationName("DEV.QUEUE.1")
+            final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder()
+                    .withName("IBM_MQ_" + name).useIBMMQ().withDestinationName("DEV.QUEUE.1")
                     .withReplyDestinationName("DEV.QUEUE.2");
             return jmsMessageBusBuilder.withUserNameConnection("app").withPasswordConnection("passw0rd").build();
         } catch (Exception ex) {
@@ -47,17 +47,18 @@ public class TestUtils {
     }
 
 
-    public static MessageBus getMessageBusJmsWithHeaders(final String topicPostFix) {
+    public static MessageBus getMessageBusJmsWithHeaders(final String name, final String topicPostFix) {
         final String queueName = "dynamicQueues/headers-message-only-" + topicPostFix;
-        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().turnOnCopyHeaders().withDestinationName(queueName);
+        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder()
+                .withName("JMS_W_HEADERS_" + name).turnOnCopyHeaders().withDestinationName(queueName);
         return jmsMessageBusBuilder.withUserNameConnection("cloudurable").withPasswordConnection("cloudurable").build();
     }
 
-    public static MessageBus getMessageBusNats(final String topicPostFix) throws IOException, InterruptedException {
+    public static MessageBus getMessageBusNats(final String name, final String topicPostFix) throws IOException, InterruptedException {
 
         final String subject = topicPostFix + "NatsMessageBus";
 
-        final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withSubject(subject);
+        final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withName("NATS_" + name).withSubject(subject);
         natsMessageBusBuilder.getOptionsBuilder().noReconnect();
         return natsMessageBusBuilder.build();
     }
@@ -68,9 +69,9 @@ public class TestUtils {
         final Thread thread = new Thread(() -> {
             try {
                 while (!stop.get()) {
-                    Thread.sleep(1000);
+                    Thread.sleep(25);
 
-                    int process = messageBridge.process(Duration.ofSeconds(10));
+                    int process = messageBridge.process();
                     if (process > 0) {
                         System.out.println("Bridge Loop: Messages sent or received " + process);
                     }
