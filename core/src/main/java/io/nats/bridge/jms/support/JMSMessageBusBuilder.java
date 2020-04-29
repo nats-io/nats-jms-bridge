@@ -237,7 +237,9 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         if (responseDestination == null) {
             responseDestination = exceptionHandler.tryReturnOrRethrow(() -> {
                         final String replyDestinationName = getReplyDestinationName();
-                        return (replyDestinationName == null) ? getSession().createTemporaryQueue() : getSession().createQueue(replyDestinationName);
+                        return (replyDestinationName == null) ?
+                                getSession().createTemporaryQueue() :
+                                getSession().createQueue(replyDestinationName);
                     },
                     e -> new JMSMessageBusBuilderException("Unable to create JMS response queue " + getUserNameConnection(), e));
         }
