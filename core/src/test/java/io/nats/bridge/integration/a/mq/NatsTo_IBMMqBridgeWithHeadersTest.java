@@ -1,4 +1,4 @@
-package io.nats.bridge.integration.a;
+package io.nats.bridge.integration.a.mq;
 
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 
-public class NatsToJmsBridgeWithHeadersTest {
+public class NatsTo_IBMMqBridgeWithHeadersTest {
 
     private final AtomicBoolean stop = new AtomicBoolean(false);
     private final AtomicReference<String> responseFromServer = new AtomicReference<>();
@@ -35,13 +35,13 @@ public class NatsToJmsBridgeWithHeadersTest {
     @Before
     public void setUp() throws Exception {
         clientMessageNatsBus = TestUtils.getMessageBusNats("CLIENT","A");
-        serverJMSMessageBus = TestUtils.getMessageBusJmsWithHeaders("SERVER","A");
+        serverJMSMessageBus = TestUtils.getMessageBusIbmMQWithHeaders("SERVER",true);
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
         bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE","A");
-        bridgeMessageBusJmsDestination = TestUtils.getMessageBusJmsWithHeaders("BRIDGE_DEST","A");
+        bridgeMessageBusJmsDestination = TestUtils.getMessageBusIbmMQWithHeaders("BRIDGE_DEST",false);
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true, null);
 
     }
@@ -80,7 +80,7 @@ public class NatsToJmsBridgeWithHeadersTest {
 
         for (int index = 0; index < 100; index++) {
 
-            resultSignal.await(100, TimeUnit.MILLISECONDS);
+            resultSignal.await(10, TimeUnit.MILLISECONDS);
             clientMessageNatsBus.process();
 
             if (responseFromServer.get() != null) break;

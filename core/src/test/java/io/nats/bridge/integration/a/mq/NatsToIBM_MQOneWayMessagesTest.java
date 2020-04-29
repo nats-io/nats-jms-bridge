@@ -1,4 +1,4 @@
-package io.nats.bridge.integration.b;
+package io.nats.bridge.integration.a.mq;
 
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
@@ -9,7 +9,6 @@ import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 
-public class IbmMqToNatsOneWayMessageTest  {
+public class NatsToIBM_MQOneWayMessagesTest {
 
     private final AtomicBoolean stop = new AtomicBoolean(false);
     private final AtomicReference<String> responseFromServer = new AtomicReference<>();
@@ -26,10 +25,10 @@ public class IbmMqToNatsOneWayMessageTest  {
     private CountDownLatch serverStopped;
     private CountDownLatch bridgeStopped;
 
-    private MessageBus serverMessageBusForNats;
-    private MessageBus clientMessageBusForIbmMQ;
-    private MessageBus bridgeMessageBusSourceForIbmMQ;
-    private MessageBus bridgeMessageBusDestinationForNats;
+    private MessageBus serverMessageBus;
+    private MessageBus clientMessageBus;
+    private MessageBus bridgeMessageBusSource;
+    private MessageBus bridgeMessageBusDestination;
 
     private MessageBus responseBusServer;
     private MessageBus responseBusClient;
@@ -43,14 +42,19 @@ public class IbmMqToNatsOneWayMessageTest  {
                     serverMessageBus.close();
                     break;
                 }
-                final Optional<Message> receive = serverMessageBus.receive(Duration.ofSeconds(10));
+                final Optional<Message> receive = serverMessageBus.receive();
+
+                if (!receive.isPresent()) {
+                    System.out.println("SERVER NO MESSAGE");
+                }
                 receive.ifPresent(message -> {
-                    System.out.println("Handle message " + message.bodyAsString());
+
+                    System.out.println("Handle message " + message.bodyAsString() + "....................");
                     responseBusServer.publish(MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build());
+
                 });
                 try {
-                    Thread.sleep(1000);
-                    System.out.println("SERVER LOOP");
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -65,20 +69,20 @@ public class IbmMqToNatsOneWayMessageTest  {
     @Before
     public void setUp() throws Exception {
 
-        final String busName = "MessagesOnlyB";
-        final String responseName = "RESPONSEB";
-        clientMessageBusForIbmMQ = TestUtils.getMessageBusIbmMQ("", true);
-        serverMessageBusForNats = TestUtils.getMessageBusNats("",busName);
+        final String busName = "MessagesOnlyA";
+        final String responseName = "RESPONSEA";
+        clientMessageBus = TestUtils.getMessageBusNats("CLIENT", busName);
+        serverMessageBus = TestUtils.getMessageBusIbmMQ("SERVER", true);
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSourceForIbmMQ = TestUtils.getMessageBusIbmMQ("", true);
-        bridgeMessageBusDestinationForNats = TestUtils.getMessageBusNats("",busName);
+        bridgeMessageBusSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE", busName);
+        bridgeMessageBusDestination = TestUtils.getMessageBusIbmMQ("BRIDGE_DEST", false);
 
-        responseBusServer = TestUtils.getMessageBusNats("",responseName);
-        responseBusClient = TestUtils.getMessageBusNats("",responseName);
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSourceForIbmMQ, bridgeMessageBusDestinationForNats, false, null);
+        responseBusServer = TestUtils.getMessageBusJms("SERVER_RESPONSE", responseName);
+        responseBusClient = TestUtils.getMessageBusJms("CLIENT_RESPONSE", responseName);
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, false, null);
 
     }
 
@@ -87,7 +91,7 @@ public class IbmMqToNatsOneWayMessageTest  {
         runServerLoop();
         runBridgeLoop();
         runClientLoop();
-        clientMessageBusForIbmMQ.publish("Rick");
+        clientMessageBus.publish("Rick");
         resultSignal.await(10, TimeUnit.SECONDS);
 
         assertEquals("Hello Rick", responseFromServer.get());
@@ -101,16 +105,17 @@ public class IbmMqToNatsOneWayMessageTest  {
             Optional<Message> receive;
             while (true) {
                 receive = responseBusClient.receive();
+                if (!receive.isPresent()) {
+                    System.out.println("No Client Message");
+                }
                 if (receive.isPresent()) {
                     Message message = receive.get();
-
-                    System.out.println("CLIENT MESSAGE FOUND IN RUN CLIENT LOOP");
                     responseFromServer.set(message.bodyAsString());
                     resultSignal.countDown();
                     break;
                 }
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -129,6 +134,6 @@ public class IbmMqToNatsOneWayMessageTest  {
     }
 
     private void runServerLoop() {
-        runServerLoop(stop, serverMessageBusForNats, responseBusServer, serverStopped);
+        runServerLoop(stop, serverMessageBus, responseBusServer, serverStopped);
     }
 }

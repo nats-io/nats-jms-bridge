@@ -76,10 +76,10 @@ public class JmsToNatsBridgeWithHeadersTest {
 
     private void runClientLoop() throws Exception {
 
-        for (int index = 0; index < 10; index++) {
+        for (int index = 0; index < 100; index++) {
 
             System.out.println("Waiting");
-            resultSignal.await(1, TimeUnit.SECONDS);
+            resultSignal.await(100, TimeUnit.MILLISECONDS);
             clientMessageBus.process();
 
             if (responseFromServer.get() != null) break;
