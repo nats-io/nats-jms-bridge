@@ -31,13 +31,13 @@ public class JmsIbmMqToNatsBridgeTest {
 
     @Before
     public void setUp() throws Exception {
-        clientMessageBus = TestUtils.getMessageBusIbmMQ("CLIENT");
+        clientMessageBus = TestUtils.getMessageBusIbmMQ("CLIENT", false);
         serverMessageBus = TestUtils.getMessageBusNats("SERVER", "B");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSource = TestUtils.getMessageBusIbmMQ("BRIDGE_SRC");
+        bridgeMessageBusSource = TestUtils.getMessageBusIbmMQ("BRIDGE_SRC", true);
         bridgeMessageBusDestination = TestUtils.getMessageBusNats("BRIDGE_DST","B");
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null);
 

@@ -311,9 +311,6 @@ public class BaseMessageWithHeaders implements BytesMessage {
     @Override
     public String toString() {
 
-        if (bodyBytes != null) {
-            System.out.println("BODY LEN " + bodyBytes.length);
-        }
         String bodyStr = bodyBytes != null ? ", bodyBytes=" + Arrays.toString(bodyBytes) : "";
 
         return "BaseMessageWithHeaders{" +

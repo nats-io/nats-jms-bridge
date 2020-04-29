@@ -34,17 +34,24 @@ public class TestUtils {
         return jmsMessageBusBuilder.withUserNameConnection("cloudurable").withPasswordConnection("cloudurable").build();
     }
 
-    public static MessageBus getMessageBusIbmMQ(final String name) {
+    public static MessageBus getMessageBusIbmMQ(final String name, boolean src) {
         try {
             final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder()
                     .withName("IBM_MQ_" + name).useIBMMQ().withDestinationName("DEV.QUEUE.1")
-                    .withReplyDestinationName("DEV.QUEUE.2");
-            return jmsMessageBusBuilder.withUserNameConnection("app").withPasswordConnection("passw0rd").build();
+                    .withResponseDestinationName("DEV.QUEUE.2");
+             jmsMessageBusBuilder.withUserNameConnection("app").withPasswordConnection("passw0rd");
+            if (src) {
+                jmsMessageBusBuilder.asSource();
+            }
+            return jmsMessageBusBuilder.build();
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new RuntimeException(ex);
         }
     }
+
+
+
 
 
     public static MessageBus getMessageBusJmsWithHeaders(final String name, final String topicPostFix) {

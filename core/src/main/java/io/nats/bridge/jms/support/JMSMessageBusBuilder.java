@@ -72,7 +72,8 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     private Hashtable<String, Object> jndiProperties = new Hashtable<>();
     private String name = "jms-no-name";
     private boolean ibmMQ = false;
-    private String replyDestinationName;
+    private String responseDestinationName="TEMP_QUEUE";
+
 
     public static JMSMessageBusBuilder builder() {
         return new JMSMessageBusBuilder();
@@ -80,6 +81,11 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     public String getName() {
         return name;
+    }
+
+    public JMSMessageBusBuilder asSource() {
+        responseDestinationName = null;
+        return this;
     }
 
     public JMSMessageBusBuilder withName(String name) {
@@ -236,8 +242,9 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     public Destination getResponseDestination() {
         if (responseDestination == null) {
             responseDestination = exceptionHandler.tryReturnOrRethrow(() -> {
-                        final String replyDestinationName = getReplyDestinationName();
-                        return (replyDestinationName == null) ?
+                        final String replyDestinationName = getResponseDestinationName();
+                        return (replyDestinationName == null) ? null :
+                        (replyDestinationName.equals("TEMP_QUEUE")) ?
                                 getSession().createTemporaryQueue() :
                                 getSession().createQueue(replyDestinationName);
                     },
@@ -420,12 +427,12 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         return this;
     }
 
-    public String getReplyDestinationName() {
-        return replyDestinationName;
+    public String getResponseDestinationName() {
+        return responseDestinationName;
     }
 
-    public JMSMessageBusBuilder withReplyDestinationName(String replyDestinationName) {
-        this.replyDestinationName = replyDestinationName;
+    public JMSMessageBusBuilder withResponseDestinationName(String replyDestinationName) {
+        this.responseDestinationName = replyDestinationName;
         return this;
     }
 
@@ -457,8 +464,10 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         final Connection connection = getConnection();
         final Session session = getSession();
         final Destination destination = getDestination();
-        return new JMSMessageBus(getName(), destination, session, connection, getResponseDestination(),
-                getResponseConsumer(), getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(),
+        return new JMSMessageBus(getName(), destination, session, connection,
+                getResponseDestinationName() != null ? getResponseDestination() : null,
+                getResponseDestinationName() != null ? getResponseConsumer() : null,
+                getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(),
                 getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(),
                 getBridgeMessageConverter(), getDestinationName());
     }

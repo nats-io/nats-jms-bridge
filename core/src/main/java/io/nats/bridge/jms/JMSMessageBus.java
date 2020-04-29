@@ -163,7 +163,6 @@ public class JMSMessageBus implements MessageBus {
 
         if (logger.isDebugEnabled()) logger.debug("request called " + message);
 
-        //TODO to get this to be more generic as part of builder pass a createDestination Function<Session, Destination> that calls session.createTemporaryQueue() or session.createTemporaryTopic()
         final javax.jms.Message jmsMessage = convertToJMSMessage(message);
 
 
@@ -242,6 +241,8 @@ public class JMSMessageBus implements MessageBus {
      * If the client is NATS and the Server is JMS then there will be messages from the `responseConsumer`.
      */
     private int processResponses() {
+
+        if (responseConsumer == null) return 0;
 
         int[] countHolder = new int[1];
 

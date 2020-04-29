@@ -67,13 +67,13 @@ public class IbmMqToNatsOneWayMessageTest  {
 
         final String busName = "MessagesOnlyB";
         final String responseName = "RESPONSEB";
-        clientMessageBusForIbmMQ = TestUtils.getMessageBusIbmMQ("");
+        clientMessageBusForIbmMQ = TestUtils.getMessageBusIbmMQ("", true);
         serverMessageBusForNats = TestUtils.getMessageBusNats("",busName);
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSourceForIbmMQ = TestUtils.getMessageBusIbmMQ("");
+        bridgeMessageBusSourceForIbmMQ = TestUtils.getMessageBusIbmMQ("", true);
         bridgeMessageBusDestinationForNats = TestUtils.getMessageBusNats("",busName);
 
         responseBusServer = TestUtils.getMessageBusNats("",responseName);
