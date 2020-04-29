@@ -136,11 +136,8 @@ public class NatsMessageBus implements MessageBus {
     private Optional<Message> doReceive(final Duration duration) {
         return tryHandler.tryReturnOrRethrow(() -> {
             io.nats.client.Message message = subscription.nextMessage(duration);
-
             if (message != null) {
-
                 countReceived.increment();
-
                 return convertMessage(message);
             } else {
                 return Optional.empty();
@@ -173,6 +170,7 @@ public class NatsMessageBus implements MessageBus {
     @Override
     public void close() {
         tryHandler.tryWithLog(() -> {
+            connection.drain(Duration.ofSeconds(30)).get();
         }, "Can't drain and close nats connection " + subject);
     }
 

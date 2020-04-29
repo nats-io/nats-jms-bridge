@@ -35,8 +35,14 @@ public class TestUtils {
     }
 
     public static MessageBus getMessageBusIbmMQ() {
-        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName("DEV.QUEUE.1").useIBMMQ();
-        return jmsMessageBusBuilder.withUserNameConnection("app").withPasswordConnection("passw0rd").build();
+        try {
+            final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().useIBMMQ().withDestinationName("DEV.QUEUE.1")
+                    .withReplyDestinationName("DEV.QUEUE.2");
+            return jmsMessageBusBuilder.withUserNameConnection("app").withPasswordConnection("passw0rd").build();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException(ex);
+        }
     }
 
 
@@ -62,7 +68,11 @@ public class TestUtils {
             try {
                 while (!stop.get()) {
                     Thread.sleep(50);
-                    messageBridge.process();
+
+                    int process = messageBridge.process();
+                    if (process > 0) {
+                        System.out.println("Messages sent or received " + process);
+                    }
                 }
                 messageBridge.close();
                 countDownLatch.countDown();

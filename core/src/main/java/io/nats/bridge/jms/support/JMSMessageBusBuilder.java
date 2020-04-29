@@ -72,6 +72,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     private Hashtable<String, Object> jndiProperties = new Hashtable<>();
     private String name = "jms-no-name";
     private boolean ibmMQ = false;
+    private String replyDestinationName;
 
     public static JMSMessageBusBuilder builder() {
         return new JMSMessageBusBuilder();
@@ -234,7 +235,10 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     public Destination getResponseDestination() {
         if (responseDestination == null) {
-            responseDestination = exceptionHandler.tryReturnOrRethrow(() -> responseDestination = getSession().createTemporaryQueue(),
+            responseDestination = exceptionHandler.tryReturnOrRethrow(() -> {
+                        final String replyDestinationName = getReplyDestinationName();
+                        return (replyDestinationName == null) ? getSession().createTemporaryQueue() : getSession().createQueue(replyDestinationName);
+                    },
                     e -> new JMSMessageBusBuilderException("Unable to create JMS response queue " + getUserNameConnection(), e));
         }
         return responseDestination;
@@ -414,6 +418,15 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         return this;
     }
 
+    public String getReplyDestinationName() {
+        return replyDestinationName;
+    }
+
+    public JMSMessageBusBuilder withReplyDestinationName(String replyDestinationName) {
+        this.replyDestinationName = replyDestinationName;
+        return this;
+    }
+
     public String getDestinationName() {
         return destinationName;
     }
@@ -438,9 +451,14 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     }
 
     public MessageBus build() {
-        return new JMSMessageBus(getName(), getDestination(), getSession(), getConnection(), getResponseDestination(),
+
+        final Connection connection = getConnection();
+        final Session session = getSession();
+        final Destination destination = getDestination();
+        return new JMSMessageBus(getName(), destination, session, connection, getResponseDestination(),
                 getResponseConsumer(), getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(),
-                getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(), getBridgeMessageConverter(), getDestinationName());
+                getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(),
+                getBridgeMessageConverter(), getDestinationName());
     }
 
 

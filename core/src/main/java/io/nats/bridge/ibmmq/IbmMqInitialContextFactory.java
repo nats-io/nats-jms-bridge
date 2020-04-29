@@ -35,8 +35,6 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
 
         try {
             final JmsFactoryFactory factoryFactory = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
-
-
             final JmsConnectionFactory connectionFactory = factoryFactory.createConnectionFactory();
 
             final String hostURL = getStringProp(jndiProperties, HOST);
@@ -52,7 +50,7 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
             connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
             connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
             connectionFactory.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
-            contextMap.put(CONNECTION_FACTORY, factoryFactory.createConnectionFactory());
+            contextMap.put(CONNECTION_FACTORY, new MQConnectionFactory(connectionFactory));
 
 //            final Set<String> queues = jndiProperties.keySet().stream().map(Object::toString)
 //                    .filter(s -> s.startsWith(QUEUE)).collect(Collectors.toSet());
@@ -71,7 +69,7 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
         return (String) jndiProperties.get(key);
     }
 
-    private static class MQConnectionFactory implements ConnectionFactory {
+    public static class MQConnectionFactory implements ConnectionFactory {
 
         private final JmsConnectionFactory connectionFactory;
 
@@ -90,7 +88,7 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
         public Connection createConnection(final String userName, final String password) throws JMSException {
             connectionFactory.setStringProperty(WMQConstants.USERID, userName);
             connectionFactory.setStringProperty(WMQConstants.PASSWORD, password);
-            return connectionFactory.createConnection();
+            return connectionFactory.createConnection(userName, password);
         }
 
         @Override
@@ -114,7 +112,7 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
         }
     }
 
-    private static class MQContext implements Context {
+    public static class MQContext implements Context {
 
 
         final Map<String, Object> contextMap;
