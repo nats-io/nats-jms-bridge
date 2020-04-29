@@ -174,7 +174,7 @@ public class JMSMessageBus implements MessageBus {
             if (logger.isDebugEnabled()) logger.debug("REQUEST BODY " + message.toString());
 
             if (logger.isDebugEnabled())
-                logger.debug(String.format("CORRELATION ID: %s %s\n", correlationID, responseDestination.toString()));
+                logger.debug(String.format("CORRELATION ID: %s %s\n", correlationID, responseDestination));
             requestResponseMap.put(correlationID, new JMSRequestResponse(replyCallback, timeSource.getTime()));
             countRequest.increment();
         }, countRequestErrors, e -> new JMSMessageBusException("unable to send JMS request", e));
