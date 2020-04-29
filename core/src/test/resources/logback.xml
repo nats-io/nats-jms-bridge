@@ -9,7 +9,7 @@
     </appender>
 
     <logger name="io.netty" level="INFO"/>
-    <logger name="io.nats" level="WARN"/>
+    <logger name="io.nats" level="DEBUG"/>
     <logger name="org.apache" level="INFO"/>
 
     <!-- Strictly speaking, the level attribute is not necessary since -->

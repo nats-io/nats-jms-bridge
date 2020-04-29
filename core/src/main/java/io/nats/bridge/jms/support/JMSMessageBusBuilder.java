@@ -172,7 +172,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     public Logger getJmsBusLogger() {
         if (jmsBusLogger == null) {
-            jmsBusLogger = LoggerFactory.getLogger(JMSMessageBus.class);
+            jmsBusLogger = LoggerFactory.getLogger(JMSMessageBus.class.toString() + "_" + getName());
         }
         return jmsBusLogger;
     }

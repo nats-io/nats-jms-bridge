@@ -87,7 +87,6 @@ public class JMSMessageBus implements MessageBus {
         this.connection = connection;
         this.responseDestination = responseDestination;
         this.responseConsumer = responseConsumer;
-        //TODO setup exception listener for JMS Connection
         this.timeSource = timeSource;
         this.tryHandler = tryHandler;
 
@@ -253,9 +252,10 @@ public class JMSMessageBus implements MessageBus {
                 message = responseConsumer.receiveNoWait();
                 if (message != null) {
                     count++;
+                    if (logger.isDebugEnabled()) logger.debug(this.name  + "::: RESPONSE FROM JMS  ");
                     final String correlationID = message.getJMSCorrelationID();
                     if (logger.isDebugEnabled())
-                        logger.debug(String.format("Process JMS Message Consumer %s \n", correlationID));
+                        logger.debug(String.format("%s ::: Process JMS Message Consumer %s \n", this.name, correlationID));
                     final Optional<JMSRequestResponse> jmsRequestResponse = Optional.ofNullable(requestResponseMap.get(correlationID));
                     final javax.jms.Message msg = message;
                     jmsRequestResponse.ifPresent(requestResponse -> {
@@ -297,7 +297,8 @@ public class JMSMessageBus implements MessageBus {
             do {
                 reply = jmsReplyQueue.poll();
                 if (reply != null) {
-                    System.out.println("REPLY FROM SERVER IN JMS MESSAGE BUS " + reply.getReply().bodyAsString());
+
+                    if (logger.isDebugEnabled()) logger.debug(this.name  + "::: REPLY FROM SERVER IN JMS MESSAGE BUS " + reply.getReply().bodyAsString());
                     count++;
                     final byte[] messageBody = reply.getReply().getBodyBytes();
                     final String correlationId = reply.getCorrelationID();
@@ -307,7 +308,7 @@ public class JMSMessageBus implements MessageBus {
                     timerReceiveReply.recordTiming(timeSource.getTime() - reply.getSentTime());
                     countReceivedReply.increment();
                     if (logger.isDebugEnabled())
-                        logger.debug(String.format("Reply handler - %s %s %s\n", reply.getReply().bodyAsString(), correlationId, replyProducer.getDestination().toString()));
+                        logger.debug(String.format("%s ::: Reply handler - %s %s %s\n", this.name, reply.getReply().bodyAsString(), correlationId, replyProducer.getDestination().toString()));
                     jmsReplyMessage.setJMSCorrelationID(correlationId);
                     replyProducer.send(jmsReplyMessage);
                     replyProducer.close();
