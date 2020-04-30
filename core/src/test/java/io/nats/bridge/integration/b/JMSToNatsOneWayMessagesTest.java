@@ -65,17 +65,17 @@ public class JMSToNatsOneWayMessagesTest {
 
         final String busName = "MessagesOnlyB";
         final String responseName = "RESPONSEB";
-        clientMessageBus = TestUtils.getMessageBusJms(busName);
-        serverMessageBus = TestUtils.getMessageBusNats(busName);
+        clientMessageBus = TestUtils.getMessageBusJms("",busName);
+        serverMessageBus = TestUtils.getMessageBusNats("",busName);
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSource = TestUtils.getMessageBusJms(busName);
-        bridgeMessageBusDestination = TestUtils.getMessageBusNats(busName);
+        bridgeMessageBusSource = TestUtils.getMessageBusJms("",busName);
+        bridgeMessageBusDestination = TestUtils.getMessageBusNats("",busName);
 
-        responseBusServer = TestUtils.getMessageBusNats(responseName);
-        responseBusClient = TestUtils.getMessageBusNats(responseName);
+        responseBusServer = TestUtils.getMessageBusNats("",responseName);
+        responseBusClient = TestUtils.getMessageBusNats("",responseName);
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, false, null);
 
     }

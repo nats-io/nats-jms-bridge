@@ -47,6 +47,13 @@ stop | bridge-stop)
     "$NATS_ADMIN_HOST/api/v1/control/bridges/admin/stop" | jq .
   ;;
 
+import)
+
+  cat $2 | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/###___/g' >> "$2.temp.file"
+  curl -s  -X PUT -H "Authorization: Bearer $TOKEN" \
+     -H 'Content-Type: text/tsv' -d @"$2.temp.file"\
+    "$NATS_ADMIN_HOST/api/v1/bridges/admin/config/import/bridges?name=$3&delim=$4" | jq .
+  ;;
 
 set-up-admin | admin)
   # shellcheck disable=SC2002
@@ -86,6 +93,10 @@ health)
 
 info)
   curl -s  "$NATS_ADMIN_HOST/manage/info"  | jq .
+  ;;
+
+kpi)
+  curl -s  "$NATS_ADMIN_HOST/manage/prometheus"
   ;;
 
 help)

@@ -4,6 +4,8 @@ package nats.io.nats.bridge.admin
 import io.micrometer.core.annotation.Timed
 import io.micrometer.core.instrument.MeterRegistry
 import io.swagger.annotations.ApiImplicitParam
+import nats.io.nats.bridge.admin.importer.BridgeFileDelimImporter
+import nats.io.nats.bridge.admin.importer.BridgeFileImporter
 import nats.io.nats.bridge.admin.models.bridges.MessageBridgeInfo
 import nats.io.nats.bridge.admin.models.bridges.NatsBridgeConfig
 import nats.io.nats.bridge.admin.models.logins.Login
@@ -20,9 +22,13 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
+import java.io.File
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
+data class Flag(val message: String, val flag: Boolean)
+data class Error(val name: String, val message: String, val root:String?=null)
+data class ResponseMessage(val message: String, val error: Error? = null)
 
 @RestController
 @RequestMapping("/api/v1/login")
@@ -133,6 +139,30 @@ class AdminController(private val config: ConfigRepo) {
     @PostMapping(path = ["/admin/config"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
     fun saveConfig(conf: NatsBridgeConfig) = config.saveConfig(conf)
+    
+
+    @PreAuthorize("hasAnyAuthority('Admin')")
+    @PutMapping(path = ["/admin/config/import/bridges"], consumes=["text/tsv", "text/csv"])
+    @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
+    fun importBridges(@RequestBody text: String, @RequestParam(name="name") name: String, @RequestParam(name="delim") delim: String="tab",
+                      @Value("\${app.config.etcd}") configDir:String) : ResponseMessage {
+
+        return try {
+            val fileName = (name + Date()).replace("/", "_").replace("..", "_").replace(" ", "_").replace(":", "_")
+            val ext = if (delim == "tab") "tsv" else if (delim == "comma" || delim == ",") "csv" else "_sv"
+            val actualDelim = if (delim == "tab") "\t" else if (delim == "comma") "," else delim
+            val outputFile = File(File(configDir), "$fileName.$ext")
+            println(text.split("###___").map{it.trim()}.filter { !it.isBlank() }.joinToString ("\r\n" ))
+            outputFile.writeText(text.split("###___").filter { !it.isBlank() }.joinToString ("\r\n"))
+            val importer = BridgeFileDelimImporter(configRepo = config, delim = actualDelim)
+            importer.import(outputFile)
+            ResponseMessage("All Good")
+        } catch (ex:Exception) {
+            ResponseMessage("Failed to upload $name", error = nats.io.nats.bridge.admin.Error(ex.javaClass.simpleName,
+                    ex.localizedMessage, ex.cause?.localizedMessage))
+        }
+
+    }
 
 }
 
@@ -202,9 +232,7 @@ class Runner(val bridgeRunner: BridgeRunnerManager) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
 
-    data class Flag(val message: String, val flag: Boolean)
-    data class Error(val name: String, val message: String, val root:String?=null)
-    data class Message(val message: String, val error: Error? = null)
+
 
     @GetMapping(path = ["/running"])
     fun isRunning() = Flag("Running?", flag = bridgeRunner.isRunning())
@@ -219,13 +247,13 @@ class Runner(val bridgeRunner: BridgeRunnerManager) {
 
     @GetMapping(path = ["/error/last"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
-    fun getLastError(): Message {
+    fun getLastError(): ResponseMessage {
         val lastError = bridgeRunner.getLastError()
         return if (lastError != null) {
-            Message("ERROR", Error(message = lastError.localizedMessage,
+            ResponseMessage("ERROR", Error(message = lastError.localizedMessage,
                     name = lastError.javaClass.simpleName, root = lastError.cause?.localizedMessage))
         } else {
-            Message("NO ERRORS")
+            ResponseMessage("NO ERRORS")
         }
     }
 

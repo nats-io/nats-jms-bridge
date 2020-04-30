@@ -7,7 +7,7 @@ public class JMSMessageBusBuilderTest {
 
     @Test
     public void withAll() {
-        JMSMessageBusBuilder builder2 = new JMSMessageBusBuilder().withDestinationName("dynamicQueues/dest_test");
+        JMSMessageBusBuilder builder2 = new JMSMessageBusBuilder().withUserNameConnection("cloudurable").withPasswordConnection("cloudurable").withDestinationName("dynamicQueues/dest_test");
         JMSMessageBusBuilder builder1 = new JMSMessageBusBuilder();
 
         builder1.withMetricsProcessor(builder2.getMetricsProcessor());

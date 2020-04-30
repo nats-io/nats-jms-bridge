@@ -31,8 +31,8 @@ internal class BridgeFileDelimImporterUtilsTest {
     @Test
     fun parseLine() {
         val messageBridge = BridgeFileDelimImporterUtils.parseLine(
-                "jms To Nats\tr\tjms Bar\tj\tqueue/barQueue\tactiveMQTest\t" +
-                        "nats Foo\tn\tfooSubject\tnatsTest",
+                "jms To Nats\tr\tjms Bar\tj\tqueue/barQueue\tjmsCluster\t" +
+                        "nats Foo\tn\tfooSubject\tnatsCluster",
                 configMap!!)
         assertNotNull(messageBridge)
         assertEquals("jms To Nats", messageBridge.name)
@@ -40,10 +40,10 @@ internal class BridgeFileDelimImporterUtilsTest {
         assertEquals("jms Bar", messageBridge.source.name)
         assertEquals(BusType.JMS, messageBridge.source.busType)
         assertEquals("queue/barQueue", messageBridge.source.subject)
-        assertEquals("activeMQTest", messageBridge.source.clusterName)
+        assertEquals("jmsCluster", messageBridge.source.clusterName)
         assertEquals("nats Foo", messageBridge.destination.name)
         assertEquals(BusType.NATS, messageBridge.destination.busType)
         assertEquals("fooSubject", messageBridge.destination.subject)
-        assertEquals("natsTest", messageBridge.destination.clusterName)
+        assertEquals("natsCluster", messageBridge.destination.clusterName)
     }
 }

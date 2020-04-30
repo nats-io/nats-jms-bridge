@@ -22,7 +22,8 @@ import java.io.IOException;
 public class ServiceAUtil {
     static MessageBus getMessageBusJms() {
         final String queueName = "dynamicQueues/A1Queue";
-        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName);
+        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withUserNameConnection("cloudurable")
+                .withPasswordConnection("cloudurable").withDestinationName(queueName);
         final MessageBus messageBus = jmsMessageBusBuilder.build();
         return messageBus;
     }

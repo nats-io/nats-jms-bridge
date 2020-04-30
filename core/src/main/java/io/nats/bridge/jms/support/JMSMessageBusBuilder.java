@@ -71,6 +71,10 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     private boolean copyHeaders = false;
     private Hashtable<String, Object> jndiProperties = new Hashtable<>();
     private String name = "jms-no-name";
+    private boolean ibmMQ = false;
+    private String responseDestinationName = "TEMP_QUEUE";
+    private boolean source = false;
+
 
     public static JMSMessageBusBuilder builder() {
         return new JMSMessageBusBuilder();
@@ -78,6 +82,12 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     public String getName() {
         return name;
+    }
+
+    public JMSMessageBusBuilder asSource() {
+
+        source = true;
+        return this;
     }
 
     public JMSMessageBusBuilder withName(String name) {
@@ -133,9 +143,9 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     public FunctionWithException<Message, io.nats.bridge.messages.Message> getJmsMessageConverter() {
         if (jmsMessageConverter == null) {
             if (!isCopyHeaders()) {
-                jmsMessageConverter = new ConvertJmsMessageToBridgeMessage(getTryHandler(), getTimeSource(), getJmsReplyQueue());
+                jmsMessageConverter = new ConvertJmsMessageToBridgeMessage(getTryHandler(), getTimeSource(), getJmsReplyQueue(), "" + getName() + "_CONVERT_JMS_MESSAGE");
             } else {
-                jmsMessageConverter = new ConvertJmsMessageToBridgeMessageWithHeaders(getTryHandler(), getTimeSource(), getJmsReplyQueue());
+                jmsMessageConverter = new ConvertJmsMessageToBridgeMessageWithHeaders(getTryHandler(), getTimeSource(), getJmsReplyQueue(), "" + getName() + "_CONVERT_JMS_MESSAGE_W_HEADERS");
             }
         }
         return jmsMessageConverter;
@@ -170,7 +180,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     public Logger getJmsBusLogger() {
         if (jmsBusLogger == null) {
-            jmsBusLogger = LoggerFactory.getLogger(JMSMessageBus.class);
+            jmsBusLogger = LoggerFactory.getLogger(JMSMessageBus.class.toString() + "_" + getName());
         }
         return jmsBusLogger;
     }
@@ -183,7 +193,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     public MetricsProcessor getMetricsProcessor() {
         if (metricsProcessor == null) {
             metricsProcessor = new MetricsDisplay(new Output() {
-            }, getMetrics(), 10, Duration.ofSeconds(10), System::currentTimeMillis);
+            }, getMetrics(), 10, Duration.ofSeconds(10), System::currentTimeMillis, name);
         }
         return metricsProcessor;
     }
@@ -233,7 +243,17 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     public Destination getResponseDestination() {
         if (responseDestination == null) {
-            responseDestination = exceptionHandler.tryReturnOrRethrow(() -> responseDestination = getSession().createTemporaryQueue(),
+            responseDestination = exceptionHandler.tryReturnOrRethrow(() -> {
+
+                        if ((getResponseDestinationName().equals("TEMP_QUEUE"))) {
+                            System.out.println("Creating temp queue ");
+                            return getSession().createTemporaryQueue();
+                        } else {
+                            System.out.println("Creating response queue " + getResponseDestinationName());
+                            return getSession().createQueue(getResponseDestinationName());
+                        }
+
+                    },
                     e -> new JMSMessageBusBuilderException("Unable to create JMS response queue " + getUserNameConnection(), e));
         }
         return responseDestination;
@@ -364,8 +384,13 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     public Destination getDestination() {
         if (destination == null) {
-            destination = exceptionHandler.tryReturnOrRethrow(() -> (Destination) getContext().lookup(getDestinationName()),
-                    e -> new JMSMessageBusBuilderException("Unable to lookup destination " + getDestinationName(), e));
+            if (!ibmMQ)
+                destination = exceptionHandler.tryReturnOrRethrow(() -> (Destination) getContext().lookup(getDestinationName()),
+                        e -> new JMSMessageBusBuilderException("Unable to lookup destination " + getDestinationName(), e));
+            else
+                destination = exceptionHandler.tryReturnOrRethrow(() ->
+                                getSessionCreator().apply(getConnection()).createQueue(getDestinationName()),
+                        e -> new JMSMessageBusBuilderException("Unable to lookup destination " + getDestinationName(), e));
         }
         return destination;
     }
@@ -408,6 +433,15 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         return this;
     }
 
+    public String getResponseDestinationName() {
+        return responseDestinationName;
+    }
+
+    public JMSMessageBusBuilder withResponseDestinationName(String replyDestinationName) {
+        this.responseDestinationName = replyDestinationName;
+        return this;
+    }
+
     public String getDestinationName() {
         return destinationName;
     }
@@ -432,11 +466,43 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     }
 
     public MessageBus build() {
-        return new JMSMessageBus(getName(), getDestination(), getSession(), getConnection(), getResponseDestination(),
-                getResponseConsumer(), getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(),
-                getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(), getBridgeMessageConverter());
+
+        if (getConnectionFactory() != null && getConnectionFactory().getClass().getPackage().getName().contains("io.nats.bridge.ibmmq")) {
+            ibmMQ = true;
+        }
+
+        final Connection connection = getConnection();
+        final Session session = getSession();
+        final Destination destination = getDestination();
+        return new JMSMessageBus(getName(), destination, session, connection,
+                getResponseDestination(),
+                source ? null : getResponseConsumer(),
+                getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(),
+                getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(),
+                getBridgeMessageConverter(), getDestinationName());
     }
 
+
+    public JMSMessageBusBuilder useIBMMQ(final Hashtable<String, Object> jndiProperties) {
+
+        getJmsBusLogger().info("CLEARING JNDI PROPERTIES");
+        ibmMQ = true;
+        this.jndiProperties.clear();
+        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.ibmmq.IbmMqInitialContextFactory"));
+        this.jndiProperties.putAll(jndiProperties);
+        return this;
+    }
+
+    public JMSMessageBusBuilder useIBMMQ() {
+        getJmsBusLogger().info("CLEARING JNDI PROPERTIES");
+        ibmMQ = true;
+        jndiProperties.clear();
+        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.ibmmq.IbmMqInitialContextFactory"));
+        jndiProperties.put("nats.ibm.mq.host", System.getenv().getOrDefault("NATS_BRIDGE_JMS_CONNECTION_FACTORY", "tcp://localhost:1414"));
+        jndiProperties.put("nats.ibm.mq.channel", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_CHANNEL", "DEV.APP.SVRCONN"));
+        jndiProperties.put("nats.ibm.mq.queueManager", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER", "QM1"));
+        return this;
+    }
 
     public Hashtable<String, Object> getJndiProperties() {
         if (jndiProperties.size() == 0) {

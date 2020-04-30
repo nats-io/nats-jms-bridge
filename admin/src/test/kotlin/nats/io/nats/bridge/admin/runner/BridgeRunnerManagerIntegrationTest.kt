@@ -140,7 +140,9 @@ dateTime:
         java.naming.factory.initial: "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory"
         connectionFactory.ConnectionFactory: "tcp://localhost:61616"
         queue.queue/testQueue: "queue.queue/testQueue=testQueue"
-      jmsDestinationType: "QUEUE"        
+      jmsDestinationType: "QUEUE"     
+      userName: "cloudurable"
+      password: "cloudurable"         
     """.trimIndent()
     var natsCluster = """
 # NATS      

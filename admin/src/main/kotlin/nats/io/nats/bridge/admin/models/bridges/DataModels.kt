@@ -21,7 +21,8 @@ data class NatsBridgeConfig(val name: String,
  * A Message bus represents a message bus system, i.e., IBM MQ, Nats, ActiveMQ, JMS, Rabbit MQ, Kafka, SQS, etc.
  * A message bus has a subject which can be Nats subject or a JMS destination.
  */
-data class MessageBusInfo(val name: String, val busType: BusType, val subject: String, val clusterName: String)
+data class MessageBusInfo(val name: String, val busType: BusType, val subject: String, val responseSubject: String?=null,
+                          val clusterName: String)
 
 /**
  * A Message Bridge connects two MessageBus and will forward messages or relay request replies between the message bus systems.
@@ -98,6 +99,7 @@ val defaultDataModel = NatsBridgeConfig(
         bridges = listOf(
                 MessageBridgeInfo("jmsToNatsSample",
                         bridgeType = BridgeType.REQUEST_REPLY,
+                        workers = 5,
                         source = MessageBusInfo(name = "jms",
                                 busType = BusType.JMS,
                                 subject = "dynamicQueues/a-queue",
@@ -110,6 +112,7 @@ val defaultDataModel = NatsBridgeConfig(
                         )
                 ),
                 MessageBridgeInfo("natsToJMS",
+                        workers = 5,
                         bridgeType = BridgeType.REQUEST_REPLY,
                         source = MessageBusInfo(name = "nats",
                                 busType = BusType.NATS,
@@ -120,6 +123,35 @@ val defaultDataModel = NatsBridgeConfig(
                                 busType = BusType.JMS,
                                 subject = "dynamicQueues/b-queue",
                                 clusterName = "jmsCluster"
+                        )
+                ),
+                MessageBridgeInfo("ibmMqToNatsSample",
+                        workers = 5,
+                        bridgeType = BridgeType.REQUEST_REPLY,
+                        source = MessageBusInfo(name = "ibmMQ",
+                                busType = BusType.JMS,
+                                subject = "DEV.QUEUE.1",
+                                clusterName = "ibmMqCluster"
+                        ),
+                        destination = MessageBusInfo(name = "nats",
+                                busType = BusType.NATS,
+                                subject = "a-subject",
+                                clusterName = "natsCluster"
+                        )
+                ),
+                MessageBridgeInfo("natsToIBMMq",
+                        workers = 5,
+                        bridgeType = BridgeType.REQUEST_REPLY,
+                        source = MessageBusInfo(name = "nats",
+                                busType = BusType.NATS,
+                                subject = "b-subject",
+                                clusterName = "natsCluster"
+                        ),
+                        destination = MessageBusInfo(name = "ibmMQ",
+                                busType = BusType.JMS,
+                                subject = "DEV.QUEUE.1",
+                                clusterName = "ibmMqCluster",
+                                responseSubject = "DEV.QUEUE.2"
                         )
                 )
         ),
@@ -142,6 +174,20 @@ val defaultDataModel = NatsBridgeConfig(
                         properties = NatsClusterConfig(
                                 host = "localhost",
                                 port = 4222
+                        )
+                ),
+                "ibmMqCluster" to Cluster(
+                        name = "ibmMqCluster",
+                        properties = JmsClusterConfig(
+                                userName = "app",
+                                password = "passw0rd",
+                                config = mapOf(
+                                        "java.naming.factory.initial" to "io.nats.bridge.ibmmq.IbmMqInitialContextFactory",
+                                        "nats.ibm.mq.host" to "tcp://localhost:1414",
+                                        "nats.ibm.mq.channel" to "DEV.APP.SVRCONN",
+                                        "nats.ibm.mq.queueManager" to "QM1"
+                                )
+
                         )
                 )
         )

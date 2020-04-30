@@ -19,7 +19,20 @@ class MessageBridgeBuilder {
     fun withName(name: String) = apply { this.name = name }
 
     fun build(): MessageBridge {
-        return MessageBridgeImpl(name, sourceBusBuilder!!.build(), destBusBuilder!!.build(), requestReply, null)
+
+        val src = try {
+            sourceBusBuilder!!.build()
+        } catch (ex: Exception) {
+            throw Exception("Unable to create source message bus $name", ex)
+        }
+
+        val dst = try {
+            destBusBuilder!!.build()
+        } catch (ex: Exception) {
+            throw Exception("Unable to create destination message bus $name", ex)
+        }
+
+        return MessageBridgeImpl(name, src, dst, requestReply, null)
     }
 
 }

@@ -21,9 +21,9 @@ internal class BridgeFileDelimImporterTest {
 
     val inputStr = """
         # JMS to Nats Bridge
-        jms To Nats| r | jms Bar | j | queue/barQueue | activeMQTest| nats Foo | n | fooSubject| natsTest
+        jms To Nats| r | jms Bar | j | queue/barQueue | jmsCluster| nats Foo | n | fooSubject| natsCluster
         # Nats To JMS Bridge
-        Nats To JMS| f | nat Bar | n | natsBarSubject | natsTest    | jms Foo  | j | queue/Foo | activeMQTest
+        Nats To JMS| f | nat Bar | n | natsBarSubject | natsCluster    | jms Foo  | j | queue/Foo | jmsCluster
     """.trimIndent().replace("|", "\t")
 
     @BeforeEach
@@ -55,11 +55,11 @@ internal class BridgeFileDelimImporterTest {
         assertEquals("jms Bar", messageBridge.source.name)
         assertEquals(BusType.JMS, messageBridge.source.busType)
         assertEquals("queue/barQueue", messageBridge.source.subject)
-        assertEquals("activeMQTest", messageBridge.source.clusterName)
+        assertEquals("jmsCluster", messageBridge.source.clusterName)
         assertEquals("nats Foo", messageBridge.destination.name)
         assertEquals(BusType.NATS, messageBridge.destination.busType)
         assertEquals("fooSubject", messageBridge.destination.subject)
-        assertEquals("natsTest", messageBridge.destination.clusterName)
+        assertEquals("natsCluster", messageBridge.destination.clusterName)
 
         messageBridge = bridges[1]
         assertEquals("Nats To JMS", messageBridge.name)
@@ -68,12 +68,12 @@ internal class BridgeFileDelimImporterTest {
         assertEquals("nat Bar", messageBridge.source.name)
         assertEquals(BusType.NATS, messageBridge.source.busType)
         assertEquals("natsBarSubject", messageBridge.source.subject)
-        assertEquals("natsTest", messageBridge.source.clusterName)
+        assertEquals("natsCluster", messageBridge.source.clusterName)
 
         assertEquals("jms Foo", messageBridge.destination.name)
         assertEquals(BusType.JMS, messageBridge.destination.busType)
         assertEquals("queue/Foo", messageBridge.destination.subject)
-        assertEquals("activeMQTest", messageBridge.destination.clusterName)
+        assertEquals("jmsCluster", messageBridge.destination.clusterName)
     }
 
 }

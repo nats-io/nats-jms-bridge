@@ -48,7 +48,7 @@ public interface MessageBus extends Closeable {
      * @param message string message
      */
     default void publish(String message) {
-        publish(MessageBuilder.builder().withBody(message).build());
+        publish(MessageBuilder.builder().withBody(message).withCreator(name()).withNoReplyHandler("DEFAULT MESSAGE BUS PUBLISH").build());
     }
 
     /**
@@ -66,7 +66,7 @@ public interface MessageBus extends Closeable {
      * @param reply   callback for reply string
      */
     default void request(final String message, final Consumer<String> reply) {
-        request(MessageBuilder.builder().withBody(message).build(),
+        request(MessageBuilder.builder().withBody(message).withCreator(name()).withNoReplyHandler("DEFAULT METHOD MESSAGE BUS REQUEST").build(),
                 replyMessage -> reply.accept(replyMessage.bodyAsString()));
     }
 
