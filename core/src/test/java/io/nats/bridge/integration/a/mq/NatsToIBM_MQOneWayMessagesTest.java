@@ -1,4 +1,4 @@
-package io.nats.bridge.integration.a;
+package io.nats.bridge.integration.a.mq;
 
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 
-public class NatsToJMSOneWayMessagesTest {
+public class NatsToIBM_MQOneWayMessagesTest {
 
     private final AtomicBoolean stop = new AtomicBoolean(false);
     private final AtomicReference<String> responseFromServer = new AtomicReference<>();
@@ -72,13 +72,13 @@ public class NatsToJMSOneWayMessagesTest {
         final String busName = "MessagesOnlyA";
         final String responseName = "RESPONSEA";
         clientMessageBus = TestUtils.getMessageBusNats("CLIENT", busName);
-        serverMessageBus = TestUtils.getMessageBusJms("SERVER", busName);
+        serverMessageBus = TestUtils.getMessageBusIbmMQ("SERVER", true);
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
         bridgeMessageBusSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE", busName);
-        bridgeMessageBusDestination = TestUtils.getMessageBusJms("BRIDGE_DEST", busName);
+        bridgeMessageBusDestination = TestUtils.getMessageBusIbmMQ("BRIDGE_DEST", false);
 
         responseBusServer = TestUtils.getMessageBusJms("SERVER_RESPONSE", responseName);
         responseBusClient = TestUtils.getMessageBusJms("CLIENT_RESPONSE", responseName);

@@ -8,6 +8,8 @@ services:
     image: 'ibmcom/mq'
     environment:
       - LICENSE=accept
+      - MQ_QMGR_NAME=QM1
+      - MQ_APP_PASSWORD=passw0rd
     ports:
       - "1414:1414"
   active-mq:

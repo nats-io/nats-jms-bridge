@@ -75,14 +75,16 @@ public class NatsMessageBus implements MessageBus {
         this.metricsProcessor = metricsProcessor;
         this.name = name.toLowerCase().replace(".", "_").replace(" ", "_").replace("-", "_");
 
-        countPublish = metrics.createCounter( "publish_count", "name_" + this.name, "nats_mb");
-        countRequest = metrics.createCounter("request_count","name_" + this.name, "nats_mb");
-        countRequestResponses = metrics.createCounter( "request_response_count","name_" + this.name, "nats_mb");
-        timerRequestResponse = metrics.createTimeTracker("request_response_timing","name_" + this.name, "nats_mb");
-        countReceived = metrics.createCounter( "received_count","name_" + this.name, "nats_mb");
-        countReceivedReply = metrics.createCounter("received_reply_count","name_" + this.name, "nats_mb");
-        timerReceiveReply = metrics.createTimeTracker("receive_reply_timing","name_" + this.name, "nats_mb");
-        countReceivedReplyErrors = metrics.createCounter("received_reply_count_errors","name_" + this.name, "nats_mb");
+        final String[] tags = Metrics.tags("name", "name_" + this.name, "mb_type", "nats_mb", "subject", subject);
+
+        countPublish = metrics.createCounter("publish_count", tags);
+        countRequest = metrics.createCounter("request_count", tags);
+        countRequestResponses = metrics.createCounter("request_response_count", tags);
+        timerRequestResponse = metrics.createTimeTracker("request_response_timing", tags);
+        countReceived = metrics.createCounter("received_count", tags);
+        countReceivedReply = metrics.createCounter("received_reply_count", tags);
+        timerReceiveReply = metrics.createTimeTracker("receive_reply_timing", tags);
+        countReceivedReplyErrors = metrics.createCounter("received_reply_count_errors", tags);
         replyToQueue = new LinkedTransferQueue<>();
 
     }
@@ -134,11 +136,8 @@ public class NatsMessageBus implements MessageBus {
     private Optional<Message> doReceive(final Duration duration) {
         return tryHandler.tryReturnOrRethrow(() -> {
             io.nats.client.Message message = subscription.nextMessage(duration);
-
             if (message != null) {
-
                 countReceived.increment();
-
                 return convertMessage(message);
             } else {
                 return Optional.empty();
@@ -171,6 +170,7 @@ public class NatsMessageBus implements MessageBus {
     @Override
     public void close() {
         tryHandler.tryWithLog(() -> {
+            connection.drain(Duration.ofSeconds(30)).get();
         }, "Can't drain and close nats connection " + subject);
     }
 

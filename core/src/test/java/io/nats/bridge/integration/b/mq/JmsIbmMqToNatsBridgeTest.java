@@ -1,10 +1,8 @@
-package io.nats.bridge.integration.a;
+package io.nats.bridge.integration.b.mq;
 
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.integration.TestUtils;
-import io.nats.bridge.messages.Message;
-import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.After;
 import org.junit.Before;
@@ -17,32 +15,31 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 
-public class NatsToJmsBridgeWithHeadersTest {
+public class JmsIbmMqToNatsBridgeTest {
 
     private final AtomicBoolean stop = new AtomicBoolean(false);
     private final AtomicReference<String> responseFromServer = new AtomicReference<>();
-    private final AtomicReference<String> responseHeaderFromServer = new AtomicReference<>();
     private CountDownLatch resultSignal;
     private CountDownLatch serverStopped;
     private CountDownLatch bridgeStopped;
 
-    private MessageBus serverJMSMessageBus;
-    private MessageBus clientMessageNatsBus;
-    private MessageBus bridgeMessageBusNatsSource;
-    private MessageBus bridgeMessageBusJmsDestination;
+    private MessageBus serverMessageBus;
+    private MessageBus clientMessageBus;
+    private MessageBus bridgeMessageBusSource;
+    private MessageBus bridgeMessageBusDestination;
     private MessageBridge messageBridge;
 
     @Before
     public void setUp() throws Exception {
-        clientMessageNatsBus = TestUtils.getMessageBusNats("CLIENT","A");
-        serverJMSMessageBus = TestUtils.getMessageBusJmsWithHeaders("SERVER","A");
+        clientMessageBus = TestUtils.getMessageBusIbmMQ("CLIENT", false);
+        serverMessageBus = TestUtils.getMessageBusNats("SERVER", "B");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE","A");
-        bridgeMessageBusJmsDestination = TestUtils.getMessageBusJmsWithHeaders("BRIDGE_DEST","A");
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true, null);
+        bridgeMessageBusSource = TestUtils.getMessageBusIbmMQ("BRIDGE_SRC", true);
+        bridgeMessageBusDestination = TestUtils.getMessageBusNats("BRIDGE_DST","B");
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null);
 
     }
 
@@ -52,36 +49,24 @@ public class NatsToJmsBridgeWithHeadersTest {
 
     @Test
     public void test() throws Exception {
-
-
         runServerLoop();
         runBridgeLoop();
-
-        final Message message = MessageBuilder.builder().withHeader("MY_HEADER", "MY_VALUE").withBody("RICK").build();
-
-        clientMessageNatsBus.request(message, reply -> {
-
-            responseHeaderFromServer.set((String) reply.headers().get("MY_HEADER"));
-            responseFromServer.set(reply.bodyAsString());
+        clientMessageBus.request("RICK", s -> {
+            responseFromServer.set(s);
             resultSignal.countDown();
         });
-
-
         runClientLoop();
-        assertEquals("Hello RICK MY_HEADER MY_VALUE", responseFromServer.get());
-
-        System.out.println(responseFromServer.get());
-
-
+        assertEquals("Hello RICK", responseFromServer.get());
         stopServerAndBridgeLoops();
     }
 
     private void runClientLoop() throws Exception {
 
-        for (int index = 0; index < 100; index++) {
+        for (int index = 0; index < 10; index++) {
 
-            resultSignal.await(100, TimeUnit.MILLISECONDS);
-            clientMessageNatsBus.process();
+            System.out.println("Waiting");
+            resultSignal.await(1, TimeUnit.SECONDS);
+            clientMessageBus.process();
 
             if (responseFromServer.get() != null) break;
         }
@@ -98,6 +83,6 @@ public class NatsToJmsBridgeWithHeadersTest {
     }
 
     private void runServerLoop() {
-        TestUtils.runServerLoop(stop, serverJMSMessageBus, serverStopped);
+        TestUtils.runServerLoop(stop, serverMessageBus, serverStopped);
     }
 }

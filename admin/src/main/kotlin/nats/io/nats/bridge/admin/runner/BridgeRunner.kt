@@ -20,27 +20,41 @@ import javax.annotation.PreDestroy
 
 class BridgeRunnerManager(private val repo: ConfigRepo,
                           private val bridgeRunnerRef: AtomicReference<BridgeRunner> = AtomicReference(),
-                          private val metricsRegistry: MeterRegistry?=null) {
+                          private val metricsRegistry: MeterRegistry? = null) {
 
     fun endProcessSignal() = endProcessSignalRef.get()!!
     fun sendEndProcessSignal() = sendEndProcessSignalRef.get()!!
+    private val lastErrorRef = AtomicReference<Exception>()
+    private val logger = LoggerFactory.getLogger(this.javaClass)
 
     @PostConstruct
-    fun init() = bridgeRunner().initRunner()
+    fun init() {
+        try {
+            bridgeRunner().initRunner()
+        } catch (ex: Exception) {
+            lastErrorRef.set(ex)
+            logger.error("Unable to start bridge runner", ex)
+        }
+    }
 
     fun restart() {
         stop()
         /* Force Bridge to reload its configuration. */
         bridgeRunnerRef.set(null)
+        lastErrorRef.set(null)
         init()
     }
 
-    fun wasError() = bridgeRunner().wasError()
+    fun wasError() = lastErrorRef.get() !=null || bridgeRunner().wasError()
+
     fun wasStarted() = bridgeRunner().wasStarted()
-    fun getLastError() = bridgeRunner().getLastError()
+    fun getLastError() : Exception? = bridgeRunner().getLastError()?:lastErrorRef.get()
     fun isRunning() = bridgeRunner().isRunning()
     fun isStopped() = bridgeRunner().isStopped()
-    fun clearLastError() = bridgeRunner().clearLastError()
+    fun clearLastError() {
+        bridgeRunner().clearLastError()
+        lastErrorRef.set(null)
+    }
 
     @PreDestroy
     fun stop() {
@@ -66,6 +80,7 @@ class BridgeRunnerManager(private val repo: ConfigRepo,
         }
         return bridgeRunnerRef.get()!!
     }
+
 
 }
 
@@ -118,10 +133,10 @@ class BridgeRunner(private val bridgeLoader: MessageBridgeLoader,
                 logger.warn("Stopped bridge runner with error", ex)
 
             }
-            messageBridges.forEach{ mb ->
+            messageBridges.forEach { mb ->
                 try {
                     mb.close()
-                } catch (ex:Exception) {
+                } catch (ex: Exception) {
                     logger.warn("error shutting down bridge ${mb.name()}", ex)
                 }
             }

@@ -33,14 +33,14 @@ public class JmsToNatsBridgeWithHeadersTest {
 
     @Before
     public void setUp() throws Exception {
-        clientMessageBus = TestUtils.getMessageBusJmsWithHeaders("B");
-        serverMessageBus = TestUtils.getMessageBusNats("B");
+        clientMessageBus = TestUtils.getMessageBusJmsWithHeaders("","B");
+        serverMessageBus = TestUtils.getMessageBusNats("","B");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSource = TestUtils.getMessageBusJmsWithHeaders("B");
-        bridgeMessageBusDestination = TestUtils.getMessageBusNats("B");
+        bridgeMessageBusSource = TestUtils.getMessageBusJmsWithHeaders("","B");
+        bridgeMessageBusDestination = TestUtils.getMessageBusNats("","B");
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null);
 
     }
@@ -76,10 +76,10 @@ public class JmsToNatsBridgeWithHeadersTest {
 
     private void runClientLoop() throws Exception {
 
-        for (int index = 0; index < 10; index++) {
+        for (int index = 0; index < 100; index++) {
 
             System.out.println("Waiting");
-            resultSignal.await(1, TimeUnit.SECONDS);
+            resultSignal.await(100, TimeUnit.MILLISECONDS);
             clientMessageBus.process();
 
             if (responseFromServer.get() != null) break;

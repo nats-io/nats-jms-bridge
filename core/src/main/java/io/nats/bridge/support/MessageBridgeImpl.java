@@ -67,7 +67,9 @@ public class MessageBridgeImpl implements MessageBridge {
 
         if (requestReply) {
             if (receiveMessageFromSourceOption.isPresent()) count++;
+
             receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
+                        //ystem.out.println("GOT MESSAGE " + receiveMessageFromSource.bodyAsString());
                         destinationBus.request(receiveMessageFromSource, replyMessage -> {
                             replyMessageQueue.add(new MessageBridgeRequestReply(receiveMessageFromSource, replyMessage));
                         });

@@ -79,14 +79,14 @@ public class JMSMessageBus implements MessageBus {
                          final Logger logger,
                          final Queue<JMSReply> jmsReplyQueue,
                          final FunctionWithException<javax.jms.Message, Message> jmsMessageConverter,
-                         final FunctionWithException<Message, javax.jms.Message> bridgeMessageConverter) {
-        this.name =  name.toLowerCase().replace(".", "_").replace(" ", "_").replace("-", "_");
+                         final FunctionWithException<Message, javax.jms.Message> bridgeMessageConverter,
+                         final String destinationName) {
+        this.name = name.toLowerCase().replace(".", "_").replace(" ", "_").replace("-", "_");
         this.destination = destination;
         this.session = session;
         this.connection = connection;
         this.responseDestination = responseDestination;
         this.responseConsumer = responseConsumer;
-        //TODO setup exception listener for JMS Connection
         this.timeSource = timeSource;
         this.tryHandler = tryHandler;
 
@@ -94,19 +94,21 @@ public class JMSMessageBus implements MessageBus {
         this.metrics = metrics;
 
 
-        countPublish = metrics.createCounter( "publish_count", "name_" + this.name, "jms_mb");
-        countPublishErrors = metrics.createCounter("publish_count_errors","name_" + this.name, "jms_mb");
-        countRequest = metrics.createCounter("request_count","name_" + this.name, "jms_mb");
-        countRequestErrors = metrics.createCounter( "request_count_errors","name_" + this.name, "jms_mb");
-        countRequestResponses = metrics.createCounter( "request_response_count","name_" + this.name, "jms_mb");
-        countRequestResponseErrors = metrics.createCounter( "request_response_count_errors","name_" + this.name, "jms_mb");
-        countRequestResponsesMissing = metrics.createCounter(  "request_response_missing_count","name_" + this.name, "jms_mb");
-        timerRequestResponse = metrics.createTimeTracker("request_response_timing","name_" + this.name, "jms_mb");
-        countReceived = metrics.createCounter( "received_count","name_" + this.name, "jms_mb");
-        countReceivedReply = metrics.createCounter("received_reply_count","name_" + this.name, "jms_mb");
-        timerReceiveReply = metrics.createTimeTracker("receive_reply_timing","name_" + this.name, "jms_mb");
-        countReceivedReplyErrors = metrics.createCounter("received_reply_count_errors","name_" + this.name, "jms_mb");
-        messageConvertErrors = metrics.createCounter("message_convert_count_errors","name_" + this.name, "jms_mb");
+        final String[] tags = Metrics.tags("name", "name_" + this.name, "mb_type", "jms_mb", "dst", destinationName);
+
+        countPublish = metrics.createCounter("publish_count", tags);
+        countPublishErrors = metrics.createCounter("publish_count_errors", tags);
+        countRequest = metrics.createCounter("request_count", tags);
+        countRequestErrors = metrics.createCounter("request_count_errors", tags);
+        countRequestResponses = metrics.createCounter("request_response_count", tags);
+        countRequestResponseErrors = metrics.createCounter("request_response_count_errors", tags);
+        countRequestResponsesMissing = metrics.createCounter("request_response_missing_count", tags);
+        timerRequestResponse = metrics.createTimeTracker("request_response_timing", tags);
+        countReceived = metrics.createCounter("received_count", tags);
+        countReceivedReply = metrics.createCounter("received_reply_count", tags);
+        timerReceiveReply = metrics.createTimeTracker("receive_reply_timing", tags);
+        countReceivedReplyErrors = metrics.createCounter("received_reply_count_errors", tags);
+        messageConvertErrors = metrics.createCounter("message_convert_count_errors", tags);
 
 
         this.producerSupplier = producerSupplier;
@@ -118,6 +120,7 @@ public class JMSMessageBus implements MessageBus {
         this.jmsMessageConverter = jmsMessageConverter;
         this.bridgeMessageConverter = bridgeMessageConverter;
     }
+
 
     private MessageProducer producer() {
         if (producer == null) {
@@ -160,7 +163,6 @@ public class JMSMessageBus implements MessageBus {
 
         if (logger.isDebugEnabled()) logger.debug("request called " + message);
 
-        //TODO to get this to be more generic as part of builder pass a createDestination Function<Session, Destination> that calls session.createTemporaryQueue() or session.createTemporaryTopic()
         final javax.jms.Message jmsMessage = convertToJMSMessage(message);
 
 
@@ -172,7 +174,7 @@ public class JMSMessageBus implements MessageBus {
             if (logger.isDebugEnabled()) logger.debug("REQUEST BODY " + message.toString());
 
             if (logger.isDebugEnabled())
-                logger.debug(String.format("CORRELATION ID: %s %s\n", correlationID, responseDestination.toString()));
+                logger.debug(String.format("CORRELATION ID: %s %s\n", correlationID, responseDestination));
             requestResponseMap.put(correlationID, new JMSRequestResponse(replyCallback, timeSource.getTime()));
             countRequest.increment();
         }, countRequestErrors, e -> new JMSMessageBusException("unable to send JMS request", e));
@@ -240,6 +242,8 @@ public class JMSMessageBus implements MessageBus {
      */
     private int processResponses() {
 
+        if (responseConsumer == null) return 0;
+
         int[] countHolder = new int[1];
 
         tryHandler.tryWithErrorCount(() -> {
@@ -249,9 +253,10 @@ public class JMSMessageBus implements MessageBus {
                 message = responseConsumer.receiveNoWait();
                 if (message != null) {
                     count++;
+                    if (logger.isDebugEnabled()) logger.debug(this.name  + "::: RESPONSE FROM JMS  ");
                     final String correlationID = message.getJMSCorrelationID();
                     if (logger.isDebugEnabled())
-                        logger.debug(String.format("Process JMS Message Consumer %s \n", correlationID));
+                        logger.debug(String.format("%s ::: Process JMS Message Consumer %s \n", this.name, correlationID));
                     final Optional<JMSRequestResponse> jmsRequestResponse = Optional.ofNullable(requestResponseMap.get(correlationID));
                     final javax.jms.Message msg = message;
                     jmsRequestResponse.ifPresent(requestResponse -> {
@@ -293,6 +298,8 @@ public class JMSMessageBus implements MessageBus {
             do {
                 reply = jmsReplyQueue.poll();
                 if (reply != null) {
+
+                    if (logger.isDebugEnabled()) logger.debug(this.name  + "::: REPLY FROM SERVER IN JMS MESSAGE BUS " + reply.getReply().bodyAsString());
                     count++;
                     final byte[] messageBody = reply.getReply().getBodyBytes();
                     final String correlationId = reply.getCorrelationID();
@@ -302,7 +309,7 @@ public class JMSMessageBus implements MessageBus {
                     timerReceiveReply.recordTiming(timeSource.getTime() - reply.getSentTime());
                     countReceivedReply.increment();
                     if (logger.isDebugEnabled())
-                        logger.debug(String.format("Reply handler - %s %s %s\n", reply.getReply().bodyAsString(), correlationId, replyProducer.getDestination().toString()));
+                        logger.debug(String.format("%s ::: Reply handler - %s %s %s\n", this.name, reply.getReply().bodyAsString(), correlationId, replyProducer.getDestination().toString()));
                     jmsReplyMessage.setJMSCorrelationID(correlationId);
                     replyProducer.send(jmsReplyMessage);
                     replyProducer.close();

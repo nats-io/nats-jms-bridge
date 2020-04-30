@@ -27,23 +27,59 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TestUtils {
-    public static MessageBus getMessageBusJms(final String topicPostFix) {
+    public static MessageBus getMessageBusJms(final String name, final String topicPostFix) {
         final String queueName = "dynamicQueues/message-only-" + topicPostFix;
-        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName);
-        return jmsMessageBusBuilder.build();
+        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName).withName("JMS_" + name);
+
+        return jmsMessageBusBuilder.withUserNameConnection("cloudurable").withPasswordConnection("cloudurable").build();
     }
 
-    public static MessageBus getMessageBusJmsWithHeaders(final String topicPostFix) {
+    public static MessageBus getMessageBusIbmMQ(final String name, boolean src) {
+        try {
+            final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder()
+                    .withName("IBM_MQ_" + name).useIBMMQ().withDestinationName("DEV.QUEUE.1")
+                    .withResponseDestinationName("DEV.QUEUE.2");
+             jmsMessageBusBuilder.withUserNameConnection("app").withPasswordConnection("passw0rd");
+            if (src) {
+                jmsMessageBusBuilder.asSource();
+            }
+            return jmsMessageBusBuilder.build();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public static MessageBus getMessageBusIbmMQWithHeaders(final String name, boolean src) {
+        try {
+            final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder()
+                    .withName("IBM_MQ_" + name).useIBMMQ().withDestinationName("DEV.QUEUE.1")
+                    .withResponseDestinationName("DEV.QUEUE.2");
+            jmsMessageBusBuilder.withUserNameConnection("app").turnOnCopyHeaders().withPasswordConnection("passw0rd");
+            if (src) {
+                jmsMessageBusBuilder.asSource();
+            }
+            return jmsMessageBusBuilder.build();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException(ex);
+        }
+    }
+
+
+
+    public static MessageBus getMessageBusJmsWithHeaders(final String name, final String topicPostFix) {
         final String queueName = "dynamicQueues/headers-message-only-" + topicPostFix;
-        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().turnOnCopyHeaders().withDestinationName(queueName);
-        return jmsMessageBusBuilder.build();
+        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder()
+                .withName("JMS_W_HEADERS_" + name).turnOnCopyHeaders().withDestinationName(queueName);
+        return jmsMessageBusBuilder.withUserNameConnection("cloudurable").withPasswordConnection("cloudurable").build();
     }
 
-    public static MessageBus getMessageBusNats(final String topicPostFix) throws IOException, InterruptedException {
+    public static MessageBus getMessageBusNats(final String name, final String topicPostFix) throws IOException, InterruptedException {
 
         final String subject = topicPostFix + "NatsMessageBus";
 
-        final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withSubject(subject);
+        final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withName("NATS_" + name).withSubject(subject);
         natsMessageBusBuilder.getOptionsBuilder().noReconnect();
         return natsMessageBusBuilder.build();
     }
@@ -54,8 +90,12 @@ public class TestUtils {
         final Thread thread = new Thread(() -> {
             try {
                 while (!stop.get()) {
-                    Thread.sleep(50);
-                    messageBridge.process();
+                    Thread.sleep(25);
+
+                    int process = messageBridge.process();
+                    if (process > 0) {
+                        System.out.println("Bridge Loop: Messages sent or received " + process);
+                    }
                 }
                 messageBridge.close();
                 countDownLatch.countDown();
@@ -84,8 +124,8 @@ public class TestUtils {
                 }
                 final Optional<Message> receive = serverMessageBus.receive();
                 receive.ifPresent(message -> {
-                    System.out.println("Handle message " + message.bodyAsString());
-                    System.out.println("Handle message headers " + message.headers());
+                    System.out.println("Server Loop: Handle message " + message.bodyAsString());
+                    System.out.println("Server Loop: Handle message headers " + message.headers());
 
 
                     final String myHeader = (String) message.headers().get("MY_HEADER");
@@ -101,7 +141,7 @@ public class TestUtils {
 
 
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

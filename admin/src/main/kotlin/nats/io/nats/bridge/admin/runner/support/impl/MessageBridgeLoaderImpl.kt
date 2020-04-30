@@ -40,6 +40,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
                 val dst = b.destBusBuilder
                 if (src is JMSMessageBusBuilder) {
                     src.withName(src.name + bridgeNum)
+                    src.asSource()
                 } else if (src is NatsMessageBusBuilder) {
                     src.withName(src.name + bridgeNum)
                 }
