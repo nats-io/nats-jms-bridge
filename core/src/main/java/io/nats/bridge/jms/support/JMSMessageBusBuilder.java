@@ -193,7 +193,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     public MetricsProcessor getMetricsProcessor() {
         if (metricsProcessor == null) {
             metricsProcessor = new MetricsDisplay(new Output() {
-            }, getMetrics(), 10, Duration.ofSeconds(10), System::currentTimeMillis);
+            }, getMetrics(), 10, Duration.ofSeconds(10), System::currentTimeMillis, name);
         }
         return metricsProcessor;
     }

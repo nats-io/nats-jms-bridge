@@ -3,6 +3,7 @@ package nats.io.nats.bridge.admin.integration
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.nats.bridge.jms.support.JMSMessageBusBuilder
 import nats.io.nats.bridge.admin.models.logins.LoginConfig
 import nats.io.nats.bridge.admin.models.logins.LoginRequest
 import nats.io.nats.bridge.admin.models.logins.TokenResponse
@@ -23,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
-class Main {
+class IntegrationUtils {
 
     val JSON: MediaType = "application/json; charset=utf-8".toMediaType()
     fun client() = OkHttpClient()
@@ -104,9 +105,22 @@ class Main {
         //postAdmin("$bridgeControlAdminURL/restart")
         val stop = AtomicBoolean()
         val builder = loader.loadBridgeBuilders()[0]
-        val jmsClient = builder.sourceBusBuilder?.build()!!
-        val natsClient = builder.destBusBuilder?.build()!!
-        val natsService = FakeServer(natsClient, stop)
+
+        val clientBuilder  = builder.sourceBusBuilder!!
+
+        if (clientBuilder is JMSMessageBusBuilder) {
+
+        }
+
+        val serverBuilder = builder.destBusBuilder!!
+
+        if (serverBuilder is JMSMessageBusBuilder) {
+            serverBuilder.asSource()
+        }
+
+        val clientBus = clientBuilder.build()
+        val serverBus = serverBuilder.build()
+        val natsService = FakeServer(serverBus, stop)
 
         natsService.run()
         val ref: AtomicReference<String> = AtomicReference()
@@ -117,17 +131,17 @@ class Main {
             val latch = CountDownLatch(10)
             for (x in 0..9) {
                 println("Call $x of run $a")
-                jmsClient.request("Rick $a $x") { response ->
+                clientBus.request("Rick $a $x") { response ->
                     ref.set(response)
                     count.incrementAndGet()
                     latch.countDown()
                 }
-                Thread.sleep(5)
-                jmsClient.process()
+                Thread.sleep(50)
+                clientBus.process()
             }
             Thread.sleep(50)
-            jmsClient.process()
-            latch.await(2000, TimeUnit.MILLISECONDS)
+            clientBus.process()
+            latch.await(5000, TimeUnit.MILLISECONDS)
             println("REPLY COUNT " + count.get())
             displayFlag(readFlag("${Constants.bridgeControlURL}/running"))
             displayFlag(readFlag("${Constants.bridgeControlURL}/started"))
@@ -136,8 +150,8 @@ class Main {
 
         Thread.sleep(1_000)
         stop.set(true)
-        jmsClient.close()
-        natsClient.close()
+        clientBus.close()
+        serverBus.close()
         println("REPLY COUNT " + count.get())
         println("Done")
 

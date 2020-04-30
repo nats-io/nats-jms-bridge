@@ -35,15 +35,17 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
 
     private fun configureBridge(b: MessageBridgeBuilder, details: Details, src: MessageBusBuilder?, dst: MessageBusBuilder?, postFix: String = "") {
 
-        b.withDestinationBusBuilder(createMessageBusBuilder(details.bridge.destination, details.destinationCluster, details.bridge))
-                .withSourceBusBuilder(createMessageBusBuilder(details.bridge.source, details.sourceCluster, details.bridge))
+        val d = createMessageBusBuilder(details.bridge.destination, details.destinationCluster, details.bridge)
+        val s =createMessageBusBuilder(details.bridge.source, details.sourceCluster, details.bridge)
+
+        b.withDestinationBusBuilder(d)
+                .withSourceBusBuilder(s)
                 .withRequestReply(details.bridge.bridgeType == BridgeType.REQUEST_REPLY)
                 .withName(details.bridge.name + postFix)
 
         if (src is JMSMessageBusBuilder) {
             src.withName(src.name + postFix)
-
-            //src.asSource()
+            src.asSource()
         } else if (src is NatsMessageBusBuilder) {
             src.withName(src.name + postFix)
         }
@@ -75,22 +77,17 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
         val builder = JMSMessageBusBuilder.builder()
                 .withDestinationName(busInfo.subject).withName(busInfo.name)
 
+        if (busInfo.responseSubject!=null) builder.withResponseDestinationName(busInfo.responseSubject)
+
         if (metricsRegistry != null)
             builder.withMetricsProcessor(SpringMetricsProcessor(metricsRegistry, builder.metrics, 10,
                     Duration.ofSeconds(30), builder.timeSource, { builder.name }))
 
-        if (config.userName != null) {
-            builder.withUserNameConnection(config.userName)
-        }
-        if (config.password != null) {
-            builder.withPasswordConnection(config.password)
-        }
-        if (bridge.copyHeaders != null) {
-            builder.withCopyHeaders(bridge.copyHeaders)
-        }
-        if (config.config.isNotEmpty()) {
-            builder.withJndiProperties(config.config)
-        }
+        if (config.userName != null) builder.withUserNameConnection(config.userName)
+        if (config.password != null) builder.withPasswordConnection(config.password)
+        if (bridge.copyHeaders != null) builder.withCopyHeaders(bridge.copyHeaders)
+        if (config.config.isNotEmpty()) builder.withJndiProperties(config.config)
+
         return builder
     }
 
