@@ -72,7 +72,8 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     private Hashtable<String, Object> jndiProperties = new Hashtable<>();
     private String name = "jms-no-name";
     private boolean ibmMQ = false;
-    private String responseDestinationName="TEMP_QUEUE";
+    private String responseDestinationName = "TEMP_QUEUE";
+    private boolean source = false;
 
 
     public static JMSMessageBusBuilder builder() {
@@ -84,7 +85,8 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     }
 
     public JMSMessageBusBuilder asSource() {
-        responseDestinationName = null;
+
+        source = true;
         return this;
     }
 
@@ -141,9 +143,9 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     public FunctionWithException<Message, io.nats.bridge.messages.Message> getJmsMessageConverter() {
         if (jmsMessageConverter == null) {
             if (!isCopyHeaders()) {
-                jmsMessageConverter = new ConvertJmsMessageToBridgeMessage(getTryHandler(), getTimeSource(), getJmsReplyQueue());
+                jmsMessageConverter = new ConvertJmsMessageToBridgeMessage(getTryHandler(), getTimeSource(), getJmsReplyQueue(), "" + getName() + "_CONVERT_JMS_MESSAGE");
             } else {
-                jmsMessageConverter = new ConvertJmsMessageToBridgeMessageWithHeaders(getTryHandler(), getTimeSource(), getJmsReplyQueue());
+                jmsMessageConverter = new ConvertJmsMessageToBridgeMessageWithHeaders(getTryHandler(), getTimeSource(), getJmsReplyQueue(), "" + getName() + "_CONVERT_JMS_MESSAGE_W_HEADERS");
             }
         }
         return jmsMessageConverter;
@@ -242,11 +244,15 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     public Destination getResponseDestination() {
         if (responseDestination == null) {
             responseDestination = exceptionHandler.tryReturnOrRethrow(() -> {
-                        final String replyDestinationName = getResponseDestinationName();
-                        return (replyDestinationName == null) ? null :
-                        (replyDestinationName.equals("TEMP_QUEUE")) ?
-                                getSession().createTemporaryQueue() :
-                                getSession().createQueue(replyDestinationName);
+
+                        if ((getResponseDestinationName().equals("TEMP_QUEUE"))) {
+                            System.out.println("Creating temp queue ");
+                            return getSession().createTemporaryQueue();
+                        } else {
+                            System.out.println("Creating response queue " + getResponseDestinationName());
+                            return getSession().createQueue(getResponseDestinationName());
+                        }
+
                     },
                     e -> new JMSMessageBusBuilderException("Unable to create JMS response queue " + getUserNameConnection(), e));
         }
@@ -469,8 +475,8 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         final Session session = getSession();
         final Destination destination = getDestination();
         return new JMSMessageBus(getName(), destination, session, connection,
-                getResponseDestinationName() != null ? getResponseDestination() : null,
-                getResponseDestinationName() != null ? getResponseConsumer() : null,
+                getResponseDestination(),
+                source ? null : getResponseConsumer(),
                 getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(),
                 getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(),
                 getBridgeMessageConverter(), getDestinationName());

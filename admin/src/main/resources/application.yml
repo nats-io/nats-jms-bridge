@@ -18,5 +18,5 @@ repo:
   logins:
     configFile: ./config/nats-bridge-logins.yaml
 
-logging.level.io.nats: INFO
+logging.level.io.nats: DEBUG
 logging.level.io.netty: INFO

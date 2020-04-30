@@ -24,6 +24,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.File
+import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -65,7 +66,7 @@ class NatService(val messageBus: MessageBus,
                         break
                     }
                     Thread.sleep(1)
-                    val receive = messageBus.receive()
+                    val receive = messageBus.receive(Duration.ofSeconds(1))
 
                     receive.ifPresent { message ->
                         //println("Handle message " + message.bodyAsString())
@@ -181,21 +182,33 @@ class Main {
         val count = AtomicInteger()
 
         for (a in 0..9) {
+            println("Run $a")
             val latch = CountDownLatch(10)
             for (x in 0..9) {
-                jmsClient.request("Rick") { response ->
+                println("Call $x of run $a")
+                jmsClient.request("Rick $a $x") { response ->
                     ref.set(response)
                     count.incrementAndGet()
                     latch.countDown()
                 }
+                Thread.sleep(5)
+                jmsClient.process()
             }
+            Thread.sleep(50)
             jmsClient.process()
-            latch.await(500, TimeUnit.MILLISECONDS)
+            latch.await(2000, TimeUnit.MILLISECONDS)
             println("REPLY COUNT " + count.get())
             displayFlag(readFlag("$bridgeControlURL/running"))
             displayFlag(readFlag("$bridgeControlURL/started"))
             displayFlag(readFlag("$bridgeControlURL/error/was-error"))
         }
+
+        Thread.sleep(1_000)
+        stop.set(true)
+        jmsClient.close()
+        natsClient.close()
+        println("REPLY COUNT " + count.get())
+        println("Done")
 
         println(ref.get())
     }
