@@ -1,15 +1,8 @@
-package nats.io.nats.bridge.admin
+package nats.io.nats.bridge.admin.integration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.nats.bridge.MessageBus
-import io.nats.bridge.messages.MessageBuilder
-import nats.io.nats.bridge.admin.Constants.adminToken
-import nats.io.nats.bridge.admin.Constants.bridgeControlURL
-import nats.io.nats.bridge.admin.Constants.initialYaml
-import nats.io.nats.bridge.admin.Constants.loginURL
-import nats.io.nats.bridge.admin.Constants.natsBridgeConfigFileName
 import nats.io.nats.bridge.admin.models.logins.LoginConfig
 import nats.io.nats.bridge.admin.models.logins.LoginRequest
 import nats.io.nats.bridge.admin.models.logins.TokenResponse
@@ -24,73 +17,11 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.File
-import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
-
-
-object Constants {
-    const val host = "http://localhost:8080"
-    const val bridgeControlURL = "$host/api/v1/control/bridges"
-    const val bridgeControlAdminURL = "$host/api/v1/control/bridges/admin"
-    const val loginURL = "$host/api/v1/login"
-    const val initialYaml = "config/initial-nats-bridge-logins.yaml"
-    const val adminToken = "config/admin.token"
-    const val natsBridgeConfigFileName = "./config/nats-bridge.yaml"
-
-}
-
-data class Flag(val message: String, val flag: Boolean)
-data class Error(val name: String, val message: String)
-data class Message(val message: String, val error: Error? = null)
-data class RequestException(val url: String, val responseMessage: String, val response: Response) : Exception(responseMessage) {
-    override fun getLocalizedMessage(): String {
-        return "$url ${response.code} ${response.message} ${response.body?.string()} ${super.getLocalizedMessage()}"
-    }
-}
-
-
-class NatService(val messageBus: MessageBus,
-                 val stop: AtomicBoolean = AtomicBoolean(false)) {
-    fun run() {
-        Thread {
-            try {
-
-                Runtime.getRuntime().addShutdownHook(Thread(Runnable { stop.set(true) }))
-                while (true) {
-                    if (stop.get()) {
-                        messageBus.close()
-                        break
-                    }
-                    Thread.sleep(1)
-                    val receive = messageBus.receive(Duration.ofSeconds(1))
-
-                    receive.ifPresent { message ->
-                        //println("Handle message " + message.bodyAsString())
-                        message.reply(MessageBuilder.builder().withBody("Hello message " + message.bodyAsString()).build())
-                    }
-
-                    if (!receive.isPresent) {
-                        //println("NOTHING")
-                    }
-                    messageBus.process()
-
-                }
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
-        }.start()
-
-    }
-}
-
-fun main() {
-    Main().run()
-}
-
 
 class Main {
 
@@ -99,10 +30,10 @@ class Main {
     val client = client()
 
     val yamlMapper: ObjectMapper = ObjectMapperUtils.getYamlObjectMapper()
-    val conf = yamlMapper.readValue<LoginConfig>(File(initialYaml))
+    val conf = yamlMapper.readValue<LoginConfig>(File(Constants.initialYaml))
     var token: String? = null
 
-    val loader = MessageBridgeLoaderImpl(ConfigRepoFromFiles(configFile = File(natsBridgeConfigFileName)))
+    val loader = MessageBridgeLoaderImpl(ConfigRepoFromFiles(configFile = File(Constants.natsBridgeConfigFileName)))
 
 
     fun adminUser() = conf.logins.find { it.subject == "admin" }!!
@@ -143,10 +74,10 @@ class Main {
     }
 
     private fun readToken(): String {
-        val adminTokenFile = File(adminToken)
+        val adminTokenFile = File(Constants.adminToken)
         return if (!adminTokenFile.exists()) {
             val adminUser = adminUser()
-            val url = "$loginURL/generateToken"
+            val url = "${Constants.loginURL}/generateToken"
             val bd: Any = LoginRequest(adminUser.subject, adminUser.publicKey, adminUser.secret)
             val response = postJson(bd, url)
             return if (response.isSuccessful) {
@@ -165,9 +96,9 @@ class Main {
     fun run() {
         token = readToken()
 
-        displayFlag(readFlag("$bridgeControlURL/running"))
-        displayFlag(readFlag("$bridgeControlURL/started"))
-        displayFlag(readFlag("$bridgeControlURL/error/was-error"))
+        displayFlag(readFlag("${Constants.bridgeControlURL}/running"))
+        displayFlag(readFlag("${Constants.bridgeControlURL}/started"))
+        displayFlag(readFlag("${Constants.bridgeControlURL}/error/was-error"))
         //postAdmin("$bridgeControlAdminURL/clear/last/error")
         //postAdmin("$bridgeControlAdminURL/stop")
         //postAdmin("$bridgeControlAdminURL/restart")
@@ -175,7 +106,7 @@ class Main {
         val builder = loader.loadBridgeBuilders()[0]
         val jmsClient = builder.sourceBusBuilder?.build()!!
         val natsClient = builder.destBusBuilder?.build()!!
-        val natsService = NatService(natsClient, stop)
+        val natsService = FakeServer(natsClient, stop)
 
         natsService.run()
         val ref: AtomicReference<String> = AtomicReference()
@@ -198,9 +129,9 @@ class Main {
             jmsClient.process()
             latch.await(2000, TimeUnit.MILLISECONDS)
             println("REPLY COUNT " + count.get())
-            displayFlag(readFlag("$bridgeControlURL/running"))
-            displayFlag(readFlag("$bridgeControlURL/started"))
-            displayFlag(readFlag("$bridgeControlURL/error/was-error"))
+            displayFlag(readFlag("${Constants.bridgeControlURL}/running"))
+            displayFlag(readFlag("${Constants.bridgeControlURL}/started"))
+            displayFlag(readFlag("${Constants.bridgeControlURL}/error/was-error"))
         }
 
         Thread.sleep(1_000)
@@ -217,7 +148,3 @@ class Main {
         println("${flag.message} ${flag.flag}")
     }
 }
-
-
-
-
