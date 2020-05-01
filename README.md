@@ -4,6 +4,11 @@
 Nats MQ JMS Bridge.
 
 
+## Travis Build
+
+![Build Status](https://api.travis-ci.org/nats-io/nats-jms-mq-bridge.svg "Build Status")
+
+
 
 ## Early version
 
@@ -39,5 +44,5 @@ The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nat
 
 This all happens async.
 
-Admin Console 
+Admin Console
 ![image](https://user-images.githubusercontent.com/382678/80275243-e3010c80-8694-11ea-843c-b26cf43cf8ae.png)
