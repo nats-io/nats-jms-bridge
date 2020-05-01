@@ -58,7 +58,6 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
 
             return new MQContext(contextMap);
         } catch (Exception ex) {
-            ex.printStackTrace();
             throw new NamingException(ex.getLocalizedMessage()); //TODO something better than this
         }
     }

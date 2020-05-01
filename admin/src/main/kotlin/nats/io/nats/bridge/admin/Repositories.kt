@@ -18,6 +18,7 @@ interface ConfigRepo {
     fun addBridge(messageBridge: MessageBridgeInfo)
 
     fun saveConfig(conf: NatsBridgeConfig)
+
 }
 
 

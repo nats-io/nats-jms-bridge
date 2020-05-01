@@ -1,0 +1,4 @@
+jms To Nats	r	jms Bar	j 	 queue/barQueue  	   jmsCluster 	       nats Foo  	  n  	fooSubject 	natsCluster
+Nats To JMS	f	nat Bar	n 	 natsBarSubject  	   natsCluster	        jms Foo  	  j  	queue/Foo  	   jmsCluster
+
+

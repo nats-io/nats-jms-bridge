@@ -18,12 +18,14 @@ public class ConvertJmsMessageToBridgeMessage implements FunctionWithException<j
     private final TimeSource timeSource;
     private final java.util.Queue<JMSReply> jmsReplyQueue; // = new LinkedTransferQueue<>();
     private final ExceptionHandler tryHandler;
+    private final String name;
 
 
-    public ConvertJmsMessageToBridgeMessage(final ExceptionHandler tryHandler, final TimeSource timeSource, final Queue<JMSReply> jmsReplyQueue) {
+    public ConvertJmsMessageToBridgeMessage(final ExceptionHandler tryHandler, final TimeSource timeSource, final Queue<JMSReply> jmsReplyQueue, String name) {
         this.timeSource = timeSource;
         this.jmsReplyQueue = jmsReplyQueue;
         this.tryHandler = tryHandler;
+        this.name = name;
     }
 
     private void enqueueReply(final long sentTime, final Message reply, final String correlationID, final Destination jmsReplyTo) {
@@ -57,9 +59,9 @@ public class ConvertJmsMessageToBridgeMessage implements FunctionWithException<j
                 enqueueReply(startTime, reply, jmsMessage.getJMSCorrelationID(), jmsReplyTo);
             }, e -> {
                 throw new JMSMessageBusException("Unable to send to JMS reply", e);
-            })).build();
+            })).withCreator(name).build();
         } else {
-            return MessageBuilder.builder().withBody(bodyBytes).build();
+            return MessageBuilder.builder().withNoReplyHandler("CONVERT JMS TO BRIDGE MESSAGE NO JMS REPLY TO").withBody(bodyBytes).build();
         }
     }
 

@@ -27,7 +27,7 @@ public class MetricsDisplayTest {
             }
         };
 
-        final MetricsDisplay display = new MetricsDisplay(output, metrics, 2, Duration.ZERO, System::currentTimeMillis);
+        final MetricsDisplay display = new MetricsDisplay(output, metrics, 2, Duration.ZERO, System::currentTimeMillis, "foo");
 
         display.process();
         display.process();

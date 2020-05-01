@@ -12,16 +12,18 @@ public class MetricsDisplay implements MetricsProcessor {
     private final int every;
     private final Duration everyDuration;
     private final TimeSource timeSource;
+    private final String name;
 
     private int index = 0;
     private long lastTime = 0L;
 
-    public MetricsDisplay(final Output output, final Metrics metrics, int every, Duration everyDuration, TimeSource timeSource) {
+    public MetricsDisplay(final Output output, final Metrics metrics, int every, Duration everyDuration, TimeSource timeSource, String name) {
         this.output = output;
         this.every = every;
         this.metrics = metrics;
         this.everyDuration = everyDuration;
         this.timeSource = timeSource;
+        this.name = name;
     }
 
 
@@ -41,11 +43,11 @@ public class MetricsDisplay implements MetricsProcessor {
 
     private void display() {
 
-        output.println("======== Counts =========== ");
+        output.println("======== Counts for " + name + " =========== ");
         metrics.counters().forEach(counter -> output.println(counter.toString()));
-        output.println("======== Gauges =========== ");
+        output.println("======== Gauges for " + name + " =========== ");
         metrics.gauges().forEach(counter -> output.println(counter.toString()));
-        output.println("======== Timers =========== ");
+        output.println("======== Timers for " + name + " =========== ");
         metrics.timers().forEach(counter -> output.println(counter.toString()));
     }
 }

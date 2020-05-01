@@ -19,12 +19,14 @@ public class ConvertJmsMessageToBridgeMessageWithHeaders implements FunctionWith
     private final ExceptionHandler tryHandler;
     private final TimeSource timeSource;
     private final Queue<JMSReply> jmsReplyQueue;
+    private final String name;
 
     public ConvertJmsMessageToBridgeMessageWithHeaders(final ExceptionHandler tryHandler, final TimeSource timeSource,
-                                                       final Queue<JMSReply> jmsReplyQueue) {
+                                                       final Queue<JMSReply> jmsReplyQueue, String name) {
         this.tryHandler = tryHandler;
         this.timeSource = timeSource;
         this.jmsReplyQueue = jmsReplyQueue;
+        this.name = name;
     }
 
     private void enqueueReply(final long sentTime, final Message reply, final String correlationID, final Destination jmsReplyTo) {
@@ -59,8 +61,10 @@ public class ConvertJmsMessageToBridgeMessageWithHeaders implements FunctionWith
             builder.withReplyHandler(reply -> tryHandler.tryWithRethrow(() -> enqueueReply(startTime, reply, jmsMessage.getJMSCorrelationID(), jmsReplyTo), e -> {
                 throw new JMSMessageBusException("Unable to send to JMS reply", e);
             }));
+        } else {
+            builder.withNoReplyHandler("CONVERT JMS TO BRIDGE MESSAGE WITH HEADERS FOR NO JMS_REPLY_TO");
         }
-        return builder.build();
+        return builder.withCreator(name).build();
 
     }
 
