@@ -16,43 +16,43 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
 
     override fun loadBridgeBuilders(): List<MessageBridgeBuilder> = doLoadMessageBridge(repo.readConfig())
 
-    data class Details(val messageBridge: MessageBridgeInfo, val sourceCluster: Cluster, val destinationCluster: Cluster)
+    data class Details(val bridge: MessageBridgeInfo, val sourceCluster: Cluster, val destinationCluster: Cluster)
 
     private fun doLoadMessageBridge(config: NatsBridgeConfig) = config.bridges.flatMap { bridge ->
         val details = extractDetails(bridge, config)
-
         if (bridge.workers == 1 || bridge.workers == 0) {
-            listOf(MessageBridgeBuilder()
-                    .withDestinationBusBuilder(createMessageBusBuilder(bridge.destination, details.destinationCluster, bridge))
-                    .withSourceBusBuilder(createMessageBusBuilder(bridge.source, details.sourceCluster, bridge))
-                    .withRequestReply(bridge.bridgeType == BridgeType.REQUEST_REPLY)
-                    .withName(bridge.name))
+            val b = MessageBridgeBuilder()
+            configureBridge(b, details, b.sourceBusBuilder, b.destBusBuilder)
+            listOf(b)
         } else {
             (1..bridge.workers!!).map { bridgeNum ->
-
                 val b = MessageBridgeBuilder()
-                        .withDestinationBusBuilder(createMessageBusBuilder(bridge.destination, details.destinationCluster, bridge))
-                        .withSourceBusBuilder(createMessageBusBuilder(bridge.source, details.sourceCluster, bridge))
-                        .withRequestReply(bridge.bridgeType == BridgeType.REQUEST_REPLY)
-                        .withName(bridge.name + bridgeNum)
-
-                val src = b.sourceBusBuilder
-                val dst = b.destBusBuilder
-                if (src is JMSMessageBusBuilder) {
-                    src.withName(src.name + bridgeNum)
-                    src.asSource()
-                } else if (src is NatsMessageBusBuilder) {
-                    src.withName(src.name + bridgeNum)
-                }
-                if (dst is JMSMessageBusBuilder) {
-                    dst.withName(dst.name + bridgeNum)
-                } else if (dst is NatsMessageBusBuilder) {
-                    dst.withName(dst.name + bridgeNum)
-                }
+                configureBridge(b, details, b.sourceBusBuilder, b.destBusBuilder, "_$bridgeNum")
                 b
-
             }
+        }
+    }
 
+    private fun configureBridge(b: MessageBridgeBuilder, details: Details, src: MessageBusBuilder?, dst: MessageBusBuilder?, postFix: String = "") {
+
+        val d = createMessageBusBuilder(details.bridge.destination, details.destinationCluster, details.bridge)
+        val s =createMessageBusBuilder(details.bridge.source, details.sourceCluster, details.bridge)
+
+        b.withDestinationBusBuilder(d)
+                .withSourceBusBuilder(s)
+                .withRequestReply(details.bridge.bridgeType == BridgeType.REQUEST_REPLY)
+                .withName(details.bridge.name + postFix)
+
+        if (src is JMSMessageBusBuilder) {
+            src.withName(src.name + postFix)
+            src.asSource()
+        } else if (src is NatsMessageBusBuilder) {
+            src.withName(src.name + postFix)
+        }
+        if (dst is JMSMessageBusBuilder) {
+            dst.withName(dst.name + postFix)
+        } else if (dst is NatsMessageBusBuilder) {
+            dst.withName(dst.name + postFix)
         }
     }
 
@@ -77,22 +77,17 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
         val builder = JMSMessageBusBuilder.builder()
                 .withDestinationName(busInfo.subject).withName(busInfo.name)
 
+        if (busInfo.responseSubject!=null) builder.withResponseDestinationName(busInfo.responseSubject)
+
         if (metricsRegistry != null)
             builder.withMetricsProcessor(SpringMetricsProcessor(metricsRegistry, builder.metrics, 10,
-                    Duration.ofSeconds(30), builder.timeSource, {builder.name}))
+                    Duration.ofSeconds(30), builder.timeSource, { builder.name }))
 
-        if (config.userName != null) {
-            builder.withUserNameConnection(config.userName)
-        }
-        if (config.password != null) {
-            builder.withPasswordConnection(config.password)
-        }
-        if (bridge.copyHeaders != null) {
-            builder.withCopyHeaders(bridge.copyHeaders)
-        }
-        if (config.config.isNotEmpty()) {
-            builder.withJndiProperties(config.config)
-        }
+        if (config.userName != null) builder.withUserNameConnection(config.userName)
+        if (config.password != null) builder.withPasswordConnection(config.password)
+        if (bridge.copyHeaders != null) builder.withCopyHeaders(bridge.copyHeaders)
+        if (config.config.isNotEmpty()) builder.withJndiProperties(config.config)
+
         return builder
     }
 
@@ -102,7 +97,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
 
         if (metricsRegistry != null)
             builder.withMetricsProcessor(SpringMetricsProcessor(metricsRegistry, builder.metrics, 10,
-                    Duration.ofSeconds(30), builder.timeSource,{builder.name}))
+                    Duration.ofSeconds(30), builder.timeSource, { builder.name }))
 
         val port = clusterConfig.port ?: 4222
         if (clusterConfig.host != null && port > 0) {

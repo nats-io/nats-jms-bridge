@@ -20,9 +20,24 @@ services:
     ports:
       - "8161:8161"
       - "61616:61616"
-  bridge-app:
-    container_name: bridge
-    image: 'cloudurable/nats-bridge'
+  bridge-core:
+    container_name: bridge-core
+    image: 'cloudurable/docker-nats-bridge'
     working_dir: /usr/app/core
+    command: ["sleep","infinity"]
+    #command: bash -c "sleep 30 && ./gradlew clean test"
+    #command: bash -c "sleep 30 && NATS_BRIDGE_JMS_USER=cloudurable NATS_BRIDGE_JMS_PWD=cloudurable NATS_BRIDGE_NATS_SERVERS=nats://nats-server:4222 NATS_BRIDGE_JMS_CONNECTION_FACTORY=tcp://active-mq:61616 ./gradlew clean test"
+  bridge-admin:
+    container_name: bridge-admin
+    image: 'cloudurable/nats-bridge-admin'
+    working_dir: /usr/app/admin
     #command: ["sleep","infinity"]
-    command: bash -c "sleep 30 && NATS_BRIDGE_JMS_USER=cloudurable NATS_BRIDGE_JMS_PWD=cloudurable NATS_BRIDGE_NATS_SERVERS=nats://nats-server:4222 NATS_BRIDGE_JMS_CONNECTION_FACTORY=tcp://active-mq:61616 ./gradlew clean test"
+    command: bash -c "./gradlew bootRun"
+    ports:
+      - "8080:8080"
+  prometheus:
+    build:
+      context: .
+      dockerfile: Dockerfile_prometheus.dev
+    ports:
+      - "9090:9090"

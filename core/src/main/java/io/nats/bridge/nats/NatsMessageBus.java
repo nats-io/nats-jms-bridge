@@ -45,6 +45,7 @@ public class NatsMessageBus implements MessageBus {
     private final Counter countRequestResponses;
     private final TimeTracker timerRequestResponse;
     private final TimeTracker timerReceiveReply;
+    private boolean stopped = false;
 
 
     //TODO create NatsMessageBusBuilder.
@@ -125,6 +126,8 @@ public class NatsMessageBus implements MessageBus {
 
     @Override
     public Optional<Message> receive(final Duration duration) {
+        if (stopped) return Optional.empty();
+
         return doReceive(duration);
     }
 
@@ -159,10 +162,11 @@ public class NatsMessageBus implements MessageBus {
         if (replyTo != null) {
             final long startTime = timeSource.getTime();
             return Optional.of(
-                    MessageBuilder.builder().withReplyHandler(reply -> replyUsingReplyTo(startTime, replyTo, reply)).buildFromBytes(message.getData())
+                    MessageBuilder.builder().withReplyHandler(reply -> replyUsingReplyTo(startTime, replyTo, reply))
+                            .withCreator(name).buildFromBytes(message.getData())
             );
         } else {
-            final Message bridgeMessage = MessageBuilder.builder().buildFromBytes(message.getData());
+            final Message bridgeMessage = MessageBuilder.builder().withNoReplyHandler("NATS MESSAGE BUS NO REPLY TO CONVERT MESSAGE NATS TO BRIDGE").withCreator(name).buildFromBytes(message.getData());
             return Optional.of(bridgeMessage);
         }
     }
@@ -170,7 +174,9 @@ public class NatsMessageBus implements MessageBus {
     @Override
     public void close() {
         tryHandler.tryWithLog(() -> {
+            stopped = true;
             connection.drain(Duration.ofSeconds(30)).get();
+
         }, "Can't drain and close nats connection " + subject);
     }
 
@@ -207,7 +213,7 @@ public class NatsMessageBus implements MessageBus {
                     if (reply.future.isDone()) {
                         count++;
                         final io.nats.client.Message replyMessage = reply.future.get();
-                        reply.replyCallback.accept(MessageBuilder.builder().buildFromBytes(replyMessage.getData()));
+                        reply.replyCallback.accept(MessageBuilder.builder().withCreator(name).withNoReplyHandler("NATS MESSAGE BUS PROCESS RESPONSE").buildFromBytes(replyMessage.getData()));
                         timerRequestResponse.recordTiming(timeSource.getTime() - reply.requestTime);
                         countRequestResponses.increment();
                     } else {

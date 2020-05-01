@@ -30,6 +30,20 @@ public class MessageBuilder {
     private byte[] body;
     private String correlationID;
 
+    public String getCreator() {
+        if (creator==null) {
+            return "";
+        }
+        return creator;
+    }
+
+    public MessageBuilder withCreator(String creator) {
+        this.creator = creator;
+        return this;
+    }
+
+    private String creator;
+
     private Consumer<Message> replyHandler;
 
     public MessageBuilder() {
@@ -52,10 +66,22 @@ public class MessageBuilder {
         if (replyHandler == null) {
             replyHandler = message -> {
                 new Exception().fillInStackTrace().printStackTrace();
-                System.out.println("DEFAULT HANDLER CALLED ");
+                System.out.println(creator + "::: DEFAULT HANDLER CALLED " + creator);
             };
         }
         return replyHandler;
+    }
+
+    public MessageBuilder withNoReplyHandler(final String description) {
+        final Exception caller = new Exception();
+
+        withReplyHandler(message -> {
+            System.out.println("NOT EXPECTING A REPLY " + description + "::: creator" +  creator + "::: DEFAULT HANDLER CALLED " + creator);
+            System.out.println("CALLER INFO----");
+            caller.printStackTrace(System.out);
+            new Exception().fillInStackTrace().printStackTrace();
+        });
+        return this;
     }
 
     public MessageBuilder withReplyHandler(Consumer<Message> replyHandler) {

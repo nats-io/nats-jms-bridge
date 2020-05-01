@@ -1,6 +1,6 @@
 # Use an existing docker image as a base
 #FROM gradle
-FROM cloudurable/nats-bridge
+FROM cloudurable/docker-nats-bridge
 
 #Copying files
 COPY . ./usr/app
