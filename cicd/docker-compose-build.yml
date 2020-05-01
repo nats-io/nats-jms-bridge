@@ -1,0 +1,33 @@
+version: '3'
+services:
+  nats-server:
+    image: 'nats'
+    ports:
+      - "4222:4222"
+  ibm-mq:
+    image: 'ibmcom/mq'
+    environment:
+      - LICENSE=accept
+      - MQ_QMGR_NAME=QM1
+      - MQ_APP_PASSWORD=passw0rd
+    ports:
+      - "1414:1414"
+  active-mq:
+    image: 'vromero/activemq-artemis'
+    environment:
+      - ARTEMIS_USERNAME=cloudurable
+      - ARTEMIS_PASSWORD=cloudurable
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+  bridge-core:
+    container_name: bridge-core
+    image: cloudurable/nats-bridge-admin
+    volumes:
+      - ../:/usr/app
+    environment:
+      - NATS_BRIDGE_IBM_MQ_HOST=tcp://ibm-mq:1414
+      - NATS_BRIDGE_NATS_SERVERS=nats://nats-server:4222
+      - NATS_BRIDGE_JMS_CONNECTION_FACTORY=tcp://active-mq:61616
+    working_dir: /usr/app/core
+    command: bash -c "ls && sleep 30 && ./gradlew clean test"

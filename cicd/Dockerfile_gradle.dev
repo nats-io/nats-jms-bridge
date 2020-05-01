@@ -26,10 +26,12 @@ ENV JAVA_HOME /root/.sdkman/candidates/java/current
 
 #Build Core
 WORKDIR /usr/app/core
+RUN bash -c "./gradlew wrapper"
 RUN bash -c "./gradlew clean build publishToMavenLocal -x test"
 
 #Build Admin
 WORKDIR /usr/app/admin
+RUN bash -c "./gradlew wrapper"
 RUN bash -c "./gradlew build -x test"
 
 WORKDIR /usr/app
