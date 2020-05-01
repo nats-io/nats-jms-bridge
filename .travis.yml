@@ -3,7 +3,7 @@ services:
   - docker
 
 before_install:
-  #Add network for bridge
+  - docker network create bnet
   - docker build -t cloudurable/docker-bridge-nats -f cicd/Dockerfile_nats.dev .
   - docker build -t cloudurable/docker-bridge-ibmmq -f cicd/Dockerfile_ibmmq.dev .
   - docker build -t cloudurable/docker-bridge-artemis -f cicd/Dockerfile_artemismq.dev .
