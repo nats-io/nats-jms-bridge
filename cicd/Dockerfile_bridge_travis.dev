@@ -1,7 +1,7 @@
 # Use an existing docker image as a base. This gets used by Travis integration testing to test core
 # This is used to run the travis tests
 # Copies code to this container and then runs gradle build
-FROM cloudurable/gradle
+FROM cloudurable/gradle:0.0.1
 
 #Copying files
 COPY . ./usr/app
