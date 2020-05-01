@@ -66,7 +66,7 @@ public class NatsToIBM_MQOneWayMessagesTest {
 
     }
 
-    //@Before
+    @Before
     public void setUp() throws Exception {
 
         final String busName = "MessagesOnlyA";
@@ -86,7 +86,7 @@ public class NatsToIBM_MQOneWayMessagesTest {
 
     }
 
-    @Test
+    //@Test
     public void test() throws Exception {
         runServerLoop();
         runBridgeLoop();
