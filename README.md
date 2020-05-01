@@ -3,6 +3,9 @@
 
 Nats MQ JMS Bridge.
 
+## Alpha Release Notes
+
+Nats Bridge is releasing an Alpha JMS / IBM MQ bridge on May 1st, 2020.
 
 
 ## Early version
