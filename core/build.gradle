@@ -32,7 +32,10 @@ publishing {
     }
 }
 
-
+test {
+    testLogging.showStandardStreams = true
+    testLogging.exceptionFormat = 'full'
+}
 
 repositories {
     mavenLocal()

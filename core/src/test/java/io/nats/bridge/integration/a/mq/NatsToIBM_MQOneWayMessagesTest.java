@@ -86,7 +86,7 @@ public class NatsToIBM_MQOneWayMessagesTest {
 
     }
 
-    @Test
+    //@Test
     public void test() throws Exception {
         runServerLoop();
         runBridgeLoop();
