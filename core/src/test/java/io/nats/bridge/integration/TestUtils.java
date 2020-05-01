@@ -56,6 +56,8 @@ public class TestUtils {
                     .withName("IBM_MQ_" + name).useIBMMQ().withDestinationName("DEV.QUEUE.1")
                     .withResponseDestinationName("DEV.QUEUE.2");
             jmsMessageBusBuilder.withUserNameConnection("app").turnOnCopyHeaders().withPasswordConnection("passw0rd");
+
+            System.out.println("JNDI " + jmsMessageBusBuilder.getJndiProperties());
             if (src) {
                 jmsMessageBusBuilder.asSource();
             }
