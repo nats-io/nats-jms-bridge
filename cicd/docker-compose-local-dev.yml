@@ -1,0 +1,22 @@
+version: '3'
+services:
+  nats-server:
+    image: 'nats'
+    ports:
+      - "4222:4222"
+  ibm-mq:
+    image: 'ibmcom/mq'
+    environment:
+      - LICENSE=accept
+      - MQ_QMGR_NAME=QM1
+      - MQ_APP_PASSWORD=passw0rd
+    ports:
+      - "1414:1414"
+  active-mq:
+    image: 'vromero/activemq-artemis'
+    environment:
+      - ARTEMIS_USERNAME=cloudurable
+      - ARTEMIS_PASSWORD=cloudurable
+    ports:
+      - "8161:8161"
+      - "61616:61616"
