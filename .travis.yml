@@ -14,7 +14,7 @@ script:
   - docker run --net bnet --name nats-server -d cloudurable/docker-bridge-nats
   - docker run --net bnet --name active-mq -d cloudurable/docker-bridge-artemis
   - docker run --net bnet --name ibm-mq -d cloudurable/docker-bridge-ibmmq
-  - docker run --net bnet --name bridge -v ./:/usr/app cloudurable/docker-gradle-bridge-build
+  - docker run --net bnet --name bridge -v .:/usr/app cloudurable/docker-gradle-bridge-build
 
 after_script:
   - docker rm -f $(docker ps -aq)
