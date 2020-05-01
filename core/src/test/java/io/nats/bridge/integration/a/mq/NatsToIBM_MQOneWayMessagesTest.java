@@ -66,7 +66,7 @@ public class NatsToIBM_MQOneWayMessagesTest {
 
     }
 
-    @Before
+    //@Before
     public void setUp() throws Exception {
 
         final String busName = "MessagesOnlyA";
