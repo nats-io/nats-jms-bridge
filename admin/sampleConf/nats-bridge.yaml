@@ -1,0 +1,56 @@
+---
+name: "Starter Config"
+dateTime:
+- 2020
+- 4
+- 30
+- 0
+- 53
+- 50
+- 423615000
+bridges:
+- name: "natsToIBMMq"
+  bridgeType: "REQUEST_REPLY"
+  source:
+    name: "nats"
+    busType: "NATS"
+    subject: "b-subject"
+    clusterName: "natsCluster"
+  destination:
+    name: "ibmMQ"
+    busType: "JMS"
+    subject: "DEV.QUEUE.1"
+    responseSubject: "DEV.QUEUE.2"
+    clusterName: "ibmMqCluster"
+  copyHeaders: false
+  workers: 1
+
+clusters:
+  jmsCluster:
+    name: "jmsCluster"
+    properties: !<jms>
+      config:
+        java.naming.factory.initial: "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory"
+        connectionFactory.ConnectionFactory: "tcp://localhost:61616"
+        queue.queue/testQueue: "queue.queue/testQueue=testQueue"
+      userName: "cloudurable"
+      password: "cloudurable"
+      jmsDestinationType: "QUEUE"
+  natsCluster:
+    name: "natsCluster"
+    properties: !<nats>
+      host: "localhost"
+      port: 4222
+      servers: []
+      config: {}
+  ibmMqCluster:
+    name: "ibmMqCluster"
+    properties: !<jms>
+      config:
+        java.naming.factory.initial: "io.nats.bridge.ibmmq.IbmMqInitialContextFactory"
+        nats.ibm.mq.host: "tcp://localhost:1414"
+        nats.ibm.mq.channel: "DEV.APP.SVRCONN"
+        nats.ibm.mq.queueManager: "QM1"
+      userName: "app"
+      password: "passw0rd"
+      jmsDestinationType: "QUEUE"

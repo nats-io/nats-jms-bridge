@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 buildscript {
 
@@ -12,21 +13,105 @@ buildscript {
     }
 }
 
-apply {
-    plugin("org.springframework.boot")
-}
 
 plugins {
+
     val kotlinVersion = "1.3.71"
     kotlin("jvm") version kotlinVersion
     id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
 
     id("maven-publish")
+    application
+    distribution
+    id("org.springframework.boot") version "2.2.6.RELEASE"
+
 
 }
 
-version = "0.2.2"
+springBoot {
+    mainClassName = "io.nats.bridge.admin.ApplicationMain"
+    buildInfo {
+        properties {
+            additional = mapOf(
+                    "release" to "Alpha1",
+                    "author" to "NATS team"
+            )
+        }
+    }
+}
+
+application {
+    mainClassName = "io.nats.bridge.admin.ApplicationMain"
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("bootJava") {
+            artifact(tasks.getByName("bootJar"))
+        }
+    }
+    repositories {
+        maven {
+            url = uri("https://repo.example.com")
+        }
+    }
+}
+
+distributions {
+    main {
+        contents {
+
+            from("bin") {
+                into("bin")
+            }
+            from("sampleConf") {
+                include("**/**")
+                into("config") {
+                    include("**/**")
+                }
+            }
+        }
+    }
+}
+
+
+/**
+ * When the application plugin is applied a distribution named boot is created.
+ * This distribution contains the archive produced by the bootJar or bootWar task and scripts
+ * to launch it on Unix-like platforms and Windows.
+ * Zip and tar distributions can be built by the bootDistZip and bootDistTar tasks respectively.
+ * distZip and distTar create dists and tars w/o a single executable.
+ *
+ */
+
+
+dependencyManagement {
+    imports {
+        mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+    }
+}
+
+
+
+tasks.getByName<BootJar>("bootJar") {
+    mainClassName = "io.nats.bridge.admin.ApplicationMain"
+    manifest {
+        attributes("Start-Class" to "io.nats.bridge.admin.ApplicationMain")
+    }
+    launchScript()
+
+    archiveClassifier.set("boot")
+
+}
+
+
+
+tasks.getByName<Jar>("jar") {
+    enabled = true
+}
+
+version = "0.3.0-ALPHA1"
 
 tasks {
     withType<KotlinCompile> {
@@ -44,24 +129,11 @@ tasks {
         }
     }
 
-    create<Zip>("buildZip") {
-        dependsOn("build")
-        from(compileKotlin)
-        from(processResources) {
-            into("lib") {
-                from(configurations.compileClasspath) {
-                    exclude("tomcat-embed-*")
-                }
-            }
-            into(".") {
-                from("build/classes/kotlin/main") {
-                    include("**/**")
-                }
-            }
-            archiveFileName.set("${project.name}-${project.version}.zip")
-        }
-    }
 
+    create<JavaExec>("runIntegration") {
+        main = "io.nats.bridge.admin.integration.IntegrationMain"
+        classpath = sourceSets["main"].runtimeClasspath
+    }
 
     repositories {
         mavenLocal()
@@ -75,6 +147,8 @@ tasks {
             mavenBom("com.fasterxml.jackson:jackson-bom:2.9.5")
         }
     }
+
+
 
     dependencies {
 
@@ -107,7 +181,7 @@ tasks {
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.1")
+        implementation("io.nats.bridge:nats-jms-bridge:0.3.0-ALPHA1")
 
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
@@ -128,7 +202,7 @@ tasks {
 
 
         // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
-        testImplementation("com.squareup.okhttp3:okhttp:4.5.0")
+        implementation("com.squareup.okhttp3:okhttp:4.5.0")
 
 
     }
