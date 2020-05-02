@@ -7,19 +7,45 @@
 'LAYOUT_AS_SKETCH
 'LAYOUT_WITH_LEGEND
 
+'skinparam backgroundColor #EEEBDC
+'skinparam handwritten true
+'skinparam defaultFontName "Comic Sans MS"
+
+'archimate #3C7FC0 "VPN Server" as vpn_server <<technology-device>>
+'Rel_R(vpn_server, nats_bridge_admin, "Manages users, and bridges")
+
+
+skinparam queue {
+    StereotypeFontColor ELEMENT_FONT_COLOR
+    FontColor ELEMENT_FONT_COLOR
+    BackgroundColor SYSTEM_BG_COLOR
+    BorderColor #3C7FC0
+}
+
+
+
+
+!include <cloudinsight/user>
+
 title System Landscape Diagram for NATS MQ/JMS Bridge
 
-Person(admin, "Admin", "Creates Users and Manages Bridges")
-Person(user, "User", "Manages Message Bridges")
 
 
-System(ngs, "NGS", "Global communications system built on NATS.io")
+!define ICONURL https://raw.githubusercontent.com/Roemer/plantuml-office/master/office2014
+!includeurl ICONURL/Clouds/private_cloud.puml
 
+
+
+Person(admin, "Admin", "<$user>\nCreates Users and Manages Bridges")
+Person(user, "User", "<$user>\nManages Message Bridges")
+
+cloud {
+System(ngs, "NGS", "<$private_cloud>\n\nGlobal communications\n system built on NATS.io")
 Enterprise_Boundary(corp_net, "Corporate Network") {
     System(nats, "NATS server", "High performance open source messaging system for cloud native applications")
     System_Ext(ibm_mq, "IBM MQ", "Queues")
     System_Ext(main_frame, "Main Frame", "main frame applications")
-    System_Ext(jms_mq, "JMS Servers", "Queues like ActiveX, AWS SQS")
+    System_Ext(jms_mq, "JMS Server", "ActiveMQ")
 
     System_Ext(prometheus, "Prometheus", "Tracks KPIs")
     System_Ext(health, "Health", "Consul, K8s or their ilk")
@@ -29,6 +55,9 @@ Enterprise_Boundary(corp_net, "Corporate Network") {
         }
     }
 }
+}
+
+
 
 Rel_R(admin, nats_bridge_admin, "Manages users, and bridges")
 Rel_R(user, nats_bridge_admin, "Manages bridges")
