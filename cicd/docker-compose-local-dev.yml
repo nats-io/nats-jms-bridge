@@ -4,14 +4,18 @@ services:
     image: 'nats'
     ports:
       - "4222:4222"
+      - "8222:8222"
   ibm-mq:
-    image: 'ibmcom/mq'
+    build:
+      context: .
+      dockerfile: Dockerfile_ibmmq.dev
     environment:
       - LICENSE=accept
       - MQ_QMGR_NAME=QM1
       - MQ_APP_PASSWORD=passw0rd
     ports:
       - "1414:1414"
+      - "9443:9443"
   active-mq:
     image: 'vromero/activemq-artemis'
     environment:
