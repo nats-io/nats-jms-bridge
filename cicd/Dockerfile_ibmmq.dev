@@ -3,9 +3,7 @@ FROM ibmcom/mq
 
 #Copy file and change the owner
 #IBM MQ can read 11-dev that creates a queue model.
-COPY --chown=1001:root 10-dev.mqsc /etc/mqm/11-dev.mqsc
-
-
+COPY --chown=1001:root cicd/10-dev.mqsc /etc/mqm/11-dev.mqsc
 
 # environment
 ENV LICENSE=accept
