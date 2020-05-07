@@ -149,4 +149,57 @@ public class BasicIbmMqIntegrationTest {
         final String result = message.get().bodyAsString();
         assertEquals("hello", result);
     }
+
+    @Test
+    public void testSendMessageWithDynamicQueue() throws Exception {
+        final String host ="localhost";
+        final int port = 1414;
+        final String user= "app";
+        final int timeout = 15000; // in ms or 15 seconds
+        final String channel = "DEV.APP.SVRCONN";
+        final String password = "passw0rd";
+        final String queueManagerName = "QM1";
+        final String destinationName= "DEV.QUEUE.1";
+        final JmsFactoryFactory ff = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
+        final JmsConnectionFactory cf = ff.createConnectionFactory();
+        // Set the properties
+        cf.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
+        cf.setIntProperty(WMQConstants.WMQ_PORT, port);
+        cf.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
+        cf.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
+        cf.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
+        cf.setStringProperty(WMQConstants.USERID, user);
+        cf.setStringProperty(WMQConstants.PASSWORD, password);
+        cf.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
+        // Create JMS objects
+        Connection connection = cf.createConnection();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Destination destination = session.createQueue(destinationName);
+        Destination responseDestination = session.createTemporaryQueue();
+        Destination tempDest = session.createTemporaryQueue();
+        MessageConsumer consumer = session.createConsumer(destination);
+        // Start the connection
+        connection.start();
+        final MessageProducer producer = session.createProducer(destination);
+        while (consumer.receive(100)!=null) {
+            System.out.println("drain");
+        }
+        final String correlationID = UUID.randomUUID().toString();
+        final TextMessage requestMessage = session.createTextMessage("REQUEST");
+        requestMessage.setJMSReplyTo(responseDestination);
+        requestMessage.setJMSCorrelationID(correlationID);
+        producer.send(requestMessage);
+        final MessageConsumer serverConsumer = session.createConsumer(destination);
+        final TextMessage requestFromClient = (TextMessage) serverConsumer.receive(5000);
+        assertEquals("REQUEST", requestFromClient.getText());
+        final Destination replyToDestination = requestFromClient.getJMSReplyTo();
+        final TextMessage replyMessage = session.createTextMessage("RESPONSE_FROM_SERVER");
+        replyMessage.setJMSCorrelationID(requestFromClient.getJMSCorrelationID());
+        session.createProducer(replyToDestination).send(replyMessage);
+        //Act like original client
+        final TextMessage replyFromServer = (TextMessage) session.createConsumer(responseDestination).receive(5000);
+        assertEquals("RESPONSE_FROM_SERVER", replyFromServer.getText());
+        connection.stop();
+    }
+
 }
