@@ -1,15 +1,14 @@
-package io.nats.bridge.ibmmq;
+package io.nats.bridge.integration.ibmmq;
 
 import com.ibm.msg.client.jms.JmsConnectionFactory;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.integration.TestUtils;
+import io.nats.bridge.TestUtils;
 import io.nats.bridge.messages.Message;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import java.time.Duration;
 import java.util.Hashtable;
@@ -75,7 +74,7 @@ public class BasicIbmMqIntegrationTest {
     @Test
     public void testLib() throws Exception {
         final Hashtable<String, Object> jndiProperties = new Hashtable<>();
-        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.ibmmq.IbmMqInitialContextFactory"));
+        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"));
         jndiProperties.put("nats.ibm.mq.host", System.getenv().getOrDefault("NATS_BRIDGE_JMS_CONNECTION_FACTORY", "tcp://localhost:1414"));
         jndiProperties.put("nats.ibm.mq.channel", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_CHANNEL", "DEV.APP.SVRCONN"));
         jndiProperties.put("nats.ibm.mq.queueManager", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER", "QM1"));

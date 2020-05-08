@@ -1,8 +1,8 @@
 package io.nats.bridge.jms.support;
 
-import io.nats.bridge.mock.JMSBinaryMessage;
-import io.nats.bridge.mock.JMSNoMessage;
-import io.nats.bridge.mock.JMSTextMessage;
+import io.nats.bridge.mock.jms.JMSBinaryMessage;
+import io.nats.bridge.mock.jms.JMSNoMessage;
+import io.nats.bridge.mock.jms.JMSTextMessage;
 import io.nats.bridge.util.FunctionWithException;
 import org.junit.Before;
 import org.junit.Test;

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package io.nats.bridge.integration;
+package io.nats.bridge;
 
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
@@ -21,6 +21,7 @@ import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.nats.support.NatsMessageBusBuilder;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -92,11 +93,9 @@ public class TestUtils {
         final Thread thread = new Thread(() -> {
             try {
                 while (!stop.get()) {
-                    Thread.sleep(25);
-
-                    int process = messageBridge.process();
+                    int process = messageBridge.process(Duration.ofMillis(10));
                     if (process > 0) {
-                        System.out.println("Bridge Loop: Messages sent or received " + process);
+                        //System.out.println("Bridge Loop: Messages sent or received " + process);
                     }
                 }
                 messageBridge.close();
@@ -124,10 +123,10 @@ public class TestUtils {
                     serverMessageBus.close();
                     break;
                 }
-                final Optional<Message> receive = serverMessageBus.receive();
+                final Optional<Message> receive = serverMessageBus.receive(Duration.ofMillis(10));
                 receive.ifPresent(message -> {
-                    System.out.println("Server Loop: Handle message " + message.bodyAsString());
-                    System.out.println("Server Loop: Handle message headers " + message.headers());
+                    //System.out.println("Server Loop: Handle message " + message.bodyAsString());
+                    //System.out.println("Server Loop: Handle message headers " + message.headers());
 
 
                     final String myHeader = (String) message.headers().get("MY_HEADER");
@@ -140,19 +139,9 @@ public class TestUtils {
                     }
 
                 });
-
-
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 serverMessageBus.process();
             }
-
             serverStopped.countDown();
-
-
         });
 
         thread.start();
