@@ -175,7 +175,6 @@ public class BasicIbmMqIntegrationTest {
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         Destination destination = session.createQueue(destinationName);
         Destination responseDestination = session.createTemporaryQueue();
-        Destination tempDest = session.createTemporaryQueue();
         MessageConsumer consumer = session.createConsumer(destination);
         // Start the connection
         connection.start();
