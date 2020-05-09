@@ -1,4 +1,4 @@
-package io.nats.bridge.ibmmq;
+package io.nats.bridge.integration.ibmmq;
 
 import com.ibm.msg.client.jms.JmsConnectionFactory;
 import com.ibm.msg.client.jms.JmsFactoryFactory;

@@ -1,4 +1,4 @@
-package io.nats.bridge.mock;
+package io.nats.bridge.mock.jms;
 
 import javax.jms.JMSException;
 import java.nio.ByteBuffer;

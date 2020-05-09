@@ -1,14 +1,31 @@
 # docker-bridge
 
-### Entering Docker
+#### Enter Docker
 ```sh
 docker exec -it bridge bash
 ```
 
 
-### Testing
-```sh
-NATS_BRIDGE_JMS_USER=cloudurable NATS_BRIDGE_JMS_PWD=cloudurable NATS_BRIDGE_NATS_SERVERS=nats://nats-server:4222 NATS_BRIDGE_JMS_CONNECTION_FACTORY=tcp://active-mq:61616 ./gradlew clean test
+#### Running local dev environment
+```
+pwd
+synadia/nats-bridge/cicd
+
+docker-compose -f docker-compose-demo.yml up
+
+### OR
+synadia/nats-bridge
+
+bin/docker-deploy-local-dev.sh
+
 ```
 
-###Check
+
+#### Testing
+```sh
+
+pwd
+synadia/nats-bridge/core
+
+./gradlew clean test
+```

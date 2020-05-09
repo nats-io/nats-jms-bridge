@@ -467,7 +467,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     public MessageBus build() {
 
-        if (getConnectionFactory() != null && getConnectionFactory().getClass().getPackage().getName().contains("io.nats.bridge.ibmmq")) {
+        if (getConnectionFactory() != null && getConnectionFactory().getClass().getPackage().getName().contains("io.nats.bridge.integration.ibmmq")) {
             ibmMQ = true;
         }
 
@@ -488,7 +488,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         getJmsBusLogger().info("CLEARING JNDI PROPERTIES");
         ibmMQ = true;
         this.jndiProperties.clear();
-        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.ibmmq.IbmMqInitialContextFactory"));
+        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"));
         this.jndiProperties.putAll(jndiProperties);
         return this;
     }
@@ -497,7 +497,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         getJmsBusLogger().info("CLEARING JNDI PROPERTIES");
         ibmMQ = true;
         jndiProperties.clear();
-        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.ibmmq.IbmMqInitialContextFactory"));
+        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"));
         jndiProperties.put("nats.ibm.mq.host", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414"));
         jndiProperties.put("nats.ibm.mq.channel", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_CHANNEL", "DEV.APP.SVRCONN"));
         jndiProperties.put("nats.ibm.mq.queueManager", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER", "QM1"));
