@@ -1,3 +1,7 @@
+#!/bin/sh
+set -e
+
+
 NATS_BRIDGE_HOME="${NATS_BRIDGE_HOME:-$PWD}"
 NATS_ADMIN_HOST="${NATS_ADMIN_HOST:-http://localhost:8080}"
 
@@ -8,49 +12,49 @@ COMMAND="$1"
 case $COMMAND in
 
 config)
-  curl -s  -H "Authorization: Bearer $TOKEN" \
+  curl -s  -k -H "Authorization: Bearer $TOKEN" \
     "$NATS_ADMIN_HOST/api/v1/bridges/admin/config" | jq .
   ;;
 
 running | bridge-running)
-  curl -s  -H "Authorization: Bearer $TOKEN" \
+  curl -s  -k -H "Authorization: Bearer $TOKEN" \
     "$NATS_ADMIN_HOST/api/v1/control/bridges/running" | jq .
   ;;
 
 started | bridge-started)
-  curl -s -H "Authorization: Bearer $TOKEN" \
+  curl -s -k -H "Authorization: Bearer $TOKEN" \
     "$NATS_ADMIN_HOST/api/v1/control/bridges/started" | jq .
   ;;
 
 was-error | bridge-errors)
-  curl -s -H "Authorization: Bearer $TOKEN" \
+  curl -s -k -H "Authorization: Bearer $TOKEN" \
     "$NATS_ADMIN_HOST/api/v1/control/bridges/error/was-error" | jq .
   ;;
 
 last-error | bridge-last-error)
-  curl -s  -H "Authorization: Bearer $TOKEN" \
+  curl -s  -k -H "Authorization: Bearer $TOKEN" \
     "$NATS_ADMIN_HOST/api/v1/control/bridges/error/last" | jq .
   ;;
 
 clear-error | bridge-clear-error)
-  curl -s  -X POST -H "Authorization: Bearer $TOKEN" \
+  curl -s  -k -X POST -H "Authorization: Bearer $TOKEN" \
     "$NATS_ADMIN_HOST/api/v1/control/bridges/admin/clear/last/error"
   ;;
 
 restart | bridge-restart)
-  curl -s  -X POST -H "Authorization: Bearer $TOKEN" \
+  curl -s  -k -X POST -H "Authorization: Bearer $TOKEN" \
     "$NATS_ADMIN_HOST/api/v1/control/bridges/admin/restart" | jq .
   ;;
 
 stop | bridge-stop)
-  curl -s  -X POST -H "Authorization: Bearer $TOKEN" \
+  curl -s  -k -X POST -H "Authorization: Bearer $TOKEN" \
     "$NATS_ADMIN_HOST/api/v1/control/bridges/admin/stop" | jq .
   ;;
 
 import)
 
   cat $2 | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/###___/g' >> "$2.temp.file"
-  curl -s  -X PUT -H "Authorization: Bearer $TOKEN" \
+  curl -s  -k -X PUT -H "Authorization: Bearer $TOKEN" \
      -H 'Content-Type: text/tsv' -d @"$2.temp.file"\
     "$NATS_ADMIN_HOST/api/v1/bridges/admin/config/import/bridges?name=$3&delim=$4" | jq .
   ;;
@@ -65,7 +69,7 @@ set-up-admin | admin)
   JSON="{'subject':'$SUBJECT', 'publicKey' : '$PUBLIC_KEY', 'secret':'$SECRET' }"
   JSON=$(tr "'" '"' <<<"$JSON")
 
-  TOKEN=$(curl -s  -X POST -d "$JSON" \
+  TOKEN=$(curl -s -k -X POST -d "$JSON" \
     -H "Content-Type: application/json" \
     "$NATS_ADMIN_HOST/api/v1/login/generateToken" | jq -r .token)
   echo "$TOKEN" >config/admin.token
@@ -80,7 +84,7 @@ generatetoken | generateToken | generate-token | token | logins-generate-token)
   JSON="{'subject':'$SUBJECT', 'publicKey' : '$PUBLIC_KEY', 'secret':'$SECRET' }"
   JSON=$(tr "'" '"' <<<"$JSON")
 
-  TOKEN=$(curl -s  -X POST -d "$JSON" \
+  TOKEN=$(curl -k -s  -X POST -d "$JSON" \
     -H "Content-Type: application/json" \
     "$NATS_ADMIN_HOST/api/v1/login/generateToken | jq -r .token")
   echo "$TOKEN" >config/admin.token
@@ -88,15 +92,15 @@ generatetoken | generateToken | generate-token | token | logins-generate-token)
   ;;
 
 health)
-  curl -s  "$NATS_ADMIN_HOST/manage/health" | jq .
+  curl -s -k  "$NATS_ADMIN_HOST/manage/health" | jq .
   ;;
 
 info)
-  curl -s  "$NATS_ADMIN_HOST/manage/info"  | jq .
+  curl -s -k "$NATS_ADMIN_HOST/manage/info"  | jq .
   ;;
 
 kpi)
-  curl -s  "$NATS_ADMIN_HOST/manage/prometheus"
+  curl -s -k "$NATS_ADMIN_HOST/manage/prometheus"
   ;;
 
 help)
