@@ -1,0 +1,29 @@
+@startuml NatsBridge
+
+left to right direction
+
+actor Admin 
+actor User
+
+
+rectangle NatsBridge{
+    Admin --- (AddUser)
+    Admin --- (EditUser)
+    Admin --- (ChangeLoginToken)
+    Admin --- (CreateBridge)
+    Admin --- (EditBridge)
+    Admin --- (DeleteBridge)
+    Admin --- (StartBridge)
+    Admin --- (StopBridge)
+    (ChangeLoginToken) --- User
+    (CreateBridge) --- User
+    (EditBridge) --- User
+    (DeleteBridge) --- User
+    (StartBridge) --- User
+    (StopBridge) --- User
+    
+    
+}
+
+
+@enduml
