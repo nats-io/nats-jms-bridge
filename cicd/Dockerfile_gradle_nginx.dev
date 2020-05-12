@@ -1,0 +1,57 @@
+# Use an existing docker image as a base
+# cloudurable/gradle
+
+FROM nginx
+
+
+#Copying files
+#This is the config file for spring and nginx
+COPY ./cicd/nginx/admin.conf /etc/nginx/conf.d/admin.conf
+COPY ./cicd/nginx/start.sh /bin/start.sh
+
+COPY . ./usr/app
+
+WORKDIR /usr/app
+
+#Install some dependencies
+RUN apt-get update
+RUN apt-get -y install curl unzip zip
+
+# Install SDK MAN
+RUN chmod +x cicd/sdkman.sh
+RUN exec cicd/sdkman.sh
+
+# Install Java
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install java 11.0.7-amzn"
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install gradle"
+
+
+ENV JAVA_HOME /root/.sdkman/candidates/java/current
+
+
+#Build Core
+WORKDIR /usr/app/core
+RUN bash -c "./gradlew wrapper"
+RUN bash -c "./gradlew clean build publishToMavenLocal -x test"
+
+#Build Admin
+WORKDIR /usr/app/admin
+RUN bash -c "./gradlew wrapper"
+RUN bash -c "./gradlew build -x test"
+
+WORKDIR /usr/app
+
+#Install ssl_trusted_certificate to localhost
+RUN apt install libnss3-tools wget -y
+RUN bash -c "mkdir certs"
+WORKDIR /usr/app/certs
+RUN bash -c "wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.1/mkcert-v1.4.1-linux-amd64"
+RUN bash -c "mv mkcert-v1.4.1-linux-amd64 mkcert"
+RUN bash -c "chmod +x mkcert"
+RUN bash -c "cp mkcert /usr/local/bin/"
+RUN bash -c "mkcert -install"
+RUN bash -c "mkcert localhost"
+
+WORKDIR /usr/app
+
+CMD ["/bin/start.sh"]
