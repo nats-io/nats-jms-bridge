@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.jms.*;
+import java.net.URI;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,8 +30,11 @@ public class BasicIbmMqIntegrationTest {
 
     @Test
     public void testBasic() throws Exception {
-        final String host = "localhost";
-        final int port = 1414;
+
+        final String hostURI = System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414");
+        final URI uri = new URI(hostURI);
+        final String host = uri.getHost();
+        final int port = uri.getPort();
         final String user = "app";
         final int timeout = 15000; // in ms or 15 seconds
         final String channel = "DEV.APP.SVRCONN";
@@ -87,8 +91,10 @@ public class BasicIbmMqIntegrationTest {
     public void testSendMessageWithDynamicQueue() throws Exception {
 
         try {
-            final String host = "localhost";
-            final int port = 1414;
+            final String hostURI = System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414");
+            final URI uri = new URI(hostURI);
+            final String host = uri.getHost();
+            final int port = uri.getPort();
             final String user = "app";
             final int timeout = 15000; // in ms or 15 seconds
             final String channel = "DEV.APP.SVRCONN";
