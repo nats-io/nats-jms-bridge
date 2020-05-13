@@ -1,2 +1,2 @@
 cd cicd
-docker-compose -f docker-compose-demo.yml up
+docker-compose -f docker-compose-local-dev.yml up

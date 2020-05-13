@@ -27,7 +27,8 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
     private final static String HOST = PREFIX + "host";
     private final static String CHANNEL = PREFIX + "channel";
     private final static String QUEUE_MANAGER = PREFIX + "queueManager";
-    //private final static String QUEUE =  "queue.";
+    private final static String QUEUE_MODEL_NAME = PREFIX + "queueModelName";
+    private final static String QUEUE_MODEL_PREFIX = PREFIX + "queueModelPrefix";
 
 
     @Override
@@ -43,6 +44,11 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
             final int port = uri.getPort();
             final String channel = getStringProp(jndiProperties, CHANNEL);
             final String queueManagerName = getStringProp(jndiProperties, QUEUE_MANAGER);
+            final String queueModelName = getStringProp(jndiProperties, QUEUE_MODEL_NAME);
+            final String queueModelPrefix = getStringProp(jndiProperties, QUEUE_MODEL_PREFIX);
+
+
+
 
             connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
             connectionFactory.setIntProperty(WMQConstants.WMQ_PORT, port);
@@ -50,6 +56,9 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
             connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
             connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
             connectionFactory.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
+            connectionFactory.setStringProperty(WMQConstants.WMQ_TEMPORARY_MODEL, queueModelName);
+            connectionFactory.setStringProperty(WMQConstants.WMQ_TEMP_Q_PREFIX, queueModelPrefix);
+
             contextMap.put(CONNECTION_FACTORY, new MQConnectionFactory(connectionFactory));
 
 //            final Set<String> queues = jndiProperties.keySet().stream().map(Object::toString)

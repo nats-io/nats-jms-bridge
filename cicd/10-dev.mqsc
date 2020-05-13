@@ -4,6 +4,8 @@ DEFINE QLOCAL('DEV.QUEUE.2') REPLACE
 DEFINE QLOCAL('DEV.QUEUE.3') REPLACE
 DEFINE QLOCAL('DEV.DEAD.LETTER.QUEUE') REPLACE
 * Creating a model queue to dynamic queues
+* https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.1.0/com.ibm.mq.ref.dev.doc/prx_wmq_tempy_model.htm
+* https://www.ibm.com/support/knowledgecenter/SSFKSJ_9.0.0/com.ibm.mq.dev.doc/q032240_.htm
 DEFINE QMODEL('DEV.MODEL') REPLACE
 * Use a different dead letter queue, for undeliverable messages
 ALTER QMGR DEADQ('DEV.DEAD.LETTER.QUEUE')
@@ -25,5 +27,5 @@ SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(USERMAP) CLNTUSER('admin') USERSRC(CHANNEL
 SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(USERMAP) CLNTUSER('admin') USERSRC(MAP) MCAUSER ('mqm') DESCR ('Allow admin as MQ-admin') ACTION(REPLACE)
 * Developer authority records
 SET AUTHREC PRINCIPAL('app') OBJTYPE(QMGR) AUTHADD(CONNECT,INQ)
-SET AUTHREC PROFILE('DEV.**') PRINCIPAL('app') OBJTYPE(QUEUE) AUTHADD(BROWSE,GET,INQ,PUT)
+SET AUTHREC PROFILE('DEV.**') PRINCIPAL('app') OBJTYPE(QUEUE) AUTHADD(BROWSE,GET,INQ,PUT,DSP)
 SET AUTHREC PROFILE('DEV.**') PRINCIPAL('app') OBJTYPE(TOPIC) AUTHADD(PUB,SUB)

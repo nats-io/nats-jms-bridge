@@ -7,7 +7,6 @@ FROM nginx
 #Copying files
 #This is the config file for spring and nginx
 COPY ./cicd/nginx/admin.conf /etc/nginx/conf.d/admin.conf
-COPY ./cicd/nginx/start.sh /bin/start.sh
 
 COPY . ./usr/app
 
@@ -53,5 +52,3 @@ RUN bash -c "mkcert -install"
 RUN bash -c "mkcert localhost"
 
 WORKDIR /usr/app
-
-CMD ["/bin/start.sh"]

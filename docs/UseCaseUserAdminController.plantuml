@@ -1,0 +1,25 @@
+@startuml UserAdminController
+
+left to right direction
+
+actor Admin 
+actor User
+
+
+rectangle NatsBridge_UserAdminController{
+    Admin --- (AddUser)
+    Admin --- (EditUser)
+    Admin --- (ListUser)
+    Admin --- (DeleteUser)
+    Admin --- (AddUserRole)
+    Admin --- (EditUserRole)
+    Admin --- (DeleteUserRole)
+    Admin --- (ListUserRole)
+    Admin --- (ListRoles)
+    Admin --- (ListSystemRoles)
+    (EditUser) --- User
+    (ListUserRole) --- User
+}
+
+
+@enduml

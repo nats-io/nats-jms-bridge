@@ -5,7 +5,7 @@ echo Starting NGINX
 
 nginx
 
-echo Starting NATS JMS Bridge 
+echo Starting NATS JMS Bridge
 cd admin
 ./gradlew bootRun
 

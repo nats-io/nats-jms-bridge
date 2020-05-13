@@ -1,0 +1,15 @@
+@startuml UtilController
+
+left to right direction
+
+actor Admin 
+actor User
+
+
+rectangle NatsBridge_UtilController{
+    Admin --- (isAlive)
+    (isAlive) --- User
+}
+
+
+@enduml
