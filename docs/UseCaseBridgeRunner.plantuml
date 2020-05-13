@@ -1,0 +1,25 @@
+@startuml BridgeRunner
+
+left to right direction
+
+actor Admin 
+actor User
+
+
+rectangle NatsBridge_BridgeRunner{
+    Admin --- (LastError)
+    Admin --- (Restart)
+    Admin --- (Stop)
+    Admin --- (wasError)
+    Admin --- (isRunning)
+    Admin --- (isStarted)
+    (LastError) --- User
+    (Restart) --- User
+    (Stop) --- User
+    (wasError) --- User
+    (isRunning) --- User
+    (isStarted) --- User
+}
+
+
+@enduml

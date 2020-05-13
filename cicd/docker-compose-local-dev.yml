@@ -1,14 +1,16 @@
 version: '3'
 services:
   nats-server:
-    image: 'nats'
+    build:
+      context: ../
+      dockerfile: cicd/Dockerfile_nats_tls.dev
     ports:
       - "4222:4222"
       - "8222:8222"
   ibm-mq:
     build:
-      context: .
-      dockerfile: Dockerfile_ibmmq.dev
+      context: ../
+      dockerfile: cicd/Dockerfile_ibmmq.dev
     environment:
       - LICENSE=accept
       - MQ_QMGR_NAME=QM1
@@ -24,3 +26,11 @@ services:
     ports:
       - "8161:8161"
       - "61616:61616"
+  bridge-admin:
+    container_name: bridge-admin
+    image: 'cloudurable/nats-bridge-admin-nginx'
+    working_dir: /usr/app/admin
+    #command: ["sleep","infinity"]
+    #command: bash -c "./gradlew bootRun"
+    ports:
+      - "443:443"
