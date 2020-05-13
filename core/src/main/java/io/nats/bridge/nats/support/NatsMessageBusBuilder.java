@@ -8,12 +8,14 @@ import io.nats.bridge.metrics.Output;
 import io.nats.bridge.metrics.implementation.SimpleMetrics;
 import io.nats.bridge.nats.NatsMessageBus;
 import io.nats.bridge.support.MessageBusBuilder;
+import io.nats.bridge.tls.SslContextBuilder;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.client.Connection;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.LinkedTransferQueue;
@@ -40,12 +42,50 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
 
     private java.util.Queue<NatsMessageBus.NatsReply> replyQueue;
     private java.util.Queue<NatsMessageBus.NatsReply> replyQueueNotDone;
-
-
     private String queueGroup;
+    private SslContextBuilder sslContextBuilder;
+    private SSLContext sslContext;
+    private boolean useTls;
+
+    public boolean isUseTls() {
+        return useTls;
+    }
+
+    public NatsMessageBusBuilder withUseTls(boolean useTls) {
+        this.useTls = useTls;
+        return this;
+    }
+
 
     public static NatsMessageBusBuilder builder() {
         return new NatsMessageBusBuilder();
+    }
+
+
+    public SslContextBuilder getSslContextBuilder() {
+
+        if (sslContextBuilder == null) {
+            sslContextBuilder = new SslContextBuilder();
+        }
+        return sslContextBuilder;
+    }
+
+    public NatsMessageBusBuilder setSslContextBuilder(SslContextBuilder sslContextBuilder) {
+        this.sslContextBuilder = sslContextBuilder;
+        return this;
+    }
+
+
+    public SSLContext getSslContext() {
+        if (sslContext == null) {
+            sslContext = getSslContextBuilder().build();
+        }
+        return sslContext;
+    }
+
+    public NatsMessageBusBuilder withSslContext(SSLContext sslContext) {
+        this.sslContext = sslContext;
+        return this;
     }
 
     public Metrics getMetrics() {
@@ -178,7 +218,9 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
     public Connection getConnection() {
         if (connection == null) {
             try {
+
                 connection = Nats.connect(this.getOptions());
+
             } catch (Exception e) {
 
                 throw new NatsBuilderException("Issues getting connection", e);
@@ -246,6 +288,9 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
             }
             if (password != null && user != null) {
                 optionsBuilder.userInfo(user, password);
+            }
+            if (isUseTls()) {
+                optionsBuilder.sslContext(this.getSslContext());
             }
         }
         return optionsBuilder;
