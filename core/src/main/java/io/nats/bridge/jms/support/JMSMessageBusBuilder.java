@@ -384,6 +384,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     public Destination getDestination() {
         if (destination == null) {
+
             if (!ibmMQ)
                 destination = exceptionHandler.tryReturnOrRethrow(() -> (Destination) getContext().lookup(getDestinationName()),
                         e -> new JMSMessageBusBuilderException("Unable to lookup destination " + getDestinationName(), e));
@@ -391,6 +392,15 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
                 destination = exceptionHandler.tryReturnOrRethrow(() ->
                                 getSessionCreator().apply(getConnection()).createQueue(getDestinationName()),
                         e -> new JMSMessageBusBuilderException("Unable to lookup destination " + getDestinationName(), e));
+
+//
+//            //if ! ibm
+//                destination = exceptionHandler.tryReturnOrRethrow(() -> (Destination) getContext().lookup(getDestinationName()),
+//                        e -> new JMSMessageBusBuilderException("Unable to lookup destination " + getDestinationName(), e));
+////            else
+////                destination = exceptionHandler.tryReturnOrRethrow(() ->
+////                                getSessionCreator().apply(getConnection()).createQueue(getDestinationName()),
+////                        e -> new JMSMessageBusBuilderException("Unable to lookup destination " + getDestinationName(), e));
         }
         return destination;
     }
