@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import java.lang.IllegalStateException;
 import java.time.Duration;
 import java.util.Hashtable;
 import java.util.Map;
@@ -75,9 +76,46 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     private String responseDestinationName = "TEMP_QUEUE";
     private boolean source = false;
 
+    private Logger logger  = LoggerFactory.getLogger(JMSMessageBusBuilder.class);
+
+    private String ibmMQQueueModelName;
+    private String ibmMQQueueModelPrefix;
+
+
 
     public static JMSMessageBusBuilder builder() {
         return new JMSMessageBusBuilder();
+    }
+
+    public String getIbmMQQueueModelName() {
+
+        if ( ibmMQQueueModelName == null) {
+            ibmMQQueueModelName = System.getenv().getOrDefault("NATS_BRIDGE_IBM_QUEUE_MODEL_NAME", "DEV.MODEL");
+
+            logger.info("IBM QUEUE MODEL NAME WAS NOT SET SO USING ENV VAR NATS_BRIDGE_IBM_QUEUE_MODEL_NAME or default value of DEV.MODEL");
+            logger.info("IBM QUEUE MODEL SET TO {}", ibmMQQueueModelName);
+
+        }
+        return ibmMQQueueModelName;
+    }
+
+    public JMSMessageBusBuilder withIbmMQQueueModelName(String ibmMQQueueModelName) {
+        this.ibmMQQueueModelName = ibmMQQueueModelName;
+        return this;
+    }
+
+    public String getIbmMQQueueModelPrefix() {
+        if ( ibmMQQueueModelPrefix == null) {
+            ibmMQQueueModelPrefix = System.getenv().getOrDefault("NATS_BRIDGE_IBM_QUEUE_MODEL_PREFIX", "DEV*");
+            logger.info("IBM QUEUE MODEL PREFIX WAS NOT SET SO USING ENV VAR NATS_BRIDGE_IBM_QUEUE_MODEL_PREFIX or default value of DEV*");
+            logger.info("IBM QUEUE MODEL PREFIX SET TO {}", ibmMQQueueModelPrefix);
+        }
+        return ibmMQQueueModelPrefix;
+    }
+
+    public JMSMessageBusBuilder withIbmMQQueueModelPrefix(String ibmMQQueueModelPrefix) {
+        this.ibmMQQueueModelPrefix = ibmMQQueueModelPrefix;
+        return this;
     }
 
     public String getName() {
@@ -506,11 +544,18 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     public JMSMessageBusBuilder useIBMMQ() {
         getJmsBusLogger().info("CLEARING JNDI PROPERTIES");
         ibmMQ = true;
+
+        final String queueModelName = getIbmMQQueueModelName();
+        final String queueModelPrefix = getIbmMQQueueModelPrefix();
+
+
         jndiProperties.clear();
         jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"));
         jndiProperties.put("nats.ibm.mq.host", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414"));
         jndiProperties.put("nats.ibm.mq.channel", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_CHANNEL", "DEV.APP.SVRCONN"));
         jndiProperties.put("nats.ibm.mq.queueManager", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER", "QM1"));
+        jndiProperties.put("nats.ibm.mq.queueModelName", queueModelName);
+        jndiProperties.put("nats.ibm.mq.queueModelPrefix", queueModelPrefix);
         return this;
     }
 

@@ -93,34 +93,34 @@ public class TestUtils {
 
     public static MessageBus getMessageBusIbmMQWithHeaders4(final String name, boolean src) {
         try {
-            final String host ="localhost";
-            final int port = 1414;
-            final String user= "app";
-            final int timeout = 15000; // in ms or 15 seconds
-            final String channel = "DEV.APP.SVRCONN";
-            final String password = "passw0rd";
-            final String queueManagerName = "QM1";
-            final String destinationName= "DEV.QUEUE.1";
-            final JmsFactoryFactory ff = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
-            final JmsConnectionFactory cf = ff.createConnectionFactory();
-            // Set the properties
-            cf.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
-            cf.setIntProperty(WMQConstants.WMQ_PORT, port);
-            cf.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
-            cf.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
-            cf.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
-            cf.setStringProperty(WMQConstants.USERID, user);
-            cf.setStringProperty(WMQConstants.PASSWORD, password);
-            cf.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
+//            final String host ="localhost";
+//            final int port = 1414;
+//            final String user= "app";
+//            final int timeout = 15000; // in ms or 15 seconds
+//            final String channel = "DEV.APP.SVRCONN";
+//            final String password = "passw0rd";
+//            final String queueManagerName = "QM1";
+//            final String destinationName= "DEV.QUEUE.1";
+//            final JmsFactoryFactory ff = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
+//            final JmsConnectionFactory cf = ff.createConnectionFactory();
+//            // Set the properties
+//            cf.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
+//            cf.setIntProperty(WMQConstants.WMQ_PORT, port);
+//            cf.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
+//            cf.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
+//            cf.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
+//            cf.setStringProperty(WMQConstants.USERID, user);
+//            cf.setStringProperty(WMQConstants.PASSWORD, password);
+//            cf.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
             // Create JMS objects
-            final Connection connection = cf.createConnection();
-            final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            final Destination destination = session.createQueue(destinationName);
-            final Destination responseDestination = session.createTemporaryQueue();
+//            final Connection connection = cf.createConnection();
+//            final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+//            final Destination destination = session.createQueue(destinationName);
+//            final Destination responseDestination = session.createTemporaryQueue();
 
             final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder()
-                    .withConnection(connection).withDestination(destination).withResponseDestination(responseDestination)
-                    .withName("IBM_MQ_" + name).useIBMMQ();
+                    //.withConnection(connection).withDestination(destination).withResponseDestination(responseDestination)
+                    .withName("IBM_MQ_" + name).useIBMMQ().withDestinationName("DEV.QUEUE.1");
             //.withDestinationName("DEV.QUEUE.1");
                     //.withResponseDestinationName("DEV.QUEUE.2");
             jmsMessageBusBuilder.withUserNameConnection("app").turnOnCopyHeaders().withPasswordConnection("passw0rd");

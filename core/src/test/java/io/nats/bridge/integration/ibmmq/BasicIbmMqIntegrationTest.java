@@ -10,9 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.jms.*;
-import javax.naming.InitialContext;
 import java.time.Duration;
-import java.util.Hashtable;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -66,65 +64,6 @@ public class BasicIbmMqIntegrationTest {
         //connection.start();
     }
 
-    @Test
-    public void testLib() throws Exception {
-        final Hashtable<String, Object> jndiProperties = new Hashtable<>();
-        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"));
-        jndiProperties.put("nats.ibm.mq.host", System.getenv().getOrDefault("NATS_BRIDGE_JMS_CONNECTION_FACTORY", "tcp://localhost:1414"));
-        jndiProperties.put("nats.ibm.mq.channel", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_CHANNEL", "DEV.APP.SVRCONN"));
-        jndiProperties.put("nats.ibm.mq.queueManager", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER", "QM1"));
-        final InitialContext context = new InitialContext(jndiProperties);
-        final Object connectionFactoryObject = context.lookup("ConnectionFactory");
-        assertTrue(connectionFactoryObject instanceof IbmMqInitialContextFactory.MQConnectionFactory);
-        final ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryObject;
-        final Connection connection = connectionFactory.createConnection("app", "passw0rd");
-        connection.start();
-        final Session session = connection.createSession();
-        final Destination destination = session.createQueue("DEV.QUEUE.1");
-        final Destination responseDestination = session.createQueue("DEV.QUEUE.2");
-        final MessageProducer producer = session.createProducer(destination);
-        final MessageConsumer consumer = session.createConsumer(destination);
-
-        while (consumer.receive(100) != null) {
-            System.out.println("drain");
-        }
-
-        producer.send(session.createTextMessage("Hello"));
-        final javax.jms.Message message = consumer.receive(1000);
-
-        System.out.println(message);
-
-        assertTrue(message instanceof TextMessage);
-
-        final TextMessage textMessage = (TextMessage) message;
-
-        assertEquals("Hello", textMessage.getText());
-
-
-        final String correlationID = UUID.randomUUID().toString();
-        final TextMessage requestMessage = session.createTextMessage("REQUEST");
-        requestMessage.setJMSReplyTo(responseDestination);
-        requestMessage.setJMSCorrelationID(correlationID);
-        producer.send(requestMessage);
-
-        //Act like Server
-        final MessageConsumer serverConsumer = session.createConsumer(destination);
-        final TextMessage requestFromClient = (TextMessage) serverConsumer.receive(5000);
-        assertEquals("REQUEST", requestFromClient.getText());
-        final Destination replyToDestination = requestFromClient.getJMSReplyTo();
-        final TextMessage replyMessage = session.createTextMessage("RESPONSE_FROM_SERVER");
-        replyMessage.setJMSCorrelationID(requestFromClient.getJMSCorrelationID());
-        session.createProducer(replyToDestination).send(replyMessage);
-
-
-        //Act like original client
-        final TextMessage replyFromServer = (TextMessage) session.createConsumer(responseDestination).receive(5000);
-        assertEquals("RESPONSE_FROM_SERVER", replyFromServer.getText());
-
-
-        connection.stop();
-
-    }
 
     @Test
     public void test() throws Exception {
@@ -143,10 +82,6 @@ public class BasicIbmMqIntegrationTest {
         assertEquals("hello", result);
     }
 
-    @Test
-    public void fail1() throws Exception{
-        throw new Exception("Will fail");
-    }
 
     @Test
     public void testSendMessageWithDynamicQueue() throws Exception {
@@ -172,7 +107,7 @@ public class BasicIbmMqIntegrationTest {
             cf.setStringProperty(WMQConstants.PASSWORD, password);
             cf.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
             cf.setStringProperty(WMQConstants.WMQ_TEMPORARY_MODEL, "DEV.MODEL");
-            cf.setStringProperty(WMQConstants.WMQ_TEMP_Q_PREFIX, "temp*");
+            cf.setStringProperty(WMQConstants.WMQ_TEMP_Q_PREFIX, "DEV*");
             // Create JMS objects
             final Connection connection = cf.createConnection();
             final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
