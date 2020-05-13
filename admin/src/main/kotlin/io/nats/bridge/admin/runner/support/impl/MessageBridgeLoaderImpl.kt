@@ -106,6 +106,8 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
         if (clusterConfig.servers != null && clusterConfig.servers.isNotEmpty()) {
             builder.withServers(clusterConfig.servers)
         }
+
+        /* This is where we added SSL / TLS config into Nats Options Builder.*/
         if (clusterConfig.config.isNotEmpty()) {
             val props = Properties()
             props.putAll(clusterConfig.config)
