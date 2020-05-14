@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.function.Function;
 
-public class MessageBridgeTaskManagerBuilder {
+public class MessageBridgeTasksManagerBuilder {
 
     private String name;
     private Logger logger;
@@ -22,7 +22,7 @@ public class MessageBridgeTaskManagerBuilder {
         return name;
     }
 
-    public MessageBridgeTaskManagerBuilder withName(String name) {
+    public MessageBridgeTasksManagerBuilder withName(String name) {
         this.name = name;
         return this;
     }
@@ -34,7 +34,7 @@ public class MessageBridgeTaskManagerBuilder {
         return logger;
     }
 
-    public MessageBridgeTaskManagerBuilder withLogger(Logger logger) {
+    public MessageBridgeTasksManagerBuilder withLogger(Logger logger) {
         this.logger = logger;
         return this;
     }
@@ -43,7 +43,7 @@ public class MessageBridgeTaskManagerBuilder {
         return bridgeBuilder;
     }
 
-    public MessageBridgeTaskManagerBuilder withBridgeBuilder(Function<String, MessageBridge> bridgeBuilder) {
+    public MessageBridgeTasksManagerBuilder withBridgeBuilder(Function<String, MessageBridge> bridgeBuilder) {
         this.bridgeBuilder = bridgeBuilder;
         return this;
     }
@@ -52,7 +52,7 @@ public class MessageBridgeTaskManagerBuilder {
         return workers;
     }
 
-    public MessageBridgeTaskManagerBuilder withWorkers(int workers) {
+    public MessageBridgeTasksManagerBuilder withWorkers(int workers) {
         this.workers = workers;
         return this;
     }
@@ -61,7 +61,7 @@ public class MessageBridgeTaskManagerBuilder {
         return tasks;
     }
 
-    public MessageBridgeTaskManagerBuilder withTasks(int tasks) {
+    public MessageBridgeTasksManagerBuilder withTasks(int tasks) {
         this.tasks = tasks;
         return this;
     }
@@ -70,7 +70,7 @@ public class MessageBridgeTaskManagerBuilder {
         return pollDuration;
     }
 
-    public MessageBridgeTaskManagerBuilder withPollDuration(Duration pollDuration) {
+    public MessageBridgeTasksManagerBuilder withPollDuration(Duration pollDuration) {
         this.pollDuration = pollDuration;
         return this;
     }
@@ -79,13 +79,13 @@ public class MessageBridgeTaskManagerBuilder {
         return namePerTask;
     }
 
-    public MessageBridgeTaskManagerBuilder withNamePerTask(boolean namePerTask) {
+    public MessageBridgeTasksManagerBuilder withNamePerTask(boolean namePerTask) {
         this.namePerTask = namePerTask;
         return this;
     }
 
-    public static MessageBridgeTaskManagerBuilder builder() {
-        return new MessageBridgeTaskManagerBuilder();
+    public static MessageBridgeTasksManagerBuilder builder() {
+        return new MessageBridgeTasksManagerBuilder();
     }
 
     public MessageBridgeTasksManager build() {
