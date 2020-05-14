@@ -33,13 +33,13 @@ public class IBM_MQ_ToNatsBridgeWithHeadersTest {
 
     @Before
     public void setUp() throws Exception {
-        clientMessageBus = TestUtils.getMessageBusIbmMQWithHeaders("CLIENT",false);
+        clientMessageBus = TestUtils.getMessageBusIbmMQWithHeaders4("CLIENT",false);
         serverMessageBus = TestUtils.getMessageBusNats("SERVER","B");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusSource = TestUtils.getMessageBusIbmMQWithHeaders("BRIDGE_SOURCE",true);
+        bridgeMessageBusSource = TestUtils.getMessageBusIbmMQWithHeaders4("BRIDGE_SOURCE",true);
         bridgeMessageBusDestination = TestUtils.getMessageBusNats("BRIDGE_DEST","B");
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null);
 
