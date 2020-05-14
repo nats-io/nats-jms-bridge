@@ -124,7 +124,7 @@ public class MessageBridgeTasksManagerImpl implements MessageBridgeTasksManager 
 
     @Override
     public boolean isHealthy() {
-        return lastError.get() != null;
+        return lastError.get() == null;
     }
 
     @Override

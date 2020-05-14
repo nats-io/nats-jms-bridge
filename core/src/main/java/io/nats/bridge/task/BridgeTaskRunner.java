@@ -33,12 +33,12 @@ public class BridgeTaskRunner {
                 for (int index = 0; index < 100; index++) { //reduce calling atomic by 100x
                     for (MessageBridge messageBridge : messageBridges) {
                         if (pause) {
-                            count += messageBridge.process();
-                        } else {
                             count += messageBridge.process(pollDuration);
+                        } else {
+                            count += messageBridge.process();
                         }
                     }
-                    if (count > 0) pause = true;
+                    if (count == 0) pause = true;
                     count = 0;
                 }
             }
