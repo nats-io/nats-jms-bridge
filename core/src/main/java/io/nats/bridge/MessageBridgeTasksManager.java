@@ -16,4 +16,6 @@ public interface MessageBridgeTasksManager extends Closeable {
 
     boolean wasStarted();
 
+    void clearLastError();
+
 }

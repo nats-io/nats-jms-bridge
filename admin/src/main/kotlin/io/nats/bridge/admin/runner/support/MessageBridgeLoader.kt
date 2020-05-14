@@ -1,7 +1,10 @@
 package io.nats.bridge.admin.runner.support
 
-interface MessageBridgeLoader {
-    fun loadBridgeBuilders(): List<MessageBridgeBuilder>
+import io.nats.bridge.admin.models.bridges.MessageBridgeInfo
+import io.nats.bridge.support.MessageBridgeBuilder
 
-    fun loadBridges() = loadBridgeBuilders().map { it.build() }
+data class BridgeConfig(val name:String, val builders:List<MessageBridgeBuilder>, val config: MessageBridgeInfo)
+
+interface MessageBridgeLoader {
+    fun loadBridgeConfigs(): List<BridgeConfig>
 }

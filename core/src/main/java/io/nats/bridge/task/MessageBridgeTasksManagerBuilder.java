@@ -12,7 +12,7 @@ public class MessageBridgeTasksManagerBuilder {
 
     private String name;
     private Logger logger;
-    private Function<String, MessageBridge> bridgeBuilder;
+    private Function<String, MessageBridge> bridgeFactory;
     private int workers;
     private int tasks;
     private Duration pollDuration;
@@ -39,12 +39,12 @@ public class MessageBridgeTasksManagerBuilder {
         return this;
     }
 
-    public Function<String, MessageBridge> getBridgeBuilder() {
-        return bridgeBuilder;
+    public Function<String, MessageBridge> getBridgeFactory() {
+        return bridgeFactory;
     }
 
-    public MessageBridgeTasksManagerBuilder withBridgeBuilder(Function<String, MessageBridge> bridgeBuilder) {
-        this.bridgeBuilder = bridgeBuilder;
+    public MessageBridgeTasksManagerBuilder withBridgeFactory(Function<String, MessageBridge> bridgeFactory) {
+        this.bridgeFactory = bridgeFactory;
         return this;
     }
 
@@ -90,6 +90,6 @@ public class MessageBridgeTasksManagerBuilder {
 
     public MessageBridgeTasksManager build() {
         return new MessageBridgeTasksManagerImpl(getName(), getLogger(),
-                getBridgeBuilder(), getWorkers(), getTasks(), getPollDuration(), isNamePerTask());
+                getBridgeFactory(), getWorkers(), getTasks(), getPollDuration(), isNamePerTask());
     }
 }

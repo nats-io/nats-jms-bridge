@@ -104,7 +104,7 @@ class IntegrationUtils {
         //postAdmin("$bridgeControlAdminURL/stop")
         //postAdmin("$bridgeControlAdminURL/restart")
         val stop = AtomicBoolean()
-        val builder = loader.loadBridgeBuilders()[0]
+        val builder = loader.loadBridgeConfigs()[0].builders[0]
 
         val clientBuilder  = builder.sourceBusBuilder!!
 
@@ -112,7 +112,7 @@ class IntegrationUtils {
 
         }
 
-        val serverBuilder = builder.destBusBuilder!!
+        val serverBuilder = builder.destinationBusBuilder!!
 
         if (serverBuilder is JMSMessageBusBuilder) {
             serverBuilder.asSource()

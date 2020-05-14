@@ -137,5 +137,10 @@ public class MessageBridgeTasksManagerImpl implements MessageBridgeTasksManager 
         return (workers == startedCount.get());
     }
 
+    @Override
+    public void clearLastError() {
+        lastError.set(null);
+    }
+
 
 }

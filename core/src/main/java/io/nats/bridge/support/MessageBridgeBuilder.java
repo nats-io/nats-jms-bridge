@@ -13,8 +13,33 @@ public class MessageBridgeBuilder {
     private String name;
     private Queue<MessageBridgeImpl.MessageBridgeRequestReply> replyMessageQueue;
 
+    private MessageBusBuilder sourceBusBuilder;
+    private MessageBusBuilder destinationBusBuilder;
+
+    public MessageBusBuilder getSourceBusBuilder() {
+        return sourceBusBuilder;
+    }
+
+    public MessageBridgeBuilder withSourceBusBuilder(MessageBusBuilder sourceBusBuilder) {
+        this.sourceBusBuilder = sourceBusBuilder;
+        return this;
+    }
+
+    public MessageBusBuilder getDestinationBusBuilder() {
+        return destinationBusBuilder;
+    }
+
+    public MessageBridgeBuilder withDestinationBusBuilder(MessageBusBuilder destBusBuilder) {
+        this.destinationBusBuilder = destBusBuilder;
+        return this;
+    }
+
     public MessageBus getSourceBus() {
-        if (sourceBus == null) throw new IllegalStateException("Source Bus must be set");
+        if (sourceBus == null && sourceBusBuilder == null) throw new IllegalStateException("Source Bus must be set");
+
+        if (sourceBus == null) {
+            sourceBus = getSourceBusBuilder().build();
+        }
         return sourceBus;
     }
 
@@ -24,7 +49,10 @@ public class MessageBridgeBuilder {
     }
 
     public MessageBus getDestinationBus() {
-        if (destinationBus == null) throw new IllegalStateException("Destination Bus must be set");
+        if (destinationBus == null && destinationBusBuilder == null) throw new IllegalStateException("Destination Bus must be set");
+        if (destinationBus == null) {
+            destinationBus = getDestinationBusBuilder().build();
+        }
         return destinationBus;
     }
 
