@@ -18,6 +18,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.File
+import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -128,20 +129,21 @@ class IntegrationUtils {
 
         for (a in 0..9) {
             println("Run $a")
-            val latch = CountDownLatch(10)
-            for (x in 0..9) {
+            val latch = CountDownLatch(100)
+            for (x in 0..99) {
                 println("Call $x of run $a")
                 clientBus.request("Rick $a $x") { response ->
                     ref.set(response)
                     count.incrementAndGet()
                     latch.countDown()
                 }
-                Thread.sleep(50)
+
+                latch.await(50, TimeUnit.MILLISECONDS)
                 clientBus.process()
             }
-            Thread.sleep(50)
+            latch.await(50, TimeUnit.MILLISECONDS)
             clientBus.process()
-            latch.await(5000, TimeUnit.MILLISECONDS)
+            latch.await(50, TimeUnit.MILLISECONDS)
             println("REPLY COUNT " + count.get())
             displayFlag(readFlag("${Constants.bridgeControlURL}/running"))
             displayFlag(readFlag("${Constants.bridgeControlURL}/started"))
