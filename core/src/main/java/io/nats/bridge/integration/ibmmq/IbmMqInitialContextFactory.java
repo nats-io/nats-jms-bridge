@@ -12,12 +12,6 @@ import javax.naming.*;
 import javax.naming.spi.InitialContextFactory;
 import java.net.URI;
 import java.util.*;
-//import java.util.function.Consumer;
-//import java.util.function.Function;
-//import java.util.function.Predicate;
-//import java.util.stream.Collectors;
-//import java.util.stream.Stream;
-
 
 public class IbmMqInitialContextFactory implements InitialContextFactory {
 
@@ -48,8 +42,6 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
             final String queueModelPrefix = getStringProp(jndiProperties, QUEUE_MODEL_PREFIX);
 
 
-
-
             connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
             connectionFactory.setIntProperty(WMQConstants.WMQ_PORT, port);
             connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
@@ -60,10 +52,6 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
             connectionFactory.setStringProperty(WMQConstants.WMQ_TEMP_Q_PREFIX, queueModelPrefix);
 
             contextMap.put(CONNECTION_FACTORY, new MQConnectionFactory(connectionFactory));
-
-//            final Set<String> queues = jndiProperties.keySet().stream().map(Object::toString)
-//                    .filter(s -> s.startsWith(QUEUE)).collect(Collectors.toSet());
-
 
             return new MQContext(contextMap);
         } catch (Exception ex) {

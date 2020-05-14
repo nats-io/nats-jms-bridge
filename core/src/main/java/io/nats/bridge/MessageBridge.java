@@ -14,7 +14,7 @@ public interface MessageBridge extends Closeable {
     int process(Duration duration);
 
     @Override
-    void close() throws IOException;
+    void close();
 
     Metrics sourceMetrics();
     Metrics destinationMetrics();

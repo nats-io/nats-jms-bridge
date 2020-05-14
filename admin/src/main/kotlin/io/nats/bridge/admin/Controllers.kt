@@ -1,20 +1,20 @@
 package io.nats.bridge.admin
 
 
+//import io.nats.bridge.admin.runner.BridgeRunnerManager
 import io.micrometer.core.annotation.Timed
 import io.micrometer.core.instrument.MeterRegistry
-import io.swagger.annotations.ApiImplicitParam
 import io.nats.bridge.admin.importer.BridgeFileDelimImporter
-import io.nats.bridge.admin.importer.BridgeFileImporter
 import io.nats.bridge.admin.models.bridges.MessageBridgeInfo
 import io.nats.bridge.admin.models.bridges.NatsBridgeConfig
 import io.nats.bridge.admin.models.logins.Login
 import io.nats.bridge.admin.models.logins.LoginRequest
 import io.nats.bridge.admin.models.logins.LoginToken
 import io.nats.bridge.admin.models.logins.TokenResponse
-import io.nats.bridge.admin.runner.BridgeRunnerManager
+import io.nats.bridge.admin.runner.support.MessageBridgeRunner
 import io.nats.bridge.admin.util.EncryptUtils
 import io.nats.bridge.admin.util.JwtUtils
+import io.swagger.annotations.ApiImplicitParam
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
@@ -27,7 +27,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 data class Flag(val message: String, val flag: Boolean)
-data class Error(val name: String, val message: String, val root:String?=null)
+data class Error(val name: String, val message: String, val root: String? = null)
 data class ResponseMessage(val message: String, val error: Error? = null)
 
 @RestController
@@ -139,25 +139,25 @@ class AdminController(private val config: ConfigRepo) {
     @PostMapping(path = ["/admin/config"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
     fun saveConfig(conf: NatsBridgeConfig) = config.saveConfig(conf)
-    
+
 
     @PreAuthorize("hasAnyAuthority('Admin')")
-    @PutMapping(path = ["/admin/config/import/bridges"], consumes=["text/tsv", "text/csv"])
+    @PutMapping(path = ["/admin/config/import/bridges"], consumes = ["text/tsv", "text/csv"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
-    fun importBridges(@RequestBody text: String, @RequestParam(name="name") name: String, @RequestParam(name="delim") delim: String="tab",
-                      @Value("\${app.config.etcd}") configDir:String) : ResponseMessage {
+    fun importBridges(@RequestBody text: String, @RequestParam(name = "name") name: String, @RequestParam(name = "delim") delim: String = "tab",
+                      @Value("\${app.config.etcd}") configDir: String): ResponseMessage {
 
         return try {
             val fileName = (name + Date()).replace("/", "_").replace("..", "_").replace(" ", "_").replace(":", "_")
             val ext = if (delim == "tab") "tsv" else if (delim == "comma" || delim == ",") "csv" else "_sv"
             val actualDelim = if (delim == "tab") "\t" else if (delim == "comma") "," else delim
             val outputFile = File(File(configDir), "$fileName.$ext")
-            println(text.split("###___").map{it.trim()}.filter { !it.isBlank() }.joinToString ("\r\n" ))
-            outputFile.writeText(text.split("###___").filter { !it.isBlank() }.joinToString ("\r\n"))
+            println(text.split("###___").map { it.trim() }.filter { !it.isBlank() }.joinToString("\r\n"))
+            outputFile.writeText(text.split("###___").filter { !it.isBlank() }.joinToString("\r\n"))
             val importer = BridgeFileDelimImporter(configRepo = config, delim = actualDelim)
             importer.import(outputFile)
             ResponseMessage("All Good")
-        } catch (ex:Exception) {
+        } catch (ex: Exception) {
             ResponseMessage("Failed to upload $name", error = io.nats.bridge.admin.Error(ex.javaClass.simpleName,
                     ex.localizedMessage, ex.cause?.localizedMessage))
         }
@@ -198,8 +198,8 @@ class UserAdminController(private val loginRepo: LoginRepo, registry: MeterRegis
 
     @GetMapping(path = ["/admin/login"])
     @ApiImplicitParam(name = "Authorization", value = "Authorization token", dataType = "string", paramType = "header")
-    fun listLogins(): List<String>  {
-        val logins =  loginRepo.listLogins()
+    fun listLogins(): List<String> {
+        val logins = loginRepo.listLogins()
         loginCount.set(logins.size)
         return logins;
     }
@@ -228,7 +228,9 @@ class UserAdminController(private val loginRepo: LoginRepo, registry: MeterRegis
 
 @RestController
 @RequestMapping("/api/v1/control/bridges")
-class Runner(val bridgeRunner: BridgeRunnerManager) {
+class Runner(
+        val bridgeRunner: MessageBridgeRunner
+) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
 
