@@ -102,7 +102,7 @@ public class MessageBridgeImpl implements MessageBridge {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close()  {
         sourceBus.close();
         destinationBus.close();
     }
