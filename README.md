@@ -60,13 +60,15 @@ The NATS JMS/MQ Bridge is broken up into two parts. The `admin` and the `core` l
 ## Improvements
 
 * More load and perf testing
-* Added the concepts of workers and tasks as part the bridge config to increase throughput (this part was completely rewritten from alpha1)
-* Health check now actually check status of bridge runner
-* NGINX set up with TLS termination
-* Added a docker container for NATS admin
+* Added the concepts of workers and tasks as part the bridge config to increase throughput (this part was completely rewritten from the alpha1 release).
+* Health check now actually check status of bridge runner.
+* NGINX set up with TLS termination.
+* Added a docker container for NATS admin.
 * Improved IBM MQ support via queue models for faster request/reply throughput.
-* NATS TLS config support added
-* Improved error handling around slow consumers and connection exceptions
+* Added support for IBM MQ QMODEL and DSP config for QMODEL Name and QMODEL prefix params to JNDI context.
+* Created IBM MQ image with QMODEL for request/reply with the correct authority added to users to create dynamic reply queues.
+* NATS TLS config support added.
+* Improved error handling around slow consumers and connection exceptions.
 
 
 ## Adding Workers and Tasks
@@ -191,7 +193,7 @@ git clone https://github.com/nats-io/nats-jms-mq-bridge.git
 cd nats-jms-mq-bridge
 bin/build.sh localdev
 ```
-The command `bin/build.sh localdev` uses `docker-deploy` to deploy IBM MQ, NATS Server, and ActiveMQ for testing and development. 
+The command `bin/build.sh localdev` uses `docker-deploy` to deploy IBM MQ, NATS Server, and ActiveMQ for testing and development.
 
 
 ## Run the application
