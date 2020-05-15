@@ -49,6 +49,7 @@ class MessageBridgeRunner(private val messageBridgeLoader: MessageBridgeLoader) 
             }}
     }
 
+    fun isHealthy(): Boolean = managers.values.all { it.isHealthy }
     fun isRunning(): Boolean = managers.values.all { it.isHealthy }
     fun wasStarted(): Boolean = managers.values.all { it.wasStarted() }
     fun wasError(): Boolean = managers.values.any{ !it.isHealthy }

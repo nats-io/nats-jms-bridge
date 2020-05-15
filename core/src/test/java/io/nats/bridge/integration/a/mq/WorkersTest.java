@@ -55,7 +55,7 @@ public class WorkersTest {
                 throw new IllegalStateException(ex);
             }
         }).withName("TEST_BRIDGE_TASK_RUNNER")
-                .withPollDuration(Duration.ofMillis(200)).withTasks(5).withWorkers(3).build();
+                .withPollDuration(Duration.ofMillis(50)).withTasks(1).withWorkers(1).build();
 
 
         manager.start();

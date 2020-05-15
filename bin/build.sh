@@ -61,6 +61,10 @@ clean_docker_images() {
   docker ps  | grep $DOCKER_NAMESPACE | awk '{print $1}' | xargs docker stop
   docker ps -a | grep $DOCKER_NAMESPACE | awk '{print $1}' | xargs docker rm
   docker images | grep $DOCKER_NAMESPACE | awk '{print $3}' | xargs docker  rmi
+  docker ps  | grep "cicd_" | awk '{print $1}' | xargs docker stop
+  docker ps -a | grep "cicd_" | awk '{print $1}' | xargs docker rm
+  docker images | grep "cicd_" | awk '{print $3}' | xargs docker  rmi
+
 }
 
 help () {
