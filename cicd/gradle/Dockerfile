@@ -1,7 +1,4 @@
-# Use an existing docker image as a base
-# cloudurable/gradle
-
-FROM ubuntu
+FROM ubuntu:20.04
 
 #Copying files
 COPY . ./usr/app

@@ -10,9 +10,8 @@ import io.nats.bridge.nats.NatsMessageBus;
 import io.nats.bridge.support.MessageBusBuilder;
 import io.nats.bridge.tls.SslContextBuilder;
 import io.nats.bridge.util.ExceptionHandler;
-import io.nats.client.Connection;
-import io.nats.client.Nats;
-import io.nats.client.Options;
+import io.nats.client.*;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
@@ -292,6 +291,25 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
             if (isUseTls()) {
                 optionsBuilder.sslContext(this.getSslContext());
             }
+
+            final Logger logger = LoggerFactory.getLogger(NatsMessageBus.class);
+            optionsBuilder.errorListener(new ErrorListener() {
+                @Override
+                public void errorOccurred(Connection conn, String error) {
+                    logger.error("Error Occurred with NATS: {} with the bus {}", error, name);
+                }
+
+                @Override
+                public void exceptionOccurred(Connection conn, Exception exp) {
+                    logger.error("Exception Occurred with NATS:", exp);
+                    logger.error("Exception Occurred with NATS: {} with the bus {}", exp.getLocalizedMessage(), name);
+                }
+
+                @Override
+                public void slowConsumerDetected(Connection conn, Consumer consumer) {
+                    logger.warn("Slow Consumer Detected {}", name);
+                }
+            });
         }
         return optionsBuilder;
     }

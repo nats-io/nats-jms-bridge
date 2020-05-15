@@ -550,8 +550,11 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
 
         jndiProperties.clear();
+        //TODO: Make java.naming.factory.initial like call it jndiInitialFactory.
         jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"));
         jndiProperties.put("nats.ibm.mq.host", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414"));
+
+        //TODO: Make Channel and Queue manager like queueModelName and queueModelPrefix
         jndiProperties.put("nats.ibm.mq.channel", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_CHANNEL", "DEV.APP.SVRCONN"));
         jndiProperties.put("nats.ibm.mq.queueManager", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER", "QM1"));
         jndiProperties.put("nats.ibm.mq.queueModelName", queueModelName);

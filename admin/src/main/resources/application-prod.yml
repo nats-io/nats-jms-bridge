@@ -1,3 +1,7 @@
 spring:
-  profiles.active: PROD
+  profiles.active: prod
 
+management:
+  endpoint:
+    health:
+      show-details: when-authorized

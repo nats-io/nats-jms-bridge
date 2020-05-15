@@ -44,7 +44,7 @@ public class WorkersTest {
 
         final MessageBridgeTasksManagerBuilder builder = MessageBridgeTasksManagerBuilder.builder();
 
-        manager = builder.withBridgeBuilder(s -> {
+        manager = builder.withBridgeFactory(s -> {
             try {
                 final MessageBus bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE", "A");
                 final MessageBus bridgeMessageBusJmsDestination = TestUtils.getMessageBusIbmMQWithHeaders4("BRIDGE_DEST", false);
@@ -55,7 +55,7 @@ public class WorkersTest {
                 throw new IllegalStateException(ex);
             }
         }).withName("TEST_BRIDGE_TASK_RUNNER")
-                .withPollDuration(Duration.ofMillis(200)).withTasks(5).withWorkers(3).build();
+                .withPollDuration(Duration.ofMillis(50)).withTasks(1).withWorkers(1).build();
 
 
         manager.start();

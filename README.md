@@ -46,64 +46,74 @@ This all happens async.
 Admin Console
 ![image](https://user-images.githubusercontent.com/382678/80275243-e3010c80-8694-11ea-843c-b26cf43cf8ae.png)
 
-# 0.3.0-Alpha1 NATS JMS/MQ Bridge
+# 0.4.0-beta1 NATS JMS/MQ Bridge
 
 
-This release is an [alpha release](https://en.wikipedia.org/wiki/Software_release_life_cycle). This [alpha release](https://stackoverflow.com/questions/40067469/what-is-the-difference-between-alpha-and-beta-release) lacks perf testing and full integration testing. There are known shortcomings. It is a work in progress. 
-
-In the core NATS bridge, there are working integration tests to Bridge REQUEST/REPLY queues between NATS and IBM MQ as well as ActiveMQ JMS. This bridging is bi-directional. The bridge can perform a QUEUE to QUEUE FORWARD or a REQUEST/REPLAY DELEGATION. 
-
-The NATS JMS/MQ Bridge is broken up into two parts. The `admin` and the `core` lib. The `admin` is written with Spring Boot and consists of an executable jar file. 
+This release is an [beta release](https://en.wikipedia.org/wiki/Software_release_life_cycle). This [beta release](https://stackoverflow.com/questions/40067469/what-is-the-difference-between-alpha-and-beta-release) lacks full perf testing and full integration testing. Efforts were made to improve performance. You can now use `workers` and `tasks` as bart of the bridge configuration to speed up throughput.  
 
 
+In the core NATS bridge, there are working integration tests to Bridge REQUEST/REPLY queues between NATS and IBM MQ as well as ActiveMQ JMS. This bridging is bi-directional. The bridge can perform a QUEUE to QUEUE FORWARD or a REQUEST/REPLAY DELEGATION. The bridge can also copy JMS headers from NATS to JMS and back.
+
+The NATS JMS/MQ Bridge is broken up into two parts. The `admin` and the `core` lib. The `admin` is written with Spring Boot and consists of an executable jar file, an application zip file, and now a docker container. The docker container uses NGINX to do SSL/TLS termination.
+
+
+## Improvements
+
+* More load and perf testing
+* Added the concepts of workers and tasks as part the bridge config to increase throughput
+* Health check now actually works with the bridge runner
+* NGINX set up with TLS termination
+* Added a docker container for NATS admin
+* Improved IBM MQ support via queue models for faster request/reply throughput.
+* NATS TLS config support added 
 
 
 
 Artifact | Description | Type
 -- | -- | --
-nats-bridge-admin-0.3.0-ALPHA1.tar | Application with start up script and lib folder. Start up scripts, utilities and libs expanded. | Spring Boot App
-nats-bridge-admin-0.3.0-ALPHA1.zip | Application with start up script and lib folder. Start up scripts, utilities and libs expanded. | Spring Boot App
-nats-bridge-admin-boot-0.3.0-ALPHA1.tar | Application with start up script and lib folder. Single executable jar files. No libs. | Spring Boot App
-nats-bridge-admin-boot-0.3.0-ALPHA1.zip | Application with start up script and lib folder. Single executable jar files. No libs. | Spring Boot App
-nats-bridge-admin-0.3.0-ALPHA1-boot.jar | Executable jar file | Spring Boot App
-nats-bridge-admin-0.3.0-ALPHA1.jar | Admin classes only | Lib
-nats-jms-bridge-0.3.0-ALPHA1.jar | Core Bridge Classes Only | Lib
-nats-jms-bridge-0.3.0-ALPHA1.pom | Maven POM file for Bridge | Manifest
+nats-bridge-admin-0.1.0-beta1.tar | Application with start up script and lib folder. Start up scripts, utilities and libs expanded. | Spring Boot App
+nats-bridge-admin-0.1.0-beta1.zip | Application with start up script and lib folder. Start up scripts, utilities and libs expanded. | Spring Boot App
+nats-bridge-admin-boot-0.1.0-beta1.tar | Application with start up script and lib folder. Single executable jar files. No libs. | Spring Boot App
+nats-bridge-admin-boot-0.1.0-beta1.zip | Application with start up script and lib folder. Single executable jar files. No libs. | Spring Boot App
+nats-bridge-admin-0.1.0-beta1-boot.jar | Executable jar file | Spring Boot App
+nats-bridge-admin-0.1.0-beta1.jar | Admin classes only | Lib
+nats-jms-bridge-0.1.0-beta1.jar | Core Bridge Classes Only | Lib
+nats-jms-bridge-0.1.0-beta1.pom | Maven POM file for Bridge | Manifest
 
-# Admin Console for NATS JMS Bridge 
+# Admin Console for NATS JMS Bridge
 
 ![image](https://user-images.githubusercontent.com/382678/80275243-e3010c80-8694-11ea-843c-b26cf43cf8ae.png)
 
 # Admin features
 
-The admin provides a REST interface. It is meant to be run behind NGINX or Apache (or some load balancer / reverse proxy that does SSL / TLS termination). The admin provides an admin user that can create other users. Users can generate a secure JWT token which they can use to use command tools that hit the admin's REST interface. 
+The admin provides a REST interface. It is meant to be run behind NGINX or Apache (or some load balancer / reverse proxy that does SSL / TLS termination). The admin provides an admin user that can create other users. Users can generate a secure JWT token which they can use to use command tools that hit the admin's REST interface.
 
 The admin emits metrics which are configured to be picked up with tools like Prometheus, DataDog, InfluxDB, CloudWatch, etc. See the CICD directory to see example docker-deploys that use Prometheus.
 
-## Install guide 
+## Install guide
 
 
 ## Download the distribution zip and unzip it
 
 ```sh
 
-mkdir bridge 
-cd bridge 
+mkdir bridge
+cd bridge
 
-wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.3.0-Alpha1/nats-bridge-admin-0.3.0-ALPHA1.zip
-unzip nats-bridge-admin-0.3.0-ALPHA1.zip
-rm *.zip 
+wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.1.0-beta1/nats-bridge-admin-0.1.0-beta1.zip
+unzip nats-bridge-admin-0.1.0-beta1.zip
+rm *.zip
 ```
 
-## Before you run the server 
+## Before you run the server
 
-Before you run the server you may want to download the source code and run the `docker-compose` out of 
-the `cicd` folder which starts up IBM MQ, ActiveMQ and NATS Servers in Docker. 
+Before you run the server you may want to download the source code and run the `docker-compose` out of
+the `cicd` folder which starts up IBM MQ, ActiveMQ and NATS Servers in Docker.
 
 ```sh
 git clone https://github.com/nats-io/nats-jms-mq-bridge.git
 cd nats-jms-mq-bridge
-docker-compose -f cicd/docker-compose-local-dev.yml up
+bin/build.sh localdev
 ```
 
 
@@ -112,15 +122,19 @@ docker-compose -f cicd/docker-compose-local-dev.yml up
 ## Run the application
 
 ```sh
-cd nats-bridge-admin-0.3.0-ALPHA1
+cd nats-bridge-admin-0.1.0-beta1
 
-## Copy the test servers the correspond to the docker compose earlier 
-mv nats-bridge.yaml config 
+mkdir config
 
-## Run the server 
+## Copy the test servers the correspond to the docker compose earlier
+mv nats-bridge.yaml config/
+
+## Run the server
 bin/nats-bridge-admin
 ```
 
+
+#### Output
 ```sh
 
  .   ____          _            __ _ _
@@ -131,7 +145,7 @@ bin/nats-bridge-admin
 =========|_|==============|___/=/_/_/_/
 :: Spring Boot ::        (v2.2.6.RELEASE)
 
-2020-05-01 03:22:06.114  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Starting ApplicationMain on Richards-MacBook-Pro.local with PID 92828 (/Users/richardhightower/bridge/nats-bridge-admin-0.3.0-ALPHA1/lib/nats-bridge-admin-0.3.0-ALPHA1.jar started by richardhightower in /Users/richardhightower/bridge/nats-bridge-admin-0.3.0-ALPHA1)
+2020-05-01 03:22:06.114  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Starting ApplicationMain on Richards-MacBook-Pro.local with PID 92828 (/Users/richardhightower/bridge/nats-bridge-admin-0.1.0-beta1/lib/nats-bridge-admin-0.1.0-beta1.jar started by richardhightower in /Users/richardhightower/bridge/nats-bridge-admin-0.1.0-beta1)
 2
 ...
 2020-05-01 03:22:09.211  INFO 92828 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
@@ -139,7 +153,7 @@ bin/nats-bridge-admin
 ```
 
 
-## Run an integration test 
+## Run an integration test
 
 ```sh
 
@@ -147,18 +161,18 @@ bin/integration.sh
 
 ```
 
-If all goes well, you should see this output. 
+If all goes well, you should see this output.
 
 ```sh
-======== Counts for nats =========== 
+======== Counts for nats ===========
                  publish_count          0
                  request_count         90
         request_response_count         91
                 received_count          0
           received_reply_count          0
    received_reply_count_errors          0
-======== Gauges for nats =========== 
-======== Timers for nats =========== 
+======== Gauges for nats ===========
+======== Timers for nats ===========
        request_response_timing         53
           receive_reply_timing          0
 REPLY COUNT 100
@@ -170,7 +184,7 @@ Errors? false
 
 
 
-## Using the command line tools 
+## Using the command line tools
 To use this tool you must install `jq`.
 `jq` is a lightweight command-line JSON processor.
 https://stedolan.github.io/jq/
@@ -263,7 +277,7 @@ https://stedolan.github.io/jq/
 ## To clear the last error use `clear-error`
 
 ```sh
-  
+
 $ bin/admin.sh clear-error
 
 ```
@@ -276,34 +290,34 @@ $ bin/admin.sh clear-error
 
 ## To Stop the bridge use `stop` (use restart to start it again)
 
-```sh 
+```sh
   $ bin/admin.sh stop
 ```
 
-## To See KPI and metrics for the admin 
+## To See KPI and metrics for the admin
 
-```sh 
-  $ bin/admin.sh metrics 
+```sh
+  $ bin/admin.sh metrics
 
 ```
 
-## To import a TSV file 
+## To import a TSV file
 
 ```sh
- $ bin/admin.sh import tab myimport.tsv 
-``` 
+ $ bin/admin.sh import tab myimport.tsv
+```
 
-## To import a CSV file 
+## To import a CSV file
 
 ```sh
- $ bin/admin.sh import tab myimport.csv 
-``` 
+ $ bin/admin.sh import tab myimport.csv
+```
 
-The file format of the TSV and CSV is described below. 
+The file format of the TSV and CSV is described below.
 
 # Nats JMS MQ Bridge Service service
 
-This is the source code for the Nats JMS MQ Bridge Service Service back-end application developed with Spring Boot. 
+This is the source code for the Nats JMS MQ Bridge Service Service back-end application developed with Spring Boot.
 
 You can build the project and run tests by running:
 
@@ -318,22 +332,22 @@ All development happens in the development branch.
 API documentation is in swagger and accessible via the url:  HTTP://application_base_url/swagger-ui.html#!
 
 
-## Swagger 
+## Swagger
 
 http://localhost:8080/swagger-ui.html#!  
 
-## Test with curl 
+## Test with curl
 
-## Send ping 
+## Send ping
 
 ```sh
 $ curl localhost:8080/ping
 
-## Output 
+## Output
 pong
 ```
 
-## Curl root 
+## Curl root
 
 ```sh
  $ curl localhost:8080/    
@@ -350,7 +364,7 @@ $  curl localhost:8080/api/v1/auth/ping  | jq .
 
 ```
 
-### Output 
+### Output
 
 ```json
 {
@@ -371,7 +385,7 @@ $  curl localhost:8080/api/v1/auth/ping  | jq .
 ```sh
    curl -X POST -H "Content-Type: application/json"\
                 -d '{"subject":"Rick Hightower", "publicKey" : "foobar" }'\
-                localhost:8080/api/v1/login/generateToken 
+                localhost:8080/api/v1/login/generateToken
 ```
 
 ### Output
@@ -392,7 +406,7 @@ $  curl localhost:8080/api/v1/auth/ping  | jq .
 ```sh
    curl -X POST -H "Content-Type: application/json"\
                 -d '{"subject":"Paul Hix", "publicKey" : "iloverick" }'\
-                localhost:8080/api/v1/login/generateToken 
+                localhost:8080/api/v1/login/generateToken
 ```
 
 ### Output
@@ -408,7 +422,7 @@ $  curl localhost:8080/api/v1/auth/ping  | jq .
 
 
 
-## Actual Admin 
+## Actual Admin
 
 
 ```sh
@@ -426,10 +440,10 @@ $  curl localhost:8080/api/v1/auth/ping  | jq .
 }
 ```
 
-## Get config list 
+## Get config list
 
-To hit the swagger UI direct when in dev use this: 
-* ADMIN 
+To hit the swagger UI direct when in dev use this:
+* ADMIN
     * Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMT0dJTl9UT0tFTiIsInN1YmplY3QiOiJSaWNrIiwicm9sZXMiOiJBZG1pbiJ9.hd2yFD_aEDL5IVaTz0TpiqxTTdZ4CteDLp1wquDTabI
 * USER
     * Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMT0dJTl9UT0tFTiIsInN1YmplY3QiOiJQYXVsIEhpeCIsInJvbGVzIjoiVXNlciJ9.Pb02geRU-RPyHyGwgxlwnptJ66zAs4nbdR7z53JY6RU
@@ -440,12 +454,12 @@ To hit the swagger UI direct when in dev use this:
 #### From User
 ```sh
    curl  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMT0dJTl9UT0tFTiIsInN1YmplY3QiOiJQYXVsIEhpeCIsInJvbGVzIjoiVXNlciJ9.Pb02geRU-RPyHyGwgxlwnptJ66zAs4nbdR7z53JY6RU"\
-          localhost:8080/api/v1/bridges/admin/config 
+          localhost:8080/api/v1/bridges/admin/config
 ```
 
 
 
-### Output 
+### Output
 
 ```json
 {
@@ -462,12 +476,12 @@ To hit the swagger UI direct when in dev use this:
 #### From Admin
 ```sh
    curl  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMT0dJTl9UT0tFTiIsInN1YmplY3QiOiJSaWNrIiwicm9sZXMiOiJBZG1pbiJ9.hd2yFD_aEDL5IVaTz0TpiqxTTdZ4CteDLp1wquDTabI"\
-          localhost:8080/api/v1/bridges/admin/config 
+          localhost:8080/api/v1/bridges/admin/config
 ```
 
 
 
-### Output 
+### Output
 
 ```json
 {
@@ -546,19 +560,19 @@ To hit the swagger UI direct when in dev use this:
 }
 ```
 
-## Show current user roles 
+## Show current user roles
 
 #### Paul
 ```sh
    curl  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMT0dJTl9UT0tFTiIsInN1YmplY3QiOiJQYXVsIEhpeCIsInJvbGVzIjoiVXNlciJ9.Pb02geRU-RPyHyGwgxlwnptJ66zAs4nbdR7z53JY6RU"\
-          localhost:8080/api/v1/logins/admin/roles 
+          localhost:8080/api/v1/logins/admin/roles
 ```
 
 
 #### Rick
 ```sh
    curl  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMT0dJTl9UT0tFTiIsInN1YmplY3QiOiJSaWNrIiwicm9sZXMiOiJBZG1pbiJ9.hd2yFD_aEDL5IVaTz0TpiqxTTdZ4CteDLp1wquDTabI"\
-          localhost:8080/api/v1/logins/admin/roles 
+          localhost:8080/api/v1/logins/admin/roles
 ```
 
 
@@ -572,29 +586,29 @@ curl  -H "Authorization: Bearer $TOKEN"\
 
 ```
 
-# Bridge Configuration Notes 
+# Bridge Configuration Notes
 
-Note that many items have a name. It is important to give short concise names as they are used for reporting health issues, alerts, metrics and KPIs. 
+Note that many items have a name. It is important to give short concise names as they are used for reporting health issues, alerts, metrics and KPIs.
 
 The ***Nats JMS/MQ Bridge*** bridges message bus systems.
-This allows sending and receiving messages between message bus systems like JMS and IBM MQ. 
+This allows sending and receiving messages between message bus systems like JMS and IBM MQ.
 
 
 ## NatsBridgeConfig
  `NatsBridgeConfig` is the root config object for exporting to and reading from JSON and YAML.
 
 Clusters refer to message bus servers for Nats or JMS/IBM MQ.
- 
-#### NatsBridgeConfig Schema 
+
+#### NatsBridgeConfig Schema
 ```kotlin
 data class NatsBridgeConfig(val name: String,
                             val bridges: List<MessageBridge>,
                             val clusters: Map<String, Cluster>)
 ```
 
-#### NatsBridge in YAML 
+#### NatsBridge in YAML
 
-```yaml 
+```yaml
 name: "Starter Config"
 
 bridges:
@@ -647,7 +661,7 @@ clusters:
 A Message bus represents a message bus system, i.e., IBM MQ, Nats, ActiveMQ, JMS, Rabbit MQ, Kafka, SQS, etc.
 A message bus has a subject which can be Nats subject or a JMS destination.
 
-#### MessageBus Schema 
+#### MessageBus Schema
 
 ```kotlin
 data class MessageBus(val name: String, val busType: BusType, val subject: String, val clusterName: String)
@@ -669,17 +683,17 @@ data class MessageBus(val name: String, val busType: BusType, val subject: Strin
 A `MessageBridge` connects two MessageBus and will forward messages or relay request/replies between the message bus systems.
 There is a source `MessageBus` and a destination `MessageBus`.
 
-#### MessageBridge Schema 
+#### MessageBridge Schema
 
-```kotlin 
+```kotlin
 data class MessageBridge(val name: String, val bridgeType: BridgeType,
                          val source: MessageBus, val destination: MessageBus, val copyHeaders: Boolean? = false)
 ```
 
 #### MessageBridge In YAML
 
-```kotlin 
-- name: "jmsToNatsSample" 
+```kotlin
+- name: "jmsToNatsSample"
   bridgeType: "REQUEST_REPLY"
   source:
     name: "jms"
@@ -697,7 +711,7 @@ data class MessageBridge(val name: String, val bridgeType: BridgeType,
 
 ## BusType
 
-#### BusType Schema 
+#### BusType Schema
 
 ```kotlin
 enum class BusType { JMS, NATS }
@@ -709,13 +723,13 @@ enum class BusType { JMS, NATS }
 busType: "NATS"
 ```
 
-Note that `busType` is an attribute of `MessageBus`. 
+Note that `busType` is an attribute of `MessageBus`.
 
 Nats JMS / IBM MQ Bridge currently supports two supported message bus types namely JMS (ActiveMQ and IBM MQ),
 and NATS.
 
 It is possible that this system could support Nats Streaming, Kinesis, Kafka, SQS, RabbitMQ, and more in the future.
- 
+
 Through JMS support, the Nats bridge could theoretically support the following JMS implementations:
 * Amazon SQS's Java Messaging Library
 * Apache ActiveMQ
@@ -736,7 +750,7 @@ Through JMS support, the Nats bridge could theoretically support the following J
 ## BridgeType
 The two supported Bridge types are request/reply and forward to subject/destination (queue to queue).
 
-#### BridgeType Schema 
+#### BridgeType Schema
 
 ```kotlin
 enum class BridgeType { REQUEST_REPLY, FORWARD }
@@ -746,15 +760,15 @@ enum class BridgeType { REQUEST_REPLY, FORWARD }
 ```yaml
   bridgeType: "REQUEST_REPLY"
 ```
-Note that `bridgeType` is an attribute of `MessageBridge`. 
+Note that `bridgeType` is an attribute of `MessageBridge`.
 
 ## Cluster
 Cluster is a way to set up a server or groups of servers for a MessageBus like Nats, or IBM MQ.
-This allows the easy configuration of bridges by moving the server/cluster configuration out of the bridge configuration code. 
-Then the message buses (`MessageBus`es) in a bridge (`MessageBridge`) refer to the cluster name instead of inlining the server/cluster configuration for each bridge. 
-  
+This allows the easy configuration of bridges by moving the server/cluster configuration out of the bridge configuration code.
+Then the message buses (`MessageBus`es) in a bridge (`MessageBridge`) refer to the cluster name instead of inlining the server/cluster configuration for each bridge.
 
-#### Cluster Schema 
+
+#### Cluster Schema
 
 ```kotlin
 data class Cluster(val name: String?, val properties: ClusterConfig)
@@ -798,7 +812,7 @@ data class NatsClusterConfig(override val userName: String? = null, override val
 
 #### Nats Cluster
 
-```yaml 
+```yaml
 
   natsTest:
     name: "natsTest"
@@ -815,9 +829,9 @@ data class NatsClusterConfig(override val userName: String? = null, override val
 
 
 
-To simplify set up, the bridge allows importing TSV files. 
+To simplify set up, the bridge allows importing TSV files.
 
-You can import TSV files to configure the Nats JMS/MQ bridge. 
+You can import TSV files to configure the Nats JMS/MQ bridge.
 
 To import a group of configured bridges refer to the following example:
 
@@ -828,7 +842,7 @@ jms To Nats <TAB> r <TAB> jms Bar <TAB> j <TAB> queue/barQueue <TAB> activeMQTes
 Nats To JMS <TAB> f <TAB> nat Bar <TAB> n <TAB> natsBarSubject <TAB> natsTest    <TAB> jms Foo  <TAB> j <TAB> queue/Foo <TAB> activeMQTest
 ```
 
-1. Lines that begin with # are comments 
+1. Lines that begin with # are comments
 2. There will be exactly 10 entries per line that denote the config of two buses (`MessageBus`) that make up a bridge (`MessageBridge`)
 3. Each line that is not a comment refers to a bridge (`MessageBridge`)
 4. White space around the `<TAB>`s (refers to `\t`, i.e., `0x9`) is ignored
@@ -842,7 +856,7 @@ BRIDGE_NAME <TAB> BRIDGE_TYPE <TAB> SOURCE_NAME <TAB> SOURCE_TYPE <TAB> SOURCE_S
 
 #### Position numbers and allowed values for CSV file
 
-```kotlin 
+```kotlin
     private const val BRIDGE_NAME = 0
     private const val BRIDGE_TYPE = 1
     private const val SOURCE_NAME = 2
@@ -873,7 +887,7 @@ BRIDGE_NAME <TAB> BRIDGE_TYPE <TAB> SOURCE_NAME <TAB> SOURCE_TYPE <TAB> SOURCE_S
 ```
 
 #### Parsing a single TSV Line
-```kotlin 
+```kotlin
 
     fun parseLine(line: String, clusterConfigs: Map<String, Cluster>, delim: String="\t"): MessageBridge {
         val parts = line.split(delim).map{it.trim()}.filter { !it.isBlank() }.toList()
@@ -913,8 +927,3 @@ BRIDGE_NAME <TAB> BRIDGE_TYPE <TAB> SOURCE_NAME <TAB> SOURCE_TYPE <TAB> SOURCE_S
         return MessageBridge(name = name, bridgeType = bridgeType, source = sourceBus, destination = destBus)
     }
 ```
-
-
-
-
-
