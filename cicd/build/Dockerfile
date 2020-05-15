@@ -1,7 +1,7 @@
 # Use an existing docker image as a base. This gets used by Travis integration testing to test core
 # This is used to run the travis tests
 # Copies code to this container and then runs gradle build
-FROM synadia/gradle:0.4.0-beta1
+FROM synadia/bridge-gradle:0.4.0-beta1
 
 #Copying files
 COPY . ./usr/app

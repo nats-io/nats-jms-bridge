@@ -44,7 +44,7 @@ public class WorkersTest {
 
         final MessageBridgeTasksManagerBuilder builder = MessageBridgeTasksManagerBuilder.builder();
 
-        manager = builder.withBridgeBuilder(s -> {
+        manager = builder.withBridgeFactory(s -> {
             try {
                 final MessageBus bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE", "A");
                 final MessageBus bridgeMessageBusJmsDestination = TestUtils.getMessageBusIbmMQWithHeaders4("BRIDGE_DEST", false);

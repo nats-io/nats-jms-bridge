@@ -116,9 +116,15 @@ build_gradle_image)
     echo "Work complete!"
     ;;
 
+build_travis_build_image)
+      build_travis_build_image
+      echo "Done!"
+      ;;
+
 localdev)
         bin/docker-deploy-local-dev.sh
         ;;
+
 help)
   help
   ;;
