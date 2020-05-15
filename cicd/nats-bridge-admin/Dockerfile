@@ -4,8 +4,7 @@ FROM nginx:1.17.10
 
 ## Some environment variables
 # Bridge Version
-ENV BRIDGE_VERSION 0.3.0-Alpha1
-ENV BRIDGE_CAPI 0.3.0-ALPHA1
+ENV BRIDGE_VERSION 0.4.0-beta1
 
 
 ## Install some dependencies
@@ -50,7 +49,7 @@ RUN unzip nats-bridge-admin-$BRIDGE_VERSION.zip
 # Delete the zip file
 RUN rm *.zip
 # Entering in the bridge folder
-WORKDIR /opt/bridge/nats-bridge-admin-$BRIDGE_CAPI
+WORKDIR /opt/bridge/nats-bridge-admin-$BRIDGE_VERSION
 # Create a config folder
 RUN mkdir config
 # Move the nat-bridge yaml to config folder
@@ -59,7 +58,7 @@ RUN mv nats-bridge.yaml config/
 
 ## Run the server
 #Copy start file
-COPY nginx/start_prod.sh /opt/bridge/nats-bridge-admin-$BRIDGE_CAPI/start_prod.sh
+COPY nginx/start_prod.sh /opt/bridge/nats-bridge-admin-$BRIDGE_VERSION/start_prod.sh
 RUN chmod 777 start_prod.sh
 
 # Start services
