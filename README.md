@@ -44,13 +44,13 @@ The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nat
 This all happens async.
 
 Admin Console
+
 ![image](https://user-images.githubusercontent.com/382678/80275243-e3010c80-8694-11ea-843c-b26cf43cf8ae.png)
 
 # 0.4.0-beta1 NATS JMS/MQ Bridge
 
 
-This release is an [beta release](https://en.wikipedia.org/wiki/Software_release_life_cycle). This [beta release](https://stackoverflow.com/questions/40067469/what-is-the-difference-between-alpha-and-beta-release) lacks full perf testing and full integration testing. Efforts were made to improve performance. You can now use `workers` and `tasks` as bart of the bridge configuration to speed up throughput.  
-
+This release is an [beta release](https://en.wikipedia.org/wiki/Software_release_life_cycle). This [beta release](https://stackoverflow.com/questions/40067469/what-is-the-difference-between-alpha-and-beta-release) lacks full perf testing and full integration testing. Efforts were made to improve performance. You can now use `workers` and `tasks` as part of the bridge configuration to speed up throughput.  
 
 In the core NATS bridge, there are working integration tests to Bridge REQUEST/REPLY queues between NATS and IBM MQ as well as ActiveMQ JMS. This bridging is bi-directional. The bridge can perform a QUEUE to QUEUE FORWARD or a REQUEST/REPLAY DELEGATION. The bridge can also copy JMS headers from NATS to JMS and back.
 
@@ -60,37 +60,115 @@ The NATS JMS/MQ Bridge is broken up into two parts. The `admin` and the `core` l
 ## Improvements
 
 * More load and perf testing
-* Added the concepts of workers and tasks as part the bridge config to increase throughput
-* Health check now actually works with the bridge runner
-* NGINX set up with TLS termination
-* Added a docker container for NATS admin
+* Added the concepts of workers and tasks as part the bridge config to increase throughput (this part was completely rewritten from the alpha1 release).
+* Health check now actually check status of bridge runner.
+* NGINX set up with TLS termination.
+* Added a docker container for NATS admin.
 * Improved IBM MQ support via queue models for faster request/reply throughput.
-* NATS TLS config support added 
+* Added support for IBM MQ QMODEL and DSP config for QMODEL Name and QMODEL prefix params to JNDI context.
+* Created IBM MQ image with QMODEL for request/reply with the correct authority added to users to create dynamic reply queues.
+* NATS TLS config support added.
+* Improved error handling around slow consumers and connection exceptions.
 
 
+## Adding Workers and Tasks
+
+```yaml
+bridges:
+- name: "natsToIBMMq"
+  bridgeType: "REQUEST_REPLY"
+  source:
+    name: "nats"
+    busType: "NATS"
+    subject: "b-subject"
+    clusterName: "natsCluster"
+  destination:
+    name: "ibmMQ"
+    busType: "JMS"
+    subject: "DEV.QUEUE.1"
+    clusterName: "ibmMqCluster"
+  copyHeaders: false
+  workers: 10
+  tasks : 5
+```
+
+See [Admin guide](https://github.com/nats-io/nats-jms-mq-bridge/tree/master/admin) for information on how to set up bridges and import new
+bridge data with csv files.
+
+## Bridge works with JMS and NATS
+The NATS bridge works with JMS and NATS.
+
+It has been tested with ActiveMQ and IBM MQ.
+As part of the install, you can run this bridge against a docker images that has IBM MQ installed.
+
+
+## Artifacts
 
 Artifact | Description | Type
 -- | -- | --
-nats-bridge-admin-0.1.0-beta1.tar | Application with start up script and lib folder. Start up scripts, utilities and libs expanded. | Spring Boot App
-nats-bridge-admin-0.1.0-beta1.zip | Application with start up script and lib folder. Start up scripts, utilities and libs expanded. | Spring Boot App
-nats-bridge-admin-boot-0.1.0-beta1.tar | Application with start up script and lib folder. Single executable jar files. No libs. | Spring Boot App
-nats-bridge-admin-boot-0.1.0-beta1.zip | Application with start up script and lib folder. Single executable jar files. No libs. | Spring Boot App
-nats-bridge-admin-0.1.0-beta1-boot.jar | Executable jar file | Spring Boot App
-nats-bridge-admin-0.1.0-beta1.jar | Admin classes only | Lib
-nats-jms-bridge-0.1.0-beta1.jar | Core Bridge Classes Only | Lib
-nats-jms-bridge-0.1.0-beta1.pom | Maven POM file for Bridge | Manifest
+nats-bridge-admin-0.4.0-beta1.tar | Application with start up script and lib folder. Start up scripts, utilities and libs expanded. | Spring Boot App
+nats-bridge-admin-0.4.0-beta1.zip | Application with start up script and lib folder. Start up scripts, utilities and libs expanded. | Spring Boot App
+nats-bridge-admin-boot-0.4.0-beta1.tar | Application with start up script and lib folder. Single executable jar files. No libs. | Spring Boot App
+nats-bridge-admin-boot-0.4.0-beta1.zip | Application with start up script and lib folder. Single executable jar files. No libs. | Spring Boot App
+nats-bridge-admin-0.4.0-beta1-boot.jar | Executable jar file | Spring Boot App
+nats-bridge-admin-0.4.0-beta1.jar | Admin classes only | Lib
+nats-jms-bridge-0.4.0-beta1.jar | Core Bridge Classes Only | Lib
+nats-jms-bridge-0.4.0-beta1.pom | Maven POM file for Bridge | Manifest
 
-# Admin Console for NATS JMS Bridge
+# The Admin Console uses Open API REST
 
 ![image](https://user-images.githubusercontent.com/382678/80275243-e3010c80-8694-11ea-843c-b26cf43cf8ae.png)
 
+The Admin Console for NATS JMS/MQ Bridge uses Open API REST end points and comes with a command line utility.
+See [Admin guide](https://github.com/nats-io/nats-jms-mq-bridge/tree/master/admin) for information on how to set up bridges and import new
+bridge data with csv files.
+
 # Admin features
 
-The admin provides a REST interface. It is meant to be run behind NGINX or Apache (or some load balancer / reverse proxy that does SSL / TLS termination). The admin provides an admin user that can create other users. Users can generate a secure JWT token which they can use to use command tools that hit the admin's REST interface.
+The admin provides a REST interface with JWT tokens and command line utilities. It is meant to be run behind NGINX or Apache (or some load balancer / reverse proxy that does SSL / TLS termination). The admin provides an admin user that can create other users. Users can generate a secure JWT token which they can use to use command tools that hit the admin's REST interface.
 
 The admin emits metrics which are configured to be picked up with tools like Prometheus, DataDog, InfluxDB, CloudWatch, etc. See the CICD directory to see example docker-deploys that use Prometheus.
 
-## Install guide
+## IBM Config
+
+Configure these environment variables to enable your NATS JMS/MQ Bridge to access your IBM MQ servers.
+
+* `NATS_BRIDGE_IBM_QUEUE_MODEL_NAME` - the name of the Queue Model used for request/replies (defaults to `DEV.MODEL`).
+* `NATS_BRIDGE_IBM_QUEUE_MODEL_PREFIX` - the name of the queue model prefix (defaults to `DEV*`).
+* `NATS_BRIDGE_IBM_MQ_HOST` - the host name of the IBM MQ server (defaults to value `tcp://localhost:1414`).
+* `NATS_BRIDGE_IBM_MQ_CHANNEL` - the channel you are using for your IBM MQ cluster (defaults to `"DEV.APP.SVRCONN`)
+* `NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER` - the name of the queue manager for your IBM MQ cluster (defaults to `QM1`).
+
+There is a sample IBM MQ Docker image configured to run with these defaults as an example see `docker pull synadia/bridge-ibmmq` on [the Synadia DockerHub](https://hub.docker.com/r/synadia/bridge-ibmmq). The source for this IBM MQ docker image is in this [NATS JMQ/MQ Bridge repo under cicd](https://github.com/nats-io/nats-jms-mq-bridge/tree/master/cicd/bridge-ibmmq).
+
+In order to use the request/reply pattern over IBM MQ you have to set up a [dynamic queue using a temporary queue model](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.1.0/com.ibm.mq.ref.dev.doc/prx_wmq_tempy_model.htm). This [queue model](https://www.ibm.com/support/knowledgecenter/SSFKSJ_9.0.0/com.ibm.mq.dev.doc/q032240_.htm) will need DISPLAY exposed so it can be used a prototype pattern to create reply queues.
+
+#### IBM MQ Queue schema for QMODEL with DSP access
+
+ ```
+...
+DEFINE QLOCAL('DEV.DEAD.LETTER.QUEUE') REPLACE
+* Creating a model queue to dynamic queues
+...
+DEFINE QMODEL('DEV.MODEL') REPLACE
+
+* Security settings
+SET CHLAUTH('*') TYPE(ADDRESSMAP) ADDRESS('*') USERSRC(NOACCESS) DESCR('Back-stop rule - Blocks everyone') ACTION(REPLACE)
+SET CHLAUTH('DEV.APP.SVRCONN') TYPE(ADDRESSMAP) ADDRESS('*') USERSRC(CHANNEL) CHCKCLNT(ASQMGR) DESCR('Allows connection via APP channel') ACTION(REPLACE)
+SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(BLOCKUSER) USERLIST('nobody') DESCR('Allows admins on ADMIN channel') ACTION(REPLACE)
+SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(USERMAP) CLNTUSER('admin') USERSRC(CHANNEL) DESCR('Allows admin user to connect via ADMIN channel') ACTION(REPLACE)
+SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(USERMAP) CLNTUSER('admin') USERSRC(MAP) MCAUSER ('mqm') DESCR ('Allow admin as MQ-admin') ACTION(REPLACE)
+* Developer authority records
+SET AUTHREC PRINCIPAL('app') OBJTYPE(QMGR) AUTHADD(CONNECT,INQ)
+SET AUTHREC PROFILE('DEV.**') PRINCIPAL('app') OBJTYPE(QUEUE) AUTHADD(BROWSE,GET,INQ,PUT,DSP)
+SET AUTHREC PROFILE('DEV.**') PRINCIPAL('app') OBJTYPE(TOPIC) AUTHADD(PUB,SUB)
+ ```
+Note that the user app has `DSP` authority added to access the `DEV.MODEL` queue model,.
+
+
+## The Install guide for 0.4.0-beta1 NATS JMS/MQ Bridge
+
+Use this install guide to download and test the NATS JMS/MQ Bridge with IBM MQ.
 
 
 ## Download the distribution zip and unzip it
@@ -100,8 +178,8 @@ The admin emits metrics which are configured to be picked up with tools like Pro
 mkdir bridge
 cd bridge
 
-wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.1.0-beta1/nats-bridge-admin-0.1.0-beta1.zip
-unzip nats-bridge-admin-0.1.0-beta1.zip
+wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.4.0-beta1/nats-bridge-admin-0.4.0-beta1.zip
+unzip nats-bridge-admin-0.4.0-beta1.zip
 rm *.zip
 ```
 
@@ -115,14 +193,13 @@ git clone https://github.com/nats-io/nats-jms-mq-bridge.git
 cd nats-jms-mq-bridge
 bin/build.sh localdev
 ```
-
-
+The command `bin/build.sh localdev` uses `docker-deploy` to deploy IBM MQ, NATS Server, and ActiveMQ for testing and development.
 
 
 ## Run the application
 
 ```sh
-cd nats-bridge-admin-0.1.0-beta1
+cd nats-bridge-admin-0.4.0-beta1
 
 mkdir config
 
@@ -145,7 +222,7 @@ bin/nats-bridge-admin
 =========|_|==============|___/=/_/_/_/
 :: Spring Boot ::        (v2.2.6.RELEASE)
 
-2020-05-01 03:22:06.114  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Starting ApplicationMain on Richards-MacBook-Pro.local with PID 92828 (/Users/richardhightower/bridge/nats-bridge-admin-0.1.0-beta1/lib/nats-bridge-admin-0.1.0-beta1.jar started by richardhightower in /Users/richardhightower/bridge/nats-bridge-admin-0.1.0-beta1)
+2020-05-01 03:22:06.114  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Starting ApplicationMain on Richards-MacBook-Pro.local with PID 92828 (/Users/richardhightower/bridge/nats-bridge-admin-0.4.0-beta1/lib/nats-bridge-admin-0.4.0-beta1.jar started by richardhightower in /Users/richardhightower/bridge/nats-bridge-admin-0.4.0-beta1)
 2
 ...
 2020-05-01 03:22:09.211  INFO 92828 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
