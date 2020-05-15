@@ -62,13 +62,13 @@ class SwaggerConfig {
                 .groupName("NatsBridgeAdmin")
                 .apiInfo(
                         ApiInfoBuilder()
-                                .title("Nats Bridge Admin Service API")
-                                .description("Nats Bridge Admin service.")
+                                .title("NATS Bridge Admin Service API")
+                                .description("NATS Bridge Admin service.")
                                 .contact(
                                         Contact(
-                                                "Rick Hightower",
+                                                "NATS developers",
                                                 "",
-                                                "rick@syndia.com")
+                                                "info@synadia.com")
                                 )
                                 .version(version)
                                 .license("")
