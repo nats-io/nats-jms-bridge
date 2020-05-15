@@ -22,7 +22,8 @@ bridges:
     subject: "DEV.QUEUE.1"
     clusterName: "ibmMqCluster"
   copyHeaders: false
-  workers: 1
+  workers: 10
+  tasks : 5
 
 clusters:
   jmsCluster:
@@ -55,4 +56,3 @@ clusters:
       userName: "app"
       password: "passw0rd"
       jmsDestinationType: "QUEUE"
-
