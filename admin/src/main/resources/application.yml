@@ -11,6 +11,10 @@ app.config:
 security:
   secretKey: sk_029aeb1c-03d7-4e15-98b1-43d9e0a2736c
 
+management:
+  endpoint:
+    health:
+      show-details: always
 
 jwt:
   algo: HmacSHA256
