@@ -4,6 +4,11 @@ services:
 
 before_install:
   - docker network create bnet
+  - docker pull synadia/bridge-ibmmq:latest
+  - docker pull synadia/bridge-activemq:latest
+  - docker pull synadia/bridge-nats-server:latest
+  - docker pull synadia/bridge-travis-build:latest
+
 
 script:
   - docker run --net bnet --name nats-server -d synadia/bridge-nats-server:latest
