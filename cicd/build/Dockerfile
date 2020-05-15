@@ -1,7 +1,7 @@
 # Use an existing docker image as a base. This gets used by Travis integration testing to test core
 # This is used to run the travis tests
 # Copies code to this container and then runs gradle build
-FROM cloudurable/gradle:0.0.1
+FROM synadia/gradle:0.4.0-beta1
 
 #Copying files
 COPY . ./usr/app
@@ -14,5 +14,9 @@ ENV GRADLE_HOME /root/.sdkman/candidates/gradle/current
 ENV NATS_BRIDGE_IBM_MQ_HOST=tcp://ibm-mq:1414
 ENV NATS_BRIDGE_NATS_SERVERS=nats://nats-server:4222
 ENV NATS_BRIDGE_JMS_CONNECTION_FACTORY=tcp://active-mq:61616
+
+#Build Admin
+#WORKDIR /usr/app/admin
+#RUN bash -c "./gradlew build -x test"
 
 CMD bash -c "ls && pwd && sleep 30 && $GRADLE_HOME/bin/gradle clean test"

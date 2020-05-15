@@ -3,7 +3,7 @@ services:
   nats-server:
     build:
       context: ../
-      dockerfile: cicd/Dockerfile_nats_tls.dev
+      dockerfile: cicd/Dockerfile
     ports:
       - "4222:4222"
       - "8222:8222"

@@ -1,9 +1,9 @@
 # Use an existing docker image as a base
-FROM ibmcom/mq
+FROM ibmcom/mq:9.1.5.0-r1
 
 #Copy file and change the owner
 #IBM MQ can read 11-dev that creates a queue model.
-COPY --chown=1001:root ./cicd/10-dev.mqsc /etc/mqm/11-dev.mqsc
+COPY --chown=1001:root 11-dev.mqsc /etc/mqm/11-dev.mqsc
 
 # environment
 ENV LICENSE=accept

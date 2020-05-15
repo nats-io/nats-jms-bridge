@@ -1,5 +1,5 @@
 # Use an existing docker image as a base
-FROM vromero/activemq-artemis
+FROM vromero/activemq-artemis:2.12.0
 
 # environment
 ENV ARTEMIS_USERNAME=cloudurable
