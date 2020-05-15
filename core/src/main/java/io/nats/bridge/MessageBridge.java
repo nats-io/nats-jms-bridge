@@ -3,7 +3,6 @@ package io.nats.bridge;
 import io.nats.bridge.metrics.Metrics;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.time.Duration;
 
 public interface MessageBridge extends Closeable {
@@ -14,8 +13,9 @@ public interface MessageBridge extends Closeable {
     int process(Duration duration);
 
     @Override
-    void close() throws IOException;
+    void close();
 
     Metrics sourceMetrics();
+
     Metrics destinationMetrics();
 }

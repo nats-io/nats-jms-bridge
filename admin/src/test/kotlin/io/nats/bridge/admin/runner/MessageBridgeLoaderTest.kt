@@ -53,9 +53,9 @@ internal class MessageBridgeLoaderTest {
     """.trimIndent()
 
         before()
-        val bridgeBuilders = MessageBridgeLoaderImpl(configRepo!!).loadBridgeBuilders()
+        val bridgeBuilders = MessageBridgeLoaderImpl(configRepo!!).loadBridgeConfigs()
 
-        val mb = bridgeBuilders[0].destBusBuilder
+        val mb = bridgeBuilders[0].builders[0].destinationBusBuilder
         assertTrue(mb is NatsMessageBusBuilder)
         if (mb is NatsMessageBusBuilder) {
             assertEquals("RickHightower", mb.options.username)
@@ -65,7 +65,7 @@ internal class MessageBridgeLoaderTest {
 
     @Test
     fun testLoad() {
-        val bridgeBuilders = MessageBridgeLoaderImpl(configRepo!!).loadBridgeBuilders()
+        val bridgeBuilders = MessageBridgeLoaderImpl(configRepo!!).loadBridgeConfigs()
 
         assertEquals(2, bridgeBuilders.size)
 
@@ -73,9 +73,9 @@ internal class MessageBridgeLoaderTest {
             - name: "jmsToNatsSample"
             bridgeType: "REQUEST_REPLY"
          */
-        val bridge0 = bridgeBuilders[0]
+        val bridge0 = bridgeBuilders[0].builders[0]
         assertEquals("jmsToNatsSample", bridge0.name)
-        assertTrue(bridge0.requestReply)
+        assertTrue(bridge0.isRequestReply)
 
         /*
             source:
@@ -100,7 +100,7 @@ internal class MessageBridgeLoaderTest {
             subject: "sample-nats-subject"
             clusterName: "natsTest"
          */
-        val dest = bridge0.destBusBuilder
+        val dest = bridge0.destinationBusBuilder
         assertTrue(dest is NatsMessageBusBuilder)
         if (dest is NatsMessageBusBuilder) {
             assertEquals("sample-nats-subject", dest.subject)

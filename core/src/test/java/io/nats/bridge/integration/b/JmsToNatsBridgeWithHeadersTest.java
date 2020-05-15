@@ -2,7 +2,7 @@ package io.nats.bridge.integration.b;
 
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.integration.TestUtils;
+import io.nats.bridge.TestUtils;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.support.MessageBridgeImpl;

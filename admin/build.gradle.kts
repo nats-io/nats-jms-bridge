@@ -111,7 +111,7 @@ tasks.getByName<Jar>("jar") {
     enabled = true
 }
 
-version = "0.3.0-ALPHA1"
+version = "0.4.0-beta1"
 
 tasks {
     withType<KotlinCompile> {
@@ -181,7 +181,7 @@ tasks {
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.3.0-ALPHA1")
+        implementation("io.nats.bridge:nats-jms-bridge:0.4.0-beta1")
 
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 

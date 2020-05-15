@@ -3,7 +3,9 @@ package io.nats.bridge.admin
 import io.micrometer.core.instrument.MeterRegistry
 import io.nats.bridge.admin.repos.ConfigRepoFromFiles
 import io.nats.bridge.admin.repos.LoginRepoFromFiles
-import io.nats.bridge.admin.runner.BridgeRunnerManager
+import io.nats.bridge.admin.runner.support.MessageBridgeLoader
+import io.nats.bridge.admin.runner.support.MessageBridgeRunner
+import io.nats.bridge.admin.runner.support.impl.MessageBridgeLoaderImpl
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -32,9 +34,12 @@ class Configuration {
     }
 
     @Bean
-    fun bridgeRunnerManager(repo: ConfigRepo, metricsRegistry: MeterRegistry): BridgeRunnerManager {
-        return BridgeRunnerManager(repo, metricsRegistry = metricsRegistry)
-    }
+    fun messageBridgeLoader(repo: ConfigRepo, metricsRegistry: MeterRegistry): MessageBridgeLoader =
+         MessageBridgeLoaderImpl(repo, metricsRegistry = metricsRegistry)
+
+    @Bean
+    fun messageBridgeRunner( messageBridgeLoader : MessageBridgeLoader) : MessageBridgeRunner =
+            MessageBridgeRunner(messageBridgeLoader)
 
     @Bean
     fun loginRepo(env: Environment,
@@ -57,13 +62,13 @@ class SwaggerConfig {
                 .groupName("NatsBridgeAdmin")
                 .apiInfo(
                         ApiInfoBuilder()
-                                .title("Nats Bridge Admin Service API")
-                                .description("Nats Bridge Admin service.")
+                                .title("NATS Bridge Admin Service API")
+                                .description("NATS Bridge Admin service.")
                                 .contact(
                                         Contact(
-                                                "Rick Hightower",
+                                                "NATS developers",
                                                 "",
-                                                "rick@syndia.com")
+                                                "info@synadia.com")
                                 )
                                 .version(version)
                                 .license("")
@@ -74,13 +79,5 @@ class SwaggerConfig {
     }
 }
 
-//@Bean
-//fun buildAmazonKinesis(accessKey: String, secretKey: String): AmazonKinesis? {
-//    val awsCredentials = BasicAWSCredentials(accessKey, secretKey)
-//    return AmazonKinesisClientBuilder.standard()
-//            .withCredentials(AWSStaticCredentialsProvider(awsCredentials))
-//            .withRegion(Regions.US_GOV_EAST_1)
-//            .build()
-//}
 
 

@@ -2,7 +2,7 @@ package io.nats.bridge.integration.a.mq;
 
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.integration.TestUtils;
+import io.nats.bridge.TestUtils;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.support.MessageBridgeImpl;
@@ -35,13 +35,15 @@ public class NatsTo_IBMMqBridgeWithHeadersTest {
     @Before
     public void setUp() throws Exception {
         clientMessageNatsBus = TestUtils.getMessageBusNats("CLIENT","A");
-        serverJMSMessageBus = TestUtils.getMessageBusIbmMQWithHeaders("SERVER",true);
+        serverJMSMessageBus = TestUtils.getMessageBusIbmMQWithHeaders4("SERVER",true);
+        //serverJMSMessageBus = TestUtils.getMessageBusIbmMQWithHeaders2("SERVER");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
         bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE","A");
-        bridgeMessageBusJmsDestination = TestUtils.getMessageBusIbmMQWithHeaders("BRIDGE_DEST",false);
+        bridgeMessageBusJmsDestination = TestUtils.getMessageBusIbmMQWithHeaders4("BRIDGE_DEST",false);
+        //bridgeMessageBusJmsDestination = TestUtils.getMessageBusIbmMQWithHeaders2("BRIDGE_DEST");
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true, null);
 
     }

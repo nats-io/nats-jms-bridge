@@ -20,10 +20,10 @@ bridges:
     name: "ibmMQ"
     busType: "JMS"
     subject: "DEV.QUEUE.1"
-    responseSubject: "DEV.QUEUE.2"
     clusterName: "ibmMqCluster"
   copyHeaders: false
-  workers: 1
+  workers: 10
+  tasks : 5
 
 clusters:
   jmsCluster:
@@ -47,10 +47,12 @@ clusters:
     name: "ibmMqCluster"
     properties: !<jms>
       config:
-        java.naming.factory.initial: "io.nats.bridge.ibmmq.IbmMqInitialContextFactory"
+        java.naming.factory.initial: "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"
         nats.ibm.mq.host: "tcp://localhost:1414"
         nats.ibm.mq.channel: "DEV.APP.SVRCONN"
         nats.ibm.mq.queueManager: "QM1"
+        nats.ibm.mq.queueModelName: "DEV.MODEL"
+        nats.ibm.mq.queueModelPrefix: "DEV*"
       userName: "app"
       password: "passw0rd"
       jmsDestinationType: "QUEUE"

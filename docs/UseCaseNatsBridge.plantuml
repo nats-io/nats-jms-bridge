@@ -1,5 +1,8 @@
 @startuml NatsBridge
 
+
+!include model/C4_Context.puml
+
 left to right direction
 
 actor Admin 
