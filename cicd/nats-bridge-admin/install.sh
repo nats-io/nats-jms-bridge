@@ -7,4 +7,3 @@ sdk install java 11.0.7-amzn
 
 # Install gradle
 sdk install gradle 6.3
-
