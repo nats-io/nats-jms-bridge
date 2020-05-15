@@ -24,6 +24,7 @@ build_admin_image() {
   bin/build_deploy_docker.sh
 }
 
+
 build_gradle_image() {
 
   DOCKER_NAME="bridge-gradle"
