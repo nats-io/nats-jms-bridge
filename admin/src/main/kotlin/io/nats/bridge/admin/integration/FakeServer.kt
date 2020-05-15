@@ -17,17 +17,16 @@ class FakeServer(val messageBus: MessageBus,
                         messageBus.close()
                         break
                     }
-                    Thread.sleep(1)
-                    val receive = messageBus.receive(Duration.ofSeconds(1))
+                    val receive = messageBus.receive(Duration.ofMillis(50))
 
                     receive.ifPresent { message ->
                         //println("Handle message " + message.bodyAsString())
                         message.reply(MessageBuilder.builder().withBody("Hello message " + message.bodyAsString()).build())
                     }
 
-                    if (!receive.isPresent) {
-                        //println("NOTHING")
-                    }
+//                    if (!receive.isPresent) {
+//                        //println("NOTHING")
+//                    }
                     messageBus.process()
 
                 }

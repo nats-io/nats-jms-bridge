@@ -13,9 +13,6 @@ spring:
   output.ansi.enabled: ALWAYS
   mvc.throw-exception-if-no-handler-found: true
 
-#logging.level.org.hibernate: INFO
-#logging.level.org.hibernate.SQL: DEBUG
-#logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-#logging.level.org.springframework.cloud: TRACE
+
 logging.level.io.nats: INFO
 logging.level.io.netty: INFO

@@ -106,12 +106,11 @@ class IntegrationUtils {
         //postAdmin("$bridgeControlAdminURL/restart")
         val stop = AtomicBoolean()
         val builder = loader.loadBridgeConfigs()[0].builders[0]
+        val builder2 = loader.loadBridgeConfigs()[0].builders[1]
 
         val clientBuilder  = builder.sourceBusBuilder!!
+        val clientBuilder2  = builder2.sourceBusBuilder!!
 
-        if (clientBuilder is JMSMessageBusBuilder) {
-
-        }
 
         val serverBuilder = builder.destinationBusBuilder!!
 
@@ -120,40 +119,74 @@ class IntegrationUtils {
         }
 
         val clientBus = clientBuilder.build()
+        val clientBus2 = clientBuilder2.build()
         val serverBus = serverBuilder.build()
+        val serverBus2 = builder2.destinationBusBuilder!!.build()
         val natsService = FakeServer(serverBus, stop)
+        val nats2Service = FakeServer(serverBus2, stop)
 
         natsService.run()
+        nats2Service.run()
         val ref: AtomicReference<String> = AtomicReference()
         val count = AtomicInteger()
 
-        for (a in 0..9) {
+        val startTime = System.currentTimeMillis()
+
+        var totalSent = 0
+        for (a in 0..49) {
             println("Run $a")
-            val latch = CountDownLatch(100)
-            for (x in 0..99) {
+            val latch = CountDownLatch(50)
+            for (x in 0..49) {
+                totalSent++
                 println("Call $x of run $a")
-                clientBus.request("Rick $a $x") { response ->
-                    ref.set(response)
-                    count.incrementAndGet()
-                    latch.countDown()
+
+                if (x % 2 == 0) {
+                    clientBus.request("Rick $a $x") { response ->
+                        ref.set(response)
+                        count.incrementAndGet()
+                        latch.countDown()
+                    }
+                } else {
+                    clientBus2.request("Rick $a $x") { response ->
+                        ref.set(response)
+                        count.incrementAndGet()
+                        latch.countDown()
+                    }
                 }
 
-                latch.await(50, TimeUnit.MILLISECONDS)
+                latch.await(1, TimeUnit.MILLISECONDS)
                 clientBus.process()
+                clientBus2.process()
             }
-            latch.await(50, TimeUnit.MILLISECONDS)
-            clientBus.process()
-            latch.await(50, TimeUnit.MILLISECONDS)
-            println("REPLY COUNT " + count.get())
+
+            for (x in 0..1000) {
+                if (latch.await(10, TimeUnit.MILLISECONDS)) {
+                    break
+                }
+                clientBus.process()
+                clientBus2.process()
+            }
+
+            val timeSpent = System.currentTimeMillis() - startTime
+            println("############### REPLY COUNT ${count.get()} of $totalSent in time $timeSpent")
             displayFlag(readFlag("${Constants.bridgeControlURL}/running"))
             displayFlag(readFlag("${Constants.bridgeControlURL}/started"))
             displayFlag(readFlag("${Constants.bridgeControlURL}/error/was-error"))
         }
 
+        val totalTime = System.currentTimeMillis() - startTime
+        println("TOTAL SENT ############### $totalSent in time $totalTime")
         Thread.sleep(1_000)
+        clientBus.process()
+        clientBus2.process()
+
+        println("Complete "+ count.get())
+
         stop.set(true)
         clientBus.close()
+        clientBus2.close()
         serverBus.close()
+        serverBus2.close()
         println("REPLY COUNT " + count.get())
         println("Done")
 
