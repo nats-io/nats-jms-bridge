@@ -50,7 +50,14 @@ build_install_dir() {
 prepare_ibm_mq_test() {
   build_install_dir
   mkdir admin/build/install/nats-bridge-admin/config
-  cp  admin/build/install/nats-bridge-admin/nats-bridge-ibm-mq-demo-conf.yaml admin/build/install/nats-bridge-admin/config/
+  cp  admin/build/install/nats-bridge-admin/nats-bridge-ibm-mq-demo-conf.yaml admin/build/install/nats-bridge-admin/config/nats-bridge.yaml
+  echo "Now run admin/build/install/nats-bridge-admin/bin/nats-bridge-admin and integration.sh"
+}
+
+prepare_ibm_mq_env_test() {
+  build_install_dir
+  mkdir admin/build/install/nats-bridge-admin/config
+  cp  admin/build/install/nats-bridge-admin/nats-bridge-ibm-mq-no-conf.yaml admin/build/install/nats-bridge-admin/config/nats-bridge.yaml
   echo "Now run admin/build/install/nats-bridge-admin/bin/nats-bridge-admin and integration.sh"
 }
 
@@ -130,6 +137,7 @@ help () {
   echo "Use build_admin_image_local or bai_local to build a admin image that does not depend on a release"
 
   echo "Use prepare_ibm_mq_test to prepare for IBM MQ example config in yaml"
+  echo "Use prepare_ibm_mq_env_test to prepare for IBM MQ config with env vars only"
 }
 
 
@@ -138,6 +146,11 @@ export COMMAND="$1"
 
 case $COMMAND in
 
+
+prepare_ibm_mq_env_test)
+  prepare_ibm_mq_env_test
+  echo "Done!"
+  ;;
 
 prepare_ibm_mq_test)
   prepare_ibm_mq_test
