@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
-class IntegrationUtils {
+class IntegrationRequestReplyUtils {
 
     val JSON: MediaType = "application/json; charset=utf-8".toMediaType()
     fun client() = OkHttpClient()

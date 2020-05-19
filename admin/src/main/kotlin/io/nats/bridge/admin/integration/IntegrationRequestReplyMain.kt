@@ -1,10 +1,10 @@
 package io.nats.bridge.admin.integration
 
 
-object IntegrationMain {
+object IntegrationRequestReplyMain {
     @JvmStatic
     fun main(args:Array<String>) {
-        IntegrationUtils().run()
+        IntegrationRequestReplyUtils().run()
     }
 }
 

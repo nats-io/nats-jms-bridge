@@ -9,21 +9,39 @@ dateTime:
 - 50
 - 423615000
 bridges:
-- name: "natsToIBMMq"
-  bridgeType: "REQUEST_REPLY"
-  source:
-    name: "nats"
-    busType: "NATS"
-    subject: "b-subject"
-    clusterName: "natsCluster"
-  destination:
-    name: "ibmMQ"
-    busType: "JMS"
-    subject: "DEV.QUEUE.1"
-    clusterName: "ibmMqCluster"
-  copyHeaders: false
-  workers: 5
-  tasks : 2
+  - name: "natsForwardToJMS"
+    bridgeType: "FORWARD"
+    source:
+      name: "natsSrc"
+      busType: "NATS"
+      subject: "forward-subject"
+      clusterName: "natsCluster"
+    destination:
+      name: "ibmMQDst"
+      busType: "JMS"
+      subject: "DEV.QUEUE.2"
+      clusterName: "ibmMqCluster"
+    copyHeaders: false
+    workers: 3
+    tasks : 1
+  - name: "natsToIBMMq"
+    bridgeType: "REQUEST_REPLY"
+    source:
+      name: "nats"
+      busType: "NATS"
+      subject: "b-subject"
+      clusterName: "natsCluster"
+    destination:
+      name: "ibmMQ"
+      busType: "JMS"
+      subject: "DEV.QUEUE.1"
+      clusterName: "ibmMqCluster"
+    copyHeaders: false
+    workers: 4
+    tasks : 1
+
+
+
 
 clusters:
   jmsCluster:
@@ -46,7 +64,6 @@ clusters:
         io.nats.client.reconnect.wait: 3000
         io.nats.client.reconnect.max: 10
         io.nats.client.timeout: 4000
-        io.nats.client.opentls: true
   ibmMqCluster:
     name: "ibmMqCluster"
     properties: !<jms>
