@@ -25,16 +25,18 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
 
         val details = extractDetails(bridge, config)
 
-        val list = if (bridge.workers == 1 || bridge.workers == 0) {
+        val list = if ((bridge.workers == 1 || bridge.workers == 0) && (bridge.tasks==1 || bridge.tasks==0)) {
             val bridgeBuilder = MessageBridgeBuilder()
             configureBridge(bridgeBuilder, details)
             listOf(bridgeBuilder)
         } else {
-            (1..bridge.workers!!).map { bridgeNum ->
-                val bridgeBuilder = MessageBridgeBuilder()
-                configureBridge(bridgeBuilder, details, "_$bridgeNum")
-                bridgeBuilder
-            }
+            (1..bridge.workers!!).map { workerNum ->
+                (1..bridge.tasks!!).map { taskNum ->
+                    val bridgeBuilder = MessageBridgeBuilder()
+                    configureBridge(bridgeBuilder, details, "_w_${workerNum}_t_${taskNum}")
+                    bridgeBuilder
+                }
+            }.flatten()
         }
         BridgeConfig(bridge.name, list, bridge)
     }

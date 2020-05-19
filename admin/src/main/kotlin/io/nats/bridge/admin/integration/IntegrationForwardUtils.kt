@@ -18,14 +18,13 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.File
-import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
-class IntegrationUtils {
+class IntegrationForwardUtils {
 
     val JSON: MediaType = "application/json; charset=utf-8".toMediaType()
     fun client() = OkHttpClient()
@@ -106,69 +105,58 @@ class IntegrationUtils {
         //postAdmin("$bridgeControlAdminURL/restart")
         val stop = AtomicBoolean()
         val builder = loader.loadBridgeConfigs()[0].builders[0]
-        val builder2 = loader.loadBridgeConfigs()[0].builders[1]
 
         val clientBuilder  = builder.sourceBusBuilder!!
-        val clientBuilder2  = builder2.sourceBusBuilder!!
-
-
         val serverBuilder = builder.destinationBusBuilder!!
 
         if (serverBuilder is JMSMessageBusBuilder) {
             serverBuilder.asSource()
         }
 
-        val clientBus = clientBuilder.build()
-        val clientBus2 = clientBuilder2.build()
-        val serverBus = serverBuilder.build()
-        val serverBus2 = builder2.destinationBusBuilder!!.build()
-        val natsService = FakeServer(serverBus, stop)
-        val nats2Service = FakeServer(serverBus2, stop)
+        val senderBus = clientBuilder.build()
 
-        natsService.run()
-        nats2Service.run()
+        val receiverBus = serverBuilder.build()
+
+
         val ref: AtomicReference<String> = AtomicReference()
         val count = AtomicInteger()
 
         val startTime = System.currentTimeMillis()
 
+        val totalLatch = CountDownLatch(50)
+
+        val thread = Thread(Runnable {
+            while (count.get() < 2500) {
+                val timeNow = System.currentTimeMillis()
+                if (timeNow - startTime > 60_000) {
+                    break
+                }
+                totalLatch.await(1, TimeUnit.MILLISECONDS)
+            }
+        })
+
+        thread.start()
+
         var totalSent = 0
         for (a in 0..49) {
             println("Run $a")
-            val latch = CountDownLatch(50)
+
             for (x in 0..49) {
                 totalSent++
                 println("Call $x of run $a")
+                senderBus.publish("Rick $a $x")
 
-                if (x % 2 == 0) {
-                    clientBus.request("Rick $a $x") { response ->
-                        ref.set(response)
-                        count.incrementAndGet()
-                        latch.countDown()
-                    }
-                } else {
-                    clientBus2.request("Rick $a $x") { response ->
-                        ref.set(response)
-                        count.incrementAndGet()
-                        latch.countDown()
-                    }
-                }
-
-                latch.await(1, TimeUnit.MILLISECONDS)
-                clientBus.process()
-                clientBus2.process()
+                senderBus.process()
             }
 
-            for (x in 0..1000) {
-                if (latch.await(10, TimeUnit.MILLISECONDS)) {
+            for (x in 0..10) {
+                if (totalLatch.await(5, TimeUnit.MILLISECONDS)) {
                     break
                 }
-                clientBus.process()
-                clientBus2.process()
+                senderBus.process()
             }
-
             val timeSpent = System.currentTimeMillis() - startTime
-            println("############### REPLY COUNT ${count.get()} of $totalSent in time $timeSpent")
+            println("############### FORWARD COUNT ${count.get()} of $totalSent in time $timeSpent")
             displayFlag(readFlag("${Constants.bridgeControlURL}/running"))
             displayFlag(readFlag("${Constants.bridgeControlURL}/started"))
             displayFlag(readFlag("${Constants.bridgeControlURL}/error/was-error"))
@@ -177,17 +165,15 @@ class IntegrationUtils {
         val totalTime = System.currentTimeMillis() - startTime
         println("TOTAL SENT ############### $totalSent in time $totalTime")
         Thread.sleep(1_000)
-        clientBus.process()
-        clientBus2.process()
+        senderBus.process()
+
 
         println("Complete "+ count.get())
 
         stop.set(true)
-        clientBus.close()
-        clientBus2.close()
-        serverBus.close()
-        serverBus2.close()
-        println("REPLY COUNT " + count.get())
+        senderBus.close()
+        receiverBus.close()
+        println("FORWARD COUNT " + count.get())
         println("Done")
 
         println(ref.get())
@@ -196,4 +182,9 @@ class IntegrationUtils {
     private fun displayFlag(flag: Flag) {
         println("${flag.message} ${flag.flag}")
     }
+}
+
+fun main() {
+    val utils = IntegrationForwardUtils()
+    utils.run()
 }
