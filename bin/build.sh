@@ -40,6 +40,20 @@ build_bridge() {
   cd ..
 }
 
+build_install_dir() {
+  build_bridge
+  cd admin
+  ./gradlew installDist
+  cd ..
+}
+
+prepare_ibm_mq_test() {
+  build_install_dir
+  mkdir admin/build/install/nats-bridge-admin/config
+  cp  admin/build/install/nats-bridge-admin/nats-bridge-ibm-mq-demo-conf.yaml admin/build/install/nats-bridge-admin/config/
+  echo "Now run admin/build/install/nats-bridge-admin/bin/nats-bridge-admin and integration.sh"
+}
+
 build_gradle_image() {
 
   DOCKER_NAME="bridge-gradle"
@@ -83,6 +97,23 @@ clean_docker_images() {
 
 }
 
+copy_ibm_test_config() {
+  echo "copying sample conf nats-bridge-ibm-mq-demo-conf.yaml to admin conf"
+  echo "-----back up------" >> admin/config/nats-bridge.bak
+  cat admin/config/nats-bridge.yaml >> admin/config/nats-bridge.bak
+  cp admin/sampleConf/nats-bridge-ibm-mq-demo-conf.yaml admin/config/nats-bridge.yaml
+}
+
+docker_deploy_test() {
+  copy_ibm_test_config
+  cd cicd
+  docker-compose  -f compose/docker-compose-ibm-test.yml up
+  cd ..
+}
+
+
+
+
 help () {
   echo "Valid commands:"
   echo "Use build_ibm_mq_image, bimi to build IBM image"
@@ -94,12 +125,29 @@ help () {
   echo "Use build_gradle_image to build travis image for testing"
   echo "Use build_travis_build_image to build travis image for testing"
   echo "Use localdev to run all images for local development"
+  echo "Use docker_deploy_test to run a version of IBM MQ that has non default values use config sample nats-bridge-ibm-mq-demo-conf.yaml"
+  echo "Use build_install_dir to create install dir"
   echo "Use build_admin_image_local or bai_local to build a admin image that does not depend on a release"
+
+  echo "Use prepare_ibm_mq_test to prepare for IBM MQ example config in yaml"
 }
+
+
 
 export COMMAND="$1"
 
 case $COMMAND in
+
+
+prepare_ibm_mq_test)
+  prepare_ibm_mq_test
+  echo "Done!"
+  ;;
+
+build_install_dir)
+  build_install_dir
+  echo "Done!"
+  ;;
 
 build_admin_image_local | bai_local)
   build_admin_image_local
@@ -155,6 +203,11 @@ build_travis_build_image)
 localdev)
         bin/docker-deploy-local-dev.sh
         ;;
+
+docker_deploy_test)
+      docker_deploy_test
+      echo "Done!"
+      ;;
 
 help)
   help

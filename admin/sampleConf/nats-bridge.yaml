@@ -46,7 +46,6 @@ clusters:
         io.nats.client.reconnect.wait: 3000
         io.nats.client.reconnect.max: 10
         io.nats.client.timeout: 4000
-        io.nats.client.opentls: true
   ibmMqCluster:
     name: "ibmMqCluster"
     properties: !<jms>

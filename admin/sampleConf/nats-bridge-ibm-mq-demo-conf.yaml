@@ -19,7 +19,7 @@ bridges:
   destination:
     name: "ibmMQ"
     busType: "JMS"
-    subject: "DEV.QUEUE.1"
+    subject: "MY.QUEUE.1"
     clusterName: "ibmMqCluster"
   copyHeaders: false
   workers: 5
@@ -31,7 +31,7 @@ clusters:
     properties: !<jms>
       config:
         java.naming.factory.initial: "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory"
-        connectionFactory.ConnectionFactory: "tcp://active-mq:61616"
+        connectionFactory.ConnectionFactory: "tcp://localhost:61616"
         queue.queue/testQueue: "queue.queue/testQueue=testQueue"
       userName: "cloudurable"
       password: "cloudurable"
@@ -39,7 +39,7 @@ clusters:
   natsCluster:
     name: "natsCluster"
     properties: !<nats>
-      host: "nats-server"
+      host: "localhost"
       port: 4222
       servers: []
       config:
@@ -51,11 +51,11 @@ clusters:
     properties: !<jms>
       config:
         java.naming.factory.initial: "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"
-        nats.ibm.mq.host: "tcp://ibm-mq:1414"
-        nats.ibm.mq.channel: "DEV.APP.SVRCONN"
-        nats.ibm.mq.queueManager: "QM1"
-        nats.ibm.mq.queueModelName: "DEV.MODEL"
-        nats.ibm.mq.queueModelPrefix: "DEV*"
+        nats.ibm.mq.host: "tcp://localhost:2414"
+        nats.ibm.mq.channel: "MY.APP.SVRCONN"
+        nats.ibm.mq.queueManager: "MYQM1"
+        nats.ibm.mq.queueModelName: "MY.MODEL"
+        nats.ibm.mq.queueModelPrefix: "MY*"
       userName: "app"
-      password: "passw0rd"
+      password: "passw0rd2"
       jmsDestinationType: "QUEUE"
