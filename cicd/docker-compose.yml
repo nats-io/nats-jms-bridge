@@ -25,6 +25,5 @@ services:
   bridge-admin:
     build:
       context: ./nats-bridge-admin
-    working_dir: /usr/app/admin
     ports:
       - "443:443"

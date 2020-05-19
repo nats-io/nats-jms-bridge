@@ -24,6 +24,21 @@ build_admin_image() {
   bin/build_deploy_docker.sh
 }
 
+build_admin_image_local() {
+  build_bridge
+  cp admin/build/distributions/nats-bridge-admin-0*.zip cicd/nats-bridge-admin-local/dist.zip
+  bin/build_deploy_docker.sh "$VERSION-b2" "$DOCKER_NAMESPACE" cicd/nats-bridge-admin-local nats-bridge-admin
+}
+
+
+build_bridge() {
+  cd core
+  ./gradlew clean build publishToMavenLocal -x test
+  cd ..
+  cd admin
+  ./gradlew clean distZip distTar bootJar bootDistZip bootDistTar
+  cd ..
+}
 
 build_gradle_image() {
 
@@ -79,11 +94,22 @@ help () {
   echo "Use build_gradle_image to build travis image for testing"
   echo "Use build_travis_build_image to build travis image for testing"
   echo "Use localdev to run all images for local development"
+  echo "Use build_admin_image_local or bai_local to build a admin image that does not depend on a release"
 }
 
 export COMMAND="$1"
 
 case $COMMAND in
+
+build_admin_image_local | bai_local)
+  build_admin_image_local
+  echo "Work complete!"
+  ;;
+
+build_bridge | bb)
+  build_bridge
+  echo "Work complete!"
+  ;;
 
 build_ibm_mq_image |  bimi)
   build_ibm_mq_image
