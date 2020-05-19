@@ -182,7 +182,7 @@ val defaultDataModel = NatsBridgeConfig(
                                 userName = "app",
                                 password = "passw0rd",
                                 config = mapOf(
-                                        "java.naming.factory.initial" to "io.nats.bridge.ibmmq.IbmMqInitialContextFactory",
+                                        "java.naming.factory.initial" to "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory",
                                         "nats.ibm.mq.host" to "tcp://localhost:1414",
                                         "nats.ibm.mq.channel" to "DEV.APP.SVRCONN",
                                         "nats.ibm.mq.queueManager" to "QM1"
