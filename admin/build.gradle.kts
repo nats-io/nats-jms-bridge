@@ -61,7 +61,6 @@ publishing {
 distributions {
     main {
         contents {
-
             from("bin") {
                 into("bin")
             }
