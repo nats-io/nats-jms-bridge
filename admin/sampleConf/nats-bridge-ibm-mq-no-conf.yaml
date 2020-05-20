@@ -54,3 +54,4 @@ clusters:
       userName: "app"
       password: "passw0rd2"
       jmsDestinationType: "QUEUE"
+      autoConfig: "IBM_MQ"

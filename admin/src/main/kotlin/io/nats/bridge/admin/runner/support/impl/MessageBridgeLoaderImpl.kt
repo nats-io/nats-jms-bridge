@@ -94,7 +94,15 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
         if (config.userName != null) builder.withUserNameConnection(config.userName)
         if (config.password != null) builder.withPasswordConnection(config.password)
         if (bridge.copyHeaders != null) builder.withCopyHeaders(bridge.copyHeaders)
+
+        if (config.autoConfig == JmsAutoConfig.IBM_MQ) {
+            builder.useIBMMQ()
+        } else if (config.autoConfig == JmsAutoConfig.ACTIVE_MQ) {
+            builder.jndiProperties
+        }
+
         if (config.config.isNotEmpty()) builder.withJndiProperties(config.config)
+
 
         return builder
     }
