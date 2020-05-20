@@ -106,6 +106,7 @@ clean_docker_images() {
 
 copy_ibm_test_config() {
   echo "copying sample conf nats-bridge-ibm-mq-demo-conf.yaml to admin conf"
+  touch  admin/config/nats-bridge.bak
   echo "-----back up------" >> admin/config/nats-bridge.bak
   cat admin/config/nats-bridge.yaml >> admin/config/nats-bridge.bak
   cp admin/sampleConf/nats-bridge-ibm-mq-demo-conf.yaml admin/config/nats-bridge.yaml
@@ -123,21 +124,24 @@ docker_deploy_test() {
 
 help () {
   echo "Valid commands:"
-  echo "Use build_ibm_mq_image, bimi to build IBM image"
-  echo "Use build_admin_image, bai, admin to build NATs bridge admin"
-  echo "Use clean_docker_images | clean_docker | ci to clear out docker images"
-  echo "Use build_prometheus_image | bpi to build prometheus which can scrape admin"
-  echo "Use build_bridge_nats_server_image | nats to build prometheus which can scrape admin"
-  echo "Use build_bridge_activemq | activemq to build activemq"
-  echo "Use build_gradle_image to build travis image for testing"
-  echo "Use build_travis_build_image to build travis image for testing"
-  echo "Use localdev to run all images for local development"
-  echo "Use docker_deploy_test to run a version of IBM MQ that has non default values use config sample nats-bridge-ibm-mq-demo-conf.yaml"
+  echo "Docker Builds:"
+  echo "Use 'build_ibm_mq_image', bimi to build IBM image"
+  echo "Use 'build_admin_image', bai, admin to build NATs bridge admin"
+  echo "Use 'clean_docker_images' | clean_docker | ci to clear out docker images"
+  echo "Use 'build_prometheus_image' | bpi to build prometheus which can scrape admin"
+  echo "Use 'build_bridge_nats_server_image' | nats to build prometheus which can scrape admin"
+  echo "Use 'build_bridge_activemq' | activemq to build activemq"
+  echo "Use 'build_gradle_image' to build travis image for testing"
+  echo "Use 'build_travis_build_image' to build travis image for testing"
+  echo "Docker Compose:"
+  echo "Use 'localdev' to run all images for local development"
+  echo "Use 'docker_deploy_test' to run a version of IBM MQ that has non default values use config sample nats-bridge-ibm-mq-demo-conf.yaml"
+  echo "Gradle Builds Compose:"
   echo "Use build_install_dir to create install dir"
   echo "Use build_admin_image_local or bai_local to build a admin image that does not depend on a release"
-
-  echo "Use prepare_ibm_mq_test to prepare for IBM MQ example config in yaml"
-  echo "Use prepare_ibm_mq_env_test to prepare for IBM MQ config with env vars only"
+  echo "QA integration tests:"
+  echo "Use 'prepare_ibm_mq_test' to prepare for IBM MQ example config in yaml"
+  echo "Use 'prepare_ibm_mq_env_test' to prepare for IBM MQ config with env vars only"
 }
 
 
@@ -216,6 +220,13 @@ build_travis_build_image)
 localdev)
         bin/docker-deploy-local-dev.sh
         ;;
+
+stop-localdev)
+  cd cicd
+  docker-compose  stop
+  cd ..
+  ;;
+
 
 docker_deploy_test)
       docker_deploy_test
