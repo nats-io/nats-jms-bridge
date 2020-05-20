@@ -1,0 +1,24 @@
+version: '3'
+services:
+  nats-server:
+    build:
+      context: ../bridge-nats-server
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+  ibm-mq:
+    build:
+      context: ../bridge-ibmmq-test
+    environment:
+      - LICENSE=accept
+      - MQ_QMGR_NAME=MYQM1
+      - MQ_APP_PASSWORD=passw0rd2
+    ports:
+      - "2414:1414"
+      - "8443:9443"
+  active-mq:
+    build:
+      context: ../bridge-activemq
+    ports:
+      - "8161:8161"
+      - "61616:61616"

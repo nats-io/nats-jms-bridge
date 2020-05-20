@@ -42,7 +42,10 @@ clusters:
       host: "localhost"
       port: 4222
       servers: []
-      config: {}
+      config:
+        io.nats.client.reconnect.wait: 3000
+        io.nats.client.reconnect.max: 10
+        io.nats.client.timeout: 4000
   ibmMqCluster:
     name: "ibmMqCluster"
     properties: !<jms>
