@@ -24,8 +24,8 @@ The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nat
 
                         +-------------------+         +-----------------+ 3      +-----------+ 4      +------------+
                         |                   | 2       |                 |        |           |sendTo  |            |
-                        | Nats Server       |sendToQueue                |send    |JMS Server |Queue   |   ServiceA |
-                        |  subject serivceA +---------> NatsMqJMSBridge +------->+           +-------->            |
+                        | NATS Server       |sendToQueue                |send    |JMS Server |Queue   |   ServiceA |
+                        |  subject serivceA +---------> NATSMqJMSBridge +------->+           +-------->            |
                         |                   |         |                 |        |Queue      |        |            |
 +----------+ request 1  |                   |publish  |                 |        |ServiceA   |        |            |
 |          +------------>                   +<--------+                 <--------+           <--------+            |
@@ -43,9 +43,11 @@ The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nat
 
 This all happens async.
 
-Admin Console
+## NATS Bridge Admin Console
 
-![image](https://user-images.githubusercontent.com/382678/80275243-e3010c80-8694-11ea-843c-b26cf43cf8ae.png)
+
+![Admin Console Swagger Open API](https://user-images.githubusercontent.com/382678/82646981-5598d580-9bca-11ea-9bc8-5dfa6875c61e.png)
+
 
 # 0.4.0-beta1 NATS JMS/MQ Bridge
 
@@ -117,7 +119,7 @@ nats-jms-bridge-0.4.0-beta1.pom | Maven POM file for Bridge | Manifest
 
 # The Admin Console uses Open API REST
 
-![image](https://user-images.githubusercontent.com/382678/80275243-e3010c80-8694-11ea-843c-b26cf43cf8ae.png)
+![Admin Console Swagger Open API](https://user-images.githubusercontent.com/382678/82646981-5598d580-9bca-11ea-9bc8-5dfa6875c61e.png)
 
 The Admin Console for NATS JMS/MQ Bridge uses Open API REST end points and comes with a command line utility.
 See [Admin guide](https://github.com/nats-io/nats-jms-mq-bridge/tree/master/admin) for information on how to set up bridges and import new
@@ -392,9 +394,9 @@ $ bin/admin.sh clear-error
 
 The file format of the TSV and CSV is described below.
 
-# Nats JMS MQ Bridge Service service
+# NATS JMS MQ Bridge Service service
 
-This is the source code for the Nats JMS MQ Bridge Service Service back-end application developed with Spring Boot.
+This is the source code for the NATS JMS MQ Bridge Service Service back-end application developed with Spring Boot.
 
 You can build the project and run tests by running:
 
@@ -583,7 +585,7 @@ To hit the swagger UI direct when in dev use this:
         }
       },
       "destination": {
-        "name": "Nats Sample",
+        "name": "NATS Sample",
         "busType": "NATS",
         "config": {
           "type": "nats",
@@ -601,7 +603,7 @@ To hit the swagger UI direct when in dev use this:
       "name": "jmsToNatsSample",
       "bridgeType": "REQUEST_REPLY",
       "source": {
-        "name": "Source Nats Sample",
+        "name": "Source NATS Sample",
         "busType": "NATS",
         "config": {
           "type": "nats",
@@ -667,14 +669,14 @@ curl  -H "Authorization: Bearer $TOKEN"\
 
 Note that many items have a name. It is important to give short concise names as they are used for reporting health issues, alerts, metrics and KPIs.
 
-The ***Nats JMS/MQ Bridge*** bridges message bus systems.
+The ***NATS JMS/MQ Bridge*** bridges message bus systems.
 This allows sending and receiving messages between message bus systems like JMS and IBM MQ.
 
 
 ## NatsBridgeConfig
  `NatsBridgeConfig` is the root config object for exporting to and reading from JSON and YAML.
 
-Clusters refer to message bus servers for Nats or JMS/IBM MQ.
+Clusters refer to message bus servers for NATS or JMS/IBM MQ.
 
 #### NatsBridgeConfig Schema
 ```kotlin
@@ -683,7 +685,7 @@ data class NatsBridgeConfig(val name: String,
                             val clusters: Map<String, Cluster>)
 ```
 
-#### NatsBridge in YAML
+#### NATS Bridge in YAML
 
 ```yaml
 name: "Starter Config"
@@ -697,7 +699,7 @@ bridges:
     subject: "dynamicQueues/sample-jms-queue"
     clusterName: "activeMQTest"
   destination:
-    name: "Nats Sample"
+    name: "NATS Sample"
     busType: "NATS"
     subject: "sample-nats-subject"
     clusterName: "natsTest"
@@ -705,7 +707,7 @@ bridges:
 - name: "natsToJMS"
   bridgeType: "FORWARD"
   source:
-    name: "Nats Sample"
+    name: "NATS Sample"
     busType: "NATS"
     subject: "sample-nats-subject"
     clusterName: "natsTest"
@@ -735,8 +737,8 @@ clusters:
 
 ## MessageBus
 
-A Message bus represents a message bus system, i.e., IBM MQ, Nats, ActiveMQ, JMS, Rabbit MQ, Kafka, SQS, etc.
-A message bus has a subject which can be Nats subject or a JMS destination.
+A Message bus represents a message bus system, i.e., IBM MQ, NATS, ActiveMQ, JMS, Rabbit MQ, Kafka, SQS, etc.
+A message bus has a subject which can be NATS subject or a JMS destination.
 
 #### MessageBus Schema
 
@@ -748,7 +750,7 @@ data class MessageBus(val name: String, val busType: BusType, val subject: Strin
 
 ```yaml
 
-    name: "Nats Sample"
+    name: "NATS Sample"
     busType: "NATS"
     subject: "sample-nats-subject"
     clusterName: "natsTest"
@@ -778,7 +780,7 @@ data class MessageBridge(val name: String, val bridgeType: BridgeType,
     subject: "dynamicQueues/sample-jms-queue"
     clusterName: "activeMQTest"
   destination:
-    name: "Nats Sample"
+    name: "NATS Sample"
     busType: "NATS"
     subject: "sample-nats-subject"
     clusterName: "natsTest"
@@ -802,12 +804,12 @@ busType: "NATS"
 
 Note that `busType` is an attribute of `MessageBus`.
 
-Nats JMS / IBM MQ Bridge currently supports two supported message bus types namely JMS (ActiveMQ and IBM MQ),
+NATS JMS / IBM MQ Bridge currently supports two supported message bus types namely JMS (ActiveMQ and IBM MQ),
 and NATS.
 
-It is possible that this system could support Nats Streaming, Kinesis, Kafka, SQS, RabbitMQ, and more in the future.
+It is possible that this system could support NATS Streaming, Kinesis, Kafka, SQS, RabbitMQ, and more in the future.
 
-Through JMS support, the Nats bridge could theoretically support the following JMS implementations:
+Through JMS support, the NATS bridge could theoretically support the following JMS implementations:
 * Amazon SQS's Java Messaging Library
 * Apache ActiveMQ
 * Apache Qpid, using AMQP
@@ -840,7 +842,7 @@ enum class BridgeType { REQUEST_REPLY, FORWARD }
 Note that `bridgeType` is an attribute of `MessageBridge`.
 
 ## Cluster
-Cluster is a way to set up a server or groups of servers for a MessageBus like Nats, or IBM MQ.
+Cluster is a way to set up a server or groups of servers for a MessageBus like NATS, or IBM MQ.
 This allows the easy configuration of bridges by moving the server/cluster configuration out of the bridge configuration code.
 Then the message buses (`MessageBus`es) in a bridge (`MessageBridge`) refer to the cluster name instead of inlining the server/cluster configuration for each bridge.
 
@@ -887,7 +889,7 @@ data class NatsClusterConfig(override val userName: String? = null, override val
       jmsDestinationType: "QUEUE"
 ```
 
-#### Nats Cluster
+#### NATS Cluster
 
 ```yaml
 
@@ -908,15 +910,15 @@ data class NatsClusterConfig(override val userName: String? = null, override val
 
 To simplify set up, the bridge allows importing TSV files.
 
-You can import TSV files to configure the Nats JMS/MQ bridge.
+You can import TSV files to configure the NATS JMS/MQ bridge.
 
 To import a group of configured bridges refer to the following example:
 
 ```tsv
-# JMS to Nats Bridge
-jms To Nats <TAB> r <TAB> jms Bar <TAB> j <TAB> queue/barQueue <TAB> activeMQTest<TAB> nats Foo <TAB> n <TAB> fooSubject<TAB> natsTest
-# Nats To JMS Bridge
-Nats To JMS <TAB> f <TAB> nat Bar <TAB> n <TAB> natsBarSubject <TAB> natsTest    <TAB> jms Foo  <TAB> j <TAB> queue/Foo <TAB> activeMQTest
+# JMS to NATS Bridge
+jms To NATS <TAB> r <TAB> jms Bar <TAB> j <TAB> queue/barQueue <TAB> activeMQTest<TAB> nats Foo <TAB> n <TAB> fooSubject<TAB> natsTest
+# NATS To JMS Bridge
+NATS To JMS <TAB> f <TAB> nat Bar <TAB> n <TAB> natsBarSubject <TAB> natsTest    <TAB> jms Foo  <TAB> j <TAB> queue/Foo <TAB> activeMQTest
 ```
 
 1. Lines that begin with # are comments

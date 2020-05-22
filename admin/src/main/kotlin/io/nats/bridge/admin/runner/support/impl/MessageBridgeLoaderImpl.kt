@@ -85,7 +85,13 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
         val builder = JMSMessageBusBuilder.builder()
                 .withDestinationName(busInfo.subject).withName(busInfo.name)
 
-        if (busInfo.responseSubject != null) builder.withResponseDestinationName(busInfo.responseSubject)
+
+
+        if (busInfo.responseSubject != null) {
+            builder.withResponseDestinationName(busInfo.responseSubject)
+        } else if  (bridge.bridgeType == BridgeType.FORWARD) {
+            builder.withRequestReply(false)
+        }
 
         if (metricsRegistry != null)
             builder.withMetricsProcessor(SpringMetricsProcessor(metricsRegistry, builder.metrics, 10,

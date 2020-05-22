@@ -18,6 +18,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.File
+import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -127,11 +128,14 @@ class IntegrationForwardUtils {
 
         val thread = Thread(Runnable {
             while (count.get() < 2500) {
+                val receive = receiverBus.receive(Duration.ofMillis(100))
+                if (receive.isPresent) {
+                    count.incrementAndGet()
+                }
                 val timeNow = System.currentTimeMillis()
                 if (timeNow - startTime > 60_000) {
                     break
                 }
-                totalLatch.await(1, TimeUnit.MILLISECONDS)
             }
         })
 
@@ -149,7 +153,7 @@ class IntegrationForwardUtils {
                 senderBus.process()
             }
 
-            for (x in 0..10) {
+            for (x in 0..100) {
                 if (totalLatch.await(5, TimeUnit.MILLISECONDS)) {
                     break
                 }

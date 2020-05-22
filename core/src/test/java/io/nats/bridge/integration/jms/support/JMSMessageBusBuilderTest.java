@@ -1,7 +1,15 @@
 package io.nats.bridge.integration.jms.support;
 
+import io.nats.bridge.TestUtils;
 import io.nats.bridge.jms.support.JMSMessageBusBuilder;
+import io.nats.bridge.messages.Message;
 import org.junit.Test;
+
+import java.time.Duration;
+import java.util.Optional;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class JMSMessageBusBuilderTest {
 
@@ -38,6 +46,13 @@ public class JMSMessageBusBuilderTest {
         builder1.build();
         builder2.build();
 
+
+    }
+
+    @Test
+    public void testIbmOptions() throws Exception {
+        JMSMessageBusBuilder ibmBuilder = new JMSMessageBusBuilder();
+        ibmBuilder.getIbmMQChannel();
 
     }
 }
