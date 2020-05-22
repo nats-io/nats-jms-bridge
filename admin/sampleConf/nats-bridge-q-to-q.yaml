@@ -1,13 +1,13 @@
 ---
 name: "Starter Config"
 dateTime:
-- 2020
-- 4
-- 30
-- 0
-- 53
-- 50
-- 423615000
+  - 2020
+  - 4
+  - 30
+  - 0
+  - 53
+  - 50
+  - 423615000
 bridges:
   - name: "natsForwardToJMS"
     bridgeType: "FORWARD"
@@ -72,8 +72,7 @@ clusters:
         nats.ibm.mq.host: "tcp://ibm-mq:1414"
         nats.ibm.mq.channel: "DEV.APP.SVRCONN"
         nats.ibm.mq.queueManager: "QM1"
-        nats.ibm.mq.queueModelName: "DEV.MODEL"
-        nats.ibm.mq.queueModelPrefix: "DEV*"
       userName: "app"
       password: "passw0rd"
       jmsDestinationType: "QUEUE"
+      autoConfig: "IBM_MQ"

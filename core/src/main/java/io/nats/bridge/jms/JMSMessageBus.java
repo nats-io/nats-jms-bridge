@@ -26,6 +26,7 @@ import io.nats.bridge.util.FunctionWithException;
 import org.slf4j.Logger;
 
 import javax.jms.*;
+import java.lang.IllegalStateException;
 import java.time.Duration;
 import java.util.Queue;
 import java.util.*;
@@ -160,6 +161,10 @@ public class JMSMessageBus implements MessageBus {
 
     @Override
     public void request(final Message message, final Consumer<Message> replyCallback) {
+
+        if (responseDestination == null) {
+            throw new IllegalStateException("Response destination is not set so request/reply is not possible");
+        }
 
         if (logger.isDebugEnabled()) logger.debug("request called " + message);
 
