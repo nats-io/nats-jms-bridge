@@ -80,7 +80,8 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     private String ibmMQQueueModelName;
     private String ibmMQQueueModelPrefix;
-
+    private String ibmMQQueueManager; //Add by Robert 05-21-20
+    private String ibmMQChannel; //Add by Robert 05-21-20
 
 
     public static JMSMessageBusBuilder builder() {
@@ -118,6 +119,34 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         return this;
     }
 
+    //Robert 05-21-20
+    public String getIbmMQQueueManager() {
+        if ( ibmMQQueueManager == null) {
+            ibmMQQueueManager = System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER", "QM1");
+            logger.info("IBM QUEUE MANAGER WAS NOT SET SO USING ENV VAR NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER or default value of QM1");
+            logger.info("IBM QUEUE MANAGER SET TO {}", ibmMQQueueManager);
+        }
+        return ibmMQQueueManager;
+    }
+
+    public JMSMessageBusBuilder withIbmMQQueueManager(String ibmMQQueueManager) {
+        this.ibmMQQueueManager = ibmMQQueueManager;
+        return this;
+    }
+    public String getIbmMQChannel() {
+        if ( ibmMQChannel == null) {
+            ibmMQChannel = System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_CHANNEL", "DEV.APP.SVRCONN");
+            logger.info("IBM QUEUE CHANNEL WAS NOT SET SO USING ENV VAR NATS_BRIDGE_IBM_MQ_CHANNEL or default value of DEV.APP.SVRCONN");
+            logger.info("IBM QUEUE MANAGER SET TO {}", ibmMQChannel);
+        }
+        return ibmMQChannel;
+    }
+
+    public JMSMessageBusBuilder withIbmMQChannel(String ibmMQChannel) {
+        this.ibmMQChannel = ibmMQChannel;
+        return this;
+    }
+    //End 05-21-20
     public String getName() {
         return name;
     }
@@ -547,7 +576,8 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
         final String queueModelName = getIbmMQQueueModelName();
         final String queueModelPrefix = getIbmMQQueueModelPrefix();
-
+        final String queueManager = getIbmMQQueueManager(); //Added by Robert 05-21-20
+        final String channel = getIbmMQChannel(); //Added by Robert 05-21-20
 
         jndiProperties.clear();
         //TODO: Make java.naming.factory.initial like call it jndiInitialFactory.
@@ -555,8 +585,8 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         jndiProperties.put("nats.ibm.mq.host", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414"));
 
         //TODO: Make Channel and Queue manager like queueModelName and queueModelPrefix
-        jndiProperties.put("nats.ibm.mq.channel", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_CHANNEL", "DEV.APP.SVRCONN"));
-        jndiProperties.put("nats.ibm.mq.queueManager", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER", "QM1"));
+        jndiProperties.put("nats.ibm.mq.channel", channel); //changed by Robert 05-21-20
+        jndiProperties.put("nats.ibm.mq.queueManager", queueManager); //changed by Robert 05-21-20
         jndiProperties.put("nats.ibm.mq.queueModelName", queueModelName);
         jndiProperties.put("nats.ibm.mq.queueModelPrefix", queueModelPrefix);
         return this;
