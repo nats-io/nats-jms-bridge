@@ -21,6 +21,7 @@ Added config changes to demonstrate using different IBM MQ servers and passing N
 * #78 tls example work admin bridge
 * #108 tls example docker, docker compose, test.
 * #121 Nats to NATS doc changes
+* #115 Session creation issue 
 
 ![Admin Console Swagger Open API](https://user-images.githubusercontent.com/382678/82646981-5598d580-9bca-11ea-9bc8-5dfa6875c61e.png)
 
