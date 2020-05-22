@@ -4,10 +4,11 @@ FROM nats:alpine3.11
 # Download and install a dependency
 
 #Copying certificates to folder /usr
-COPY cert/*.* ./usr/
+#COPY ./cicd/bridge-nats-server/cert/*.* ./usr/
+#COPY ./cicd/bridge-nats-server/nats-server.conf /etc/nats/nats-server.conf
 
 # Tell the image what to do when it starts as a container
-#EXPOSE 4222
+EXPOSE 4222
 #EXPOSE 8222
 
 #CMD sh -c "nats-server --tls --tlscert=./usr/localhost.pem --tlskey=./usr/localhost-key.pem --tlsverify=false"
