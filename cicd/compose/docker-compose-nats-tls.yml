@@ -13,10 +13,10 @@ services:
       context: ../bridge-ibmmq
     environment:
       - LICENSE=accept
-      - MQ_QMGR_NAME=MYQM1
-      - MQ_APP_PASSWORD=passw0rd2
+      - MQ_QMGR_NAME=QM1
+      - MQ_APP_PASSWORD=passw0rd
     ports:
-      - "2414:1414"
+      - "1414:1414"
       - "8443:9443"
   active-mq:
     build:

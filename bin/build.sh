@@ -115,6 +115,7 @@ copy_ibm_test_config() {
 docker_deploy_ibm_mq_test() {
   copy_ibm_test_config
   cd cicd
+  docker-compose  -f compose/docker-compose-ibm-test.yml build 
   docker-compose  -f compose/docker-compose-ibm-test.yml up
   cd ..
 }
@@ -130,7 +131,15 @@ copy_nats_tls_test_config() {
 docker_deploy_nats_tls_test() {
   copy_nats_tls_test_config
   cd cicd
+  docker-compose  -f compose/docker-compose-nats-tls.yml build
   docker-compose  -f compose/docker-compose-nats-tls.yml up
+  cd ..
+}
+
+docker_build_nats_tls_test() {
+  copy_nats_tls_test_config
+  cd cicd
+  docker-compose  -f compose/docker-compose-nats-tls.yml build
   cd ..
 }
 
@@ -165,6 +174,9 @@ export COMMAND="$1"
 
 case $COMMAND in
 
+docker_build_nats_tls_test)
+  docker_build_nats_tls_test
+  ;;
 
 docker_deploy_nats_tls_test)
   docker_deploy_nats_tls_test
