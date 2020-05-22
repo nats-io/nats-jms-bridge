@@ -138,10 +138,10 @@ class IntegrationRequestReplyUtils {
         val startTime = System.currentTimeMillis()
 
         var totalSent = 0
-        for (a in 0..49) {
+        for (a in 0..9) {
             println("Run $a")
-            val latch = CountDownLatch(50)
-            for (x in 0..49) {
+            val latch = CountDownLatch(10)
+            for (x in 0..9) {
                 totalSent++
                 println("Call $x of run $a")
 
@@ -165,7 +165,7 @@ class IntegrationRequestReplyUtils {
             }
 
             for (x in 0..1000) {
-                if (latch.await(10, TimeUnit.MILLISECONDS)) {
+                if (latch.await(5, TimeUnit.MILLISECONDS)) {
                     break
                 }
                 clientBus.process()

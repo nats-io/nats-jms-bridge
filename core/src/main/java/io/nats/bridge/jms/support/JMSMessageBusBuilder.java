@@ -82,7 +82,6 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     private String ibmMQQueueModelPrefix;
     private String ibmMQQueueManager;
     private String ibmMQChannel;
-
     private boolean requestReply = true;
 
     public boolean isRequestReply() {
@@ -129,6 +128,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         return this;
     }
 
+
     public String getIbmMQQueueManager() {
         if ( ibmMQQueueManager == null) {
             ibmMQQueueManager = System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER", "QM1");
@@ -155,7 +155,7 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         this.ibmMQChannel = ibmMQChannel;
         return this;
     }
-  
+
     public String getName() {
         return name;
     }
@@ -592,12 +592,8 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
     public JMSMessageBusBuilder useIBMMQ() {
         getJmsBusLogger().info("CLEARING JNDI PROPERTIES");
         ibmMQ = true;
-
-
         final String queueManager = getIbmMQQueueManager();
         final String channel = getIbmMQChannel();
-
-
 
         jndiProperties.clear();
         jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"));
