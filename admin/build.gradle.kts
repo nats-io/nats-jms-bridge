@@ -34,7 +34,7 @@ springBoot {
     buildInfo {
         properties {
             additional = mapOf(
-                    "release" to "Alpha1",
+                    "release" to "Beta2",
                     "author" to "NATS team"
             )
         }
@@ -110,7 +110,7 @@ tasks.getByName<Jar>("jar") {
     enabled = true
 }
 
-version = "0.4.0-beta1"
+version = "0.6.0-beta2"
 
 tasks {
     withType<KotlinCompile> {
@@ -180,7 +180,7 @@ tasks {
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.4.0-beta1")
+        implementation("io.nats.bridge:nats-jms-bridge:0.6.0-beta2")
 
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 

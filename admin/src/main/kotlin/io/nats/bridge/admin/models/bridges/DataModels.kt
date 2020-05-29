@@ -50,7 +50,9 @@ data class MessageBridgeInfo(val name: String, val bridgeType: BridgeType,
  *      RabbitMQ from Pivotal Software
  *      SwiftMQ and others
  */
-enum class BusType { JMS, NATS }
+enum class BusType { JMS, NATS, KAFKA, KINESIS, SQS }
+
+enum class JmsAutoConfig { IBM_MQ, ACTIVE_MQ, SQS, OTHER, NONE }
 
 /** Two Supported Bridge types are request/reply and
  *  forward to subject/destination (queue to queue).
@@ -83,7 +85,8 @@ enum class JmsDestinationType { QUEUE, TOPIC }
  */
 data class JmsClusterConfig(override val config: Map<String, String> = emptyMap(),
                             override val userName: String? = null, override val password: String? = null,
-                            val jmsDestinationType: JmsDestinationType = JmsDestinationType.QUEUE) : ClusterConfig
+                            val jmsDestinationType: JmsDestinationType = JmsDestinationType.QUEUE,
+                            val autoConfig:JmsAutoConfig?=JmsAutoConfig.NONE) : ClusterConfig
 
 /**
  * Specific cluster config object for NATS.
@@ -97,34 +100,6 @@ data class NatsClusterConfig(override val userName: String? = null, override val
 val defaultDataModel = NatsBridgeConfig(
         name = "Starter Config",
         bridges = listOf(
-                MessageBridgeInfo("jmsToNatsSample",
-                        bridgeType = BridgeType.REQUEST_REPLY,
-                        workers = 5,
-                        source = MessageBusInfo(name = "jms",
-                                busType = BusType.JMS,
-                                subject = "dynamicQueues/a-queue",
-                                clusterName = "jmsCluster"
-                        ),
-                        destination = MessageBusInfo(name = "nats",
-                                busType = BusType.NATS,
-                                subject = "a-subject",
-                                clusterName = "natsCluster"
-                        )
-                ),
-                MessageBridgeInfo("natsToJMS",
-                        workers = 5,
-                        bridgeType = BridgeType.REQUEST_REPLY,
-                        source = MessageBusInfo(name = "nats",
-                                busType = BusType.NATS,
-                                subject = "b-subject",
-                                clusterName = "natsCluster"
-                        ),
-                        destination = MessageBusInfo(name = "jms",
-                                busType = BusType.JMS,
-                                subject = "dynamicQueues/b-queue",
-                                clusterName = "jmsCluster"
-                        )
-                ),
                 MessageBridgeInfo("ibmMqToNatsSample",
                         workers = 5,
                         bridgeType = BridgeType.REQUEST_REPLY,
@@ -140,7 +115,7 @@ val defaultDataModel = NatsBridgeConfig(
                         )
                 ),
                 MessageBridgeInfo("natsToIBMMq",
-                        workers = 5,
+                        workers = 1,
                         bridgeType = BridgeType.REQUEST_REPLY,
                         source = MessageBusInfo(name = "nats",
                                 busType = BusType.NATS,
@@ -153,7 +128,36 @@ val defaultDataModel = NatsBridgeConfig(
                                 clusterName = "ibmMqCluster",
                                 responseSubject = "DEV.QUEUE.2"
                         )
+                ),
+                MessageBridgeInfo("jmsToNatsSample",
+                        bridgeType = BridgeType.REQUEST_REPLY,
+                        workers = 1,
+                        source = MessageBusInfo(name = "jms",
+                                busType = BusType.JMS,
+                                subject = "dynamicQueues/a-queue",
+                                clusterName = "jmsCluster"
+                        ),
+                        destination = MessageBusInfo(name = "nats",
+                                busType = BusType.NATS,
+                                subject = "a-subject",
+                                clusterName = "natsCluster"
+                        )
+                ),
+                MessageBridgeInfo("natsToJMS",
+                        workers = 1,
+                        bridgeType = BridgeType.REQUEST_REPLY,
+                        source = MessageBusInfo(name = "nats",
+                                busType = BusType.NATS,
+                                subject = "b-subject",
+                                clusterName = "natsCluster"
+                        ),
+                        destination = MessageBusInfo(name = "jms",
+                                busType = BusType.JMS,
+                                subject = "dynamicQueues/b-queue",
+                                clusterName = "jmsCluster"
+                        )
                 )
+
         ),
         clusters = mapOf(
                 "jmsCluster" to Cluster(
@@ -165,7 +169,8 @@ val defaultDataModel = NatsBridgeConfig(
                                         "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory",
                                         "connectionFactory.ConnectionFactory" to "tcp://localhost:61616",
                                         "queue.queue/testQueue" to "queue.queue/testQueue=testQueue"
-                                )
+                                ),
+                                autoConfig = JmsAutoConfig.ACTIVE_MQ
                         )
                 ),
                 "natsCluster" to Cluster(
@@ -185,9 +190,11 @@ val defaultDataModel = NatsBridgeConfig(
                                         "java.naming.factory.initial" to "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory",
                                         "nats.ibm.mq.host" to "tcp://localhost:1414",
                                         "nats.ibm.mq.channel" to "DEV.APP.SVRCONN",
-                                        "nats.ibm.mq.queueManager" to "QM1"
-                                )
-
+                                        "nats.ibm.mq.queueManager" to "QM1",
+                                        "nats.ibm.mq.queueModelName" to "DEV.MODEL",
+                                        "nats.ibm.mq.queueModelPrefix" to "DEV*"
+                                ),
+                                autoConfig = JmsAutoConfig.IBM_MQ
                         )
                 )
         )

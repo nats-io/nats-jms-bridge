@@ -1,10 +1,10 @@
-# Admin Console for NATS JMS Bridge 
+# Admin Console for NATS JMS Bridge
 
-![image](https://user-images.githubusercontent.com/382678/80275243-e3010c80-8694-11ea-843c-b26cf43cf8ae.png)
+![Admin Console Swagger Open API](https://user-images.githubusercontent.com/382678/82646981-5598d580-9bca-11ea-9bc8-5dfa6875c61e.png)
 
-# Nats JMS MQ Bridge Service service
+# NATS JMS MQ Bridge Service service
 
-This is the source code for the Nats JMS MQ Bridge Service Service back-end application developed with Spring Boot (Kotlin). 
+This is the source code for the NATSJMS MQ Bridge Service back-end application developed with Spring Boot (Kotlin).
 
 You can build the project and run tests by running:
 
@@ -19,22 +19,22 @@ All development happens in the development branch.
 API documentation is in swagger and accessible via the url:  HTTP://application_base_url/swagger-ui.html#!
 
 
-## Swagger 
+## Swagger
 
 http://localhost:8080/swagger-ui.html#!  
 
-## Test with curl 
+## Test with curl
 
-## Send ping 
+## Send ping
 
 ```sh
 $ curl localhost:8080/ping
 
-## Output 
+## Output
 pong
 ```
 
-## Curl root 
+## Curl root
 
 ```sh
  $ curl localhost:8080/    
@@ -51,7 +51,7 @@ $  curl localhost:8080/api/v1/auth/ping  | jq .
 
 ```
 
-### Output 
+### Output
 
 ```json
 {
@@ -72,7 +72,7 @@ $  curl localhost:8080/api/v1/auth/ping  | jq .
 ```sh
    curl -X POST -H "Content-Type: application/json"\
                 -d '{"subject":"Rick Hightower", "publicKey" : "foobar" }'\
-                localhost:8080/api/v1/login/generateToken 
+                localhost:8080/api/v1/login/generateToken
 ```
 
 ### Output
@@ -93,7 +93,7 @@ $  curl localhost:8080/api/v1/auth/ping  | jq .
 ```sh
    curl -X POST -H "Content-Type: application/json"\
                 -d '{"subject":"Paul Hix", "publicKey" : "iloverick" }'\
-                localhost:8080/api/v1/login/generateToken 
+                localhost:8080/api/v1/login/generateToken
 ```
 
 ### Output
@@ -109,7 +109,7 @@ $  curl localhost:8080/api/v1/auth/ping  | jq .
 
 
 
-## Actual Admin 
+## Actual Admin
 
 
 ```sh
@@ -127,10 +127,10 @@ $  curl localhost:8080/api/v1/auth/ping  | jq .
 }
 ```
 
-## Get config list 
+## Get config list
 
-To hit the swagger UI direct when in dev use this: 
-* ADMIN 
+To hit the swagger UI direct when in dev use this:
+* ADMIN
     * Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMT0dJTl9UT0tFTiIsInN1YmplY3QiOiJSaWNrIiwicm9sZXMiOiJBZG1pbiJ9.hd2yFD_aEDL5IVaTz0TpiqxTTdZ4CteDLp1wquDTabI
 * USER
     * Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMT0dJTl9UT0tFTiIsInN1YmplY3QiOiJQYXVsIEhpeCIsInJvbGVzIjoiVXNlciJ9.Pb02geRU-RPyHyGwgxlwnptJ66zAs4nbdR7z53JY6RU
@@ -141,12 +141,12 @@ To hit the swagger UI direct when in dev use this:
 #### From User
 ```sh
    curl  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMT0dJTl9UT0tFTiIsInN1YmplY3QiOiJQYXVsIEhpeCIsInJvbGVzIjoiVXNlciJ9.Pb02geRU-RPyHyGwgxlwnptJ66zAs4nbdR7z53JY6RU"\
-          localhost:8080/api/v1/bridges/admin/config 
+          localhost:8080/api/v1/bridges/admin/config
 ```
 
 
 
-### Output 
+### Output
 
 ```json
 {
@@ -163,12 +163,12 @@ To hit the swagger UI direct when in dev use this:
 #### From Admin
 ```sh
    curl  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMT0dJTl9UT0tFTiIsInN1YmplY3QiOiJSaWNrIiwicm9sZXMiOiJBZG1pbiJ9.hd2yFD_aEDL5IVaTz0TpiqxTTdZ4CteDLp1wquDTabI"\
-          localhost:8080/api/v1/bridges/admin/config 
+          localhost:8080/api/v1/bridges/admin/config
 ```
 
 
 
-### Output 
+### Output
 
 ```json
 {
@@ -193,7 +193,7 @@ To hit the swagger UI direct when in dev use this:
         }
       },
       "destination": {
-        "name": "Nats Sample",
+        "name": "NATS Sample",
         "busType": "NATS",
         "config": {
           "type": "nats",
@@ -211,7 +211,7 @@ To hit the swagger UI direct when in dev use this:
       "name": "jmsToNatsSample",
       "bridgeType": "REQUEST_REPLY",
       "source": {
-        "name": "Source Nats Sample",
+        "name": "Source NATSSample",
         "busType": "NATS",
         "config": {
           "type": "nats",
@@ -247,19 +247,19 @@ To hit the swagger UI direct when in dev use this:
 }
 ```
 
-## Show current user roles 
+## Show current user roles
 
 #### Paul
 ```sh
    curl  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMT0dJTl9UT0tFTiIsInN1YmplY3QiOiJQYXVsIEhpeCIsInJvbGVzIjoiVXNlciJ9.Pb02geRU-RPyHyGwgxlwnptJ66zAs4nbdR7z53JY6RU"\
-          localhost:8080/api/v1/logins/admin/roles 
+          localhost:8080/api/v1/logins/admin/roles
 ```
 
 
 #### Rick
 ```sh
    curl  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMT0dJTl9UT0tFTiIsInN1YmplY3QiOiJSaWNrIiwicm9sZXMiOiJBZG1pbiJ9.hd2yFD_aEDL5IVaTz0TpiqxTTdZ4CteDLp1wquDTabI"\
-          localhost:8080/api/v1/logins/admin/roles 
+          localhost:8080/api/v1/logins/admin/roles
 ```
 
 
@@ -273,29 +273,29 @@ curl  -H "Authorization: Bearer $TOKEN"\
 
 ```
 
-# Bridge Configuration Notes 
+# Bridge Configuration Notes
 
-Note that many items have a name. It is important to give short concise names as they are used for reporting health issues, alerts, metrics and KPIs. 
+Note that many items have a name. It is important to give short concise names as they are used for reporting health issues, alerts, metrics and KPIs.
 
-The ***Nats JMS/MQ Bridge*** bridges message bus systems.
-This allows sending and receiving messages between message bus systems like JMS and IBM MQ. 
+The ***NATS JMS/MQ Bridge*** bridges message bus systems.
+This allows sending and receiving messages between message bus systems like JMS and IBM MQ.
 
 
 ## NatsBridgeConfig
  `NatsBridgeConfig` is the root config object for exporting to and reading from JSON and YAML.
 
-Clusters refer to message bus servers for Nats or JMS/IBM MQ.
- 
-#### NatsBridgeConfig Schema 
+Clusters refer to message bus servers for NATS or JMS/IBM MQ.
+
+#### NATS Bridge Config Schema
 ```kotlin
 data class NatsBridgeConfig(val name: String,
                             val bridges: List<MessageBridge>,
                             val clusters: Map<String, Cluster>)
 ```
 
-#### NatsBridge in YAML 
+#### NATS Bridge in YAML
 
-```yaml 
+```yaml
 name: "Starter Config"
 
 bridges:
@@ -307,7 +307,7 @@ bridges:
     subject: "dynamicQueues/sample-jms-queue"
     clusterName: "activeMQTest"
   destination:
-    name: "Nats Sample"
+    name: "NAT SSample"
     busType: "NATS"
     subject: "sample-nats-subject"
     clusterName: "natsTest"
@@ -315,7 +315,7 @@ bridges:
 - name: "natsToJMS"
   bridgeType: "FORWARD"
   source:
-    name: "Nats Sample"
+    name: "NATS Sample"
     busType: "NATS"
     subject: "sample-nats-subject"
     clusterName: "natsTest"
@@ -346,9 +346,9 @@ clusters:
 ## MessageBus
 
 A Message bus represents a message bus system, i.e., IBM MQ, Nats, ActiveMQ, JMS, Rabbit MQ, Kafka, SQS, etc.
-A message bus has a subject which can be Nats subject or a JMS destination.
+A message bus has a subject which can be NATS subject or a JMS destination.
 
-#### MessageBus Schema 
+#### MessageBus Schema
 
 ```kotlin
 data class MessageBus(val name: String, val busType: BusType, val subject: String, val clusterName: String)
@@ -358,7 +358,7 @@ data class MessageBus(val name: String, val busType: BusType, val subject: Strin
 
 ```yaml
 
-    name: "Nats Sample"
+    name: "NATS Sample"
     busType: "NATS"
     subject: "sample-nats-subject"
     clusterName: "natsTest"
@@ -370,17 +370,17 @@ data class MessageBus(val name: String, val busType: BusType, val subject: Strin
 A `MessageBridge` connects two MessageBus and will forward messages or relay request/replies between the message bus systems.
 There is a source `MessageBus` and a destination `MessageBus`.
 
-#### MessageBridge Schema 
+#### MessageBridge Schema
 
-```kotlin 
+```kotlin
 data class MessageBridge(val name: String, val bridgeType: BridgeType,
                          val source: MessageBus, val destination: MessageBus, val copyHeaders: Boolean? = false)
 ```
 
 #### MessageBridge In YAML
 
-```kotlin 
-- name: "jmsToNatsSample" 
+```kotlin
+- name: "jmsToNatsSample"
   bridgeType: "REQUEST_REPLY"
   source:
     name: "jms"
@@ -388,7 +388,7 @@ data class MessageBridge(val name: String, val bridgeType: BridgeType,
     subject: "dynamicQueues/sample-jms-queue"
     clusterName: "activeMQTest"
   destination:
-    name: "Nats Sample"
+    name: "NATS Sample"
     busType: "NATS"
     subject: "sample-nats-subject"
     clusterName: "natsTest"
@@ -398,7 +398,7 @@ data class MessageBridge(val name: String, val bridgeType: BridgeType,
 
 ## BusType
 
-#### BusType Schema 
+#### BusType Schema
 
 ```kotlin
 enum class BusType { JMS, NATS }
@@ -410,14 +410,14 @@ enum class BusType { JMS, NATS }
 busType: "NATS"
 ```
 
-Note that `busType` is an attribute of `MessageBus`. 
+Note that `busType` is an attribute of `MessageBus`.
 
-Nats JMS / IBM MQ Bridge currently supports two supported message bus types namely JMS (ActiveMQ and IBM MQ),
+NATS JMS / IBM MQ Bridge currently supports two supported message bus types namely JMS (ActiveMQ and IBM MQ),
 and NATS.
 
-It is possible that this system could support Nats Streaming, Kinesis, Kafka, SQS, RabbitMQ, and more in the future.
- 
-Through JMS support, the Nats bridge could theoretically support the following JMS implementations:
+It is possible that this system could support NATS Streaming, Kinesis, Kafka, SQS, RabbitMQ, and more in the future.
+
+Through JMS support, the NATS bridge could theoretically support the following JMS implementations:
 * Amazon SQS's Java Messaging Library
 * Apache ActiveMQ
 * Apache Qpid, using AMQP
@@ -437,7 +437,7 @@ Through JMS support, the Nats bridge could theoretically support the following J
 ## BridgeType
 The two supported Bridge types are request/reply and forward to subject/destination (queue to queue).
 
-#### BridgeType Schema 
+#### BridgeType Schema
 
 ```kotlin
 enum class BridgeType { REQUEST_REPLY, FORWARD }
@@ -447,15 +447,15 @@ enum class BridgeType { REQUEST_REPLY, FORWARD }
 ```yaml
   bridgeType: "REQUEST_REPLY"
 ```
-Note that `bridgeType` is an attribute of `MessageBridge`. 
+Note that `bridgeType` is an attribute of `MessageBridge`.
 
 ## Cluster
 Cluster is a way to set up a server or groups of servers for a MessageBus like Nats, or IBM MQ.
-This allows the easy configuration of bridges by moving the server/cluster configuration out of the bridge configuration code. 
-Then the message buses (`MessageBus`es) in a bridge (`MessageBridge`) refer to the cluster name instead of inlining the server/cluster configuration for each bridge. 
-  
+This allows the easy configuration of bridges by moving the server/cluster configuration out of the bridge configuration code.
+Then the message buses (`MessageBus`es) in a bridge (`MessageBridge`) refer to the cluster name instead of inlining the server/cluster configuration for each bridge.
 
-#### Cluster Schema 
+
+#### Cluster Schema
 
 ```kotlin
 data class Cluster(val name: String?, val properties: ClusterConfig)
@@ -497,9 +497,9 @@ data class NatsClusterConfig(override val userName: String? = null, override val
       jmsDestinationType: "QUEUE"
 ```
 
-#### Nats Cluster
+#### NATS Cluster
 
-```yaml 
+```yaml
 
   natsTest:
     name: "natsTest"
@@ -516,20 +516,20 @@ data class NatsClusterConfig(override val userName: String? = null, override val
 
 
 
-To simplify set up, the bridge allows importing TSV files. 
+To simplify set up, the bridge allows importing TSV files.
 
-You can import TSV files to configure the Nats JMS/MQ bridge. 
+You can import TSV files to configure the NATS JMS/MQ bridge.
 
 To import a group of configured bridges refer to the following example:
 
 ```tsv
-# JMS to Nats Bridge
-jms To Nats <TAB> r <TAB> jms Bar <TAB> j <TAB> queue/barQueue <TAB> activeMQTest<TAB> nats Foo <TAB> n <TAB> fooSubject<TAB> natsTest
-# Nats To JMS Bridge
-Nats To JMS <TAB> f <TAB> nat Bar <TAB> n <TAB> natsBarSubject <TAB> natsTest    <TAB> jms Foo  <TAB> j <TAB> queue/Foo <TAB> activeMQTest
+# JMS to NATS Bridge
+jms To NATS <TAB> r <TAB> jms Bar <TAB> j <TAB> queue/barQueue <TAB> activeMQTest<TAB> nats Foo <TAB> n <TAB> fooSubject<TAB> natsTest
+# NATS To JMS Bridge
+NATS o JMS <TAB> f <TAB> nat Bar <TAB> n <TAB> natsBarSubject <TAB> natsTest    <TAB> jms Foo  <TAB> j <TAB> queue/Foo <TAB> activeMQTest
 ```
 
-1. Lines that begin with # are comments 
+1. Lines that begin with # are comments
 2. There will be exactly 10 entries per line that denote the config of two buses (`MessageBus`) that make up a bridge (`MessageBridge`)
 3. Each line that is not a comment refers to a bridge (`MessageBridge`)
 4. White space around the `<TAB>`s (refers to `\t`, i.e., `0x9`) is ignored
@@ -543,7 +543,7 @@ BRIDGE_NAME <TAB> BRIDGE_TYPE <TAB> SOURCE_NAME <TAB> SOURCE_TYPE <TAB> SOURCE_S
 
 #### Position numbers and allowed values for CSV file
 
-```kotlin 
+```kotlin
     private const val BRIDGE_NAME = 0
     private const val BRIDGE_TYPE = 1
     private const val SOURCE_NAME = 2
@@ -574,7 +574,7 @@ BRIDGE_NAME <TAB> BRIDGE_TYPE <TAB> SOURCE_NAME <TAB> SOURCE_TYPE <TAB> SOURCE_S
 ```
 
 #### Parsing a single TSV Line
-```kotlin 
+```kotlin
 
     fun parseLine(line: String, clusterConfigs: Map<String, Cluster>, delim: String="\t"): MessageBridge {
         val parts = line.split(delim).map{it.trim()}.filter { !it.isBlank() }.toList()

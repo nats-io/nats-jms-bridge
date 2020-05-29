@@ -10,5 +10,5 @@ build/
 /keys/public_key.pem
 /data
 /admin
-/config
+/config/
 /out

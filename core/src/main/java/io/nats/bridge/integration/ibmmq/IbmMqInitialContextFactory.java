@@ -11,7 +11,9 @@ import javax.jms.JMSException;
 import javax.naming.*;
 import javax.naming.spi.InitialContextFactory;
 import java.net.URI;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 
 public class IbmMqInitialContextFactory implements InitialContextFactory {
 
@@ -38,8 +40,8 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
             final int port = uri.getPort();
             final String channel = getStringProp(jndiProperties, CHANNEL);
             final String queueManagerName = getStringProp(jndiProperties, QUEUE_MANAGER);
-            final String queueModelName = getStringProp(jndiProperties, QUEUE_MODEL_NAME);
-            final String queueModelPrefix = getStringProp(jndiProperties, QUEUE_MODEL_PREFIX);
+            final String queueModelName = getOptionalStringProp(jndiProperties, QUEUE_MODEL_NAME);
+            final String queueModelPrefix = getOptionalStringProp(jndiProperties, QUEUE_MODEL_PREFIX);
 
 
             connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
@@ -48,8 +50,12 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
             connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
             connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
             connectionFactory.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
-            connectionFactory.setStringProperty(WMQConstants.WMQ_TEMPORARY_MODEL, queueModelName);
-            connectionFactory.setStringProperty(WMQConstants.WMQ_TEMP_Q_PREFIX, queueModelPrefix);
+
+            if (queueModelName != null)
+                connectionFactory.setStringProperty(WMQConstants.WMQ_TEMPORARY_MODEL, queueModelName);
+
+            if (queueModelPrefix != null)
+                connectionFactory.setStringProperty(WMQConstants.WMQ_TEMP_Q_PREFIX, queueModelPrefix);
 
             contextMap.put(CONNECTION_FACTORY, new MQConnectionFactory(connectionFactory));
 
@@ -59,6 +65,9 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
         }
     }
 
+    private String getOptionalStringProp(Hashtable<?, ?> jndiProperties, String key) {
+        return (String) jndiProperties.get(key);
+    }
 
     private String getStringProp(Hashtable<?, ?> jndiProperties, String key) {
         if (!jndiProperties.containsKey(key)) throw new IllegalStateException("REQ KEY IS MISSING KEY " + key);
