@@ -1,11 +1,11 @@
 version: '3'
 services:
-  #nats-server:
-  #  build:
-  #    context: ./bridge-nats-server
-  #  ports:
-  #    - "4222:4222"
-  #    - "8222:8222"
+  nats-server:
+    build:
+      context: ./bridge-nats-server
+    ports:
+      - "4222:4222"
+      - "8222:8222"
   ibm-mq:
     build:
       context: ./bridge-ibmmq
