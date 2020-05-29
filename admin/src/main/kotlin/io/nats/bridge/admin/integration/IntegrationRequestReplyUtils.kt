@@ -10,6 +10,7 @@ import io.nats.bridge.admin.models.logins.TokenResponse
 import io.nats.bridge.admin.repos.ConfigRepoFromFiles
 import io.nats.bridge.admin.runner.support.impl.MessageBridgeLoaderImpl
 import io.nats.bridge.admin.util.ObjectMapperUtils
+import io.nats.bridge.admin.util.getLogger
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -17,6 +18,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
@@ -36,7 +38,6 @@ class IntegrationRequestReplyUtils {
     var token: String? = null
 
     val loader = MessageBridgeLoaderImpl(ConfigRepoFromFiles(configFile = File(Constants.natsBridgeConfigFileName)))
-
 
     fun adminUser() = conf.logins.find { it.subject == "admin" }!!
 

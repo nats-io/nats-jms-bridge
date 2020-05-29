@@ -1,28 +1,34 @@
 package io.nats.bridge.admin.runner.support.impl
 
+
 import io.micrometer.core.instrument.MeterRegistry
 import io.nats.bridge.admin.ConfigRepo
 import io.nats.bridge.admin.models.bridges.*
 import io.nats.bridge.admin.runner.support.BridgeConfig
 import io.nats.bridge.admin.runner.support.MessageBridgeLoader
+import io.nats.bridge.admin.util.getLogger
 import io.nats.bridge.jms.support.JMSMessageBusBuilder
 import io.nats.bridge.nats.support.NatsMessageBusBuilder
 import io.nats.bridge.support.MessageBridgeBuilder
 import io.nats.bridge.support.MessageBusBuilder
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 
-
 class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsRegistry: MeterRegistry? = null) : MessageBridgeLoader {
 
-
     override fun loadBridgeConfigs() = doLoadMessageBridge(repo.readConfig())
+
+    private val logger = LoggerFactory.getLogger(this.javaClass)
 
     data class Details(val bridge: MessageBridgeInfo, val sourceCluster: Cluster, val destinationCluster: Cluster)
 
     private fun doLoadMessageBridge(config: NatsBridgeConfig) = config.bridges.map { bridge ->
 
-
+        logger.info("Hello Rick")
+        logger.trace("Hello Cowboy")
+        getLogger("infolevel").info("Hello My Friend Rick")
+        getLogger("tracelevel").trace("Hello My Friend Robert")
         val details = extractDetails(bridge, config)
 
         val list = if ((bridge.workers == 1 || bridge.workers == 0) && (bridge.tasks==1 || bridge.tasks==0)) {
@@ -128,6 +134,5 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
 
         return builder
     }
-
 
 }

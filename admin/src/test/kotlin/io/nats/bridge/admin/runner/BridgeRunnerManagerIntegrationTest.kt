@@ -2,6 +2,8 @@ package io.nats.bridge.admin.runner
 
 import io.nats.bridge.admin.ConfigRepo
 import io.nats.bridge.admin.repos.ConfigRepoFromFiles
+import io.nats.bridge.admin.util.logger.Logging
+import io.nats.bridge.admin.util.logger.LoggingImp
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
