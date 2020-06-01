@@ -4,12 +4,10 @@ import io.nats.bridge.MessageBus;
 import io.nats.bridge.TimeSource;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
-import io.nats.bridge.metrics.Counter;
-import io.nats.bridge.metrics.Metrics;
-import io.nats.bridge.metrics.MetricsProcessor;
-import io.nats.bridge.metrics.TimeTracker;
+import io.nats.bridge.metrics.*;
 import io.nats.bridge.util.ExceptionHandler;
 import io.nats.client.Connection;
+import io.nats.client.Statistics;
 import io.nats.client.Subscription;
 
 import java.nio.charset.StandardCharsets;
@@ -45,6 +43,13 @@ public class NatsMessageBus implements MessageBus {
     private final Counter countRequestResponses;
     private final TimeTracker timerRequestResponse;
     private final TimeTracker timerReceiveReply;
+    private final Duration durationConnectionsMetrics;
+    private final Gauge countInMsgs;
+    private final Gauge countOutMsgs;
+    private final Gauge countInBytes;
+    private final Gauge countOutBytes;
+    private final Gauge countReconnects;
+    private final Gauge countDropped;
     private boolean stopped = false;
 
 
@@ -52,6 +57,9 @@ public class NatsMessageBus implements MessageBus {
     private final MetricsProcessor metricsProcessor;
     private final TimeSource timeSource;
     private final String name;
+
+    private long lastConnectionMetricsCollection;
+    private int checkEvery = 0;
 
     public NatsMessageBus(final String name, final String subject, final Connection connection,
                           final String queueGroup,
@@ -61,10 +69,12 @@ public class NatsMessageBus implements MessageBus {
                           final Queue<NatsReply> replyQueueNotDone,
                           final TimeSource timeSource,
                           final Metrics metrics,
-                          final MetricsProcessor metricsProcessor) {
+                          final MetricsProcessor metricsProcessor,
+                          final Duration durationConnectionsMetrics) {
 
         //ystem.out.println("SUBJECT" + subject);
         this.connection = connection;
+        this.durationConnectionsMetrics = durationConnectionsMetrics;
         this.subject = subject;
         //this.pool = pool;
         this.subscription = connection.subscribe(subject, queueGroup);
@@ -86,6 +96,13 @@ public class NatsMessageBus implements MessageBus {
         countReceivedReply = metrics.createCounter("received_reply_count", tags);
         timerReceiveReply = metrics.createTimeTracker("receive_reply_timing", tags);
         countReceivedReplyErrors = metrics.createCounter("received_reply_count_errors", tags);
+        countInMsgs = metrics.createGauge("conn_get_in_msgs_count");
+        countOutMsgs = metrics.createGauge("conn_get_out_msgs_count");
+        countInBytes = metrics.createGauge("conn_get_in_bytes");
+        countOutBytes = metrics.createGauge("conn_get_out_bytes");
+        countReconnects = metrics.createGauge("conn_reconnects");
+        countDropped = metrics.createGauge("conn_dropped_count");
+
         replyToQueue = new LinkedTransferQueue<>();
 
     }
@@ -182,6 +199,20 @@ public class NatsMessageBus implements MessageBus {
 
     @Override
     public int process() {
+
+        checkEvery++;
+        if (checkEvery % 10 == 0) {
+            if (timeSource.getTime() - lastConnectionMetricsCollection > durationConnectionsMetrics.toMillis()) {
+                lastConnectionMetricsCollection = timeSource.getTime();
+                final Statistics statistics = connection.getStatistics();
+                countDropped.recordLevel(statistics.getDroppedCount());
+                countInBytes.recordLevel(statistics.getInBytes());
+                countOutBytes.recordLevel(statistics.getOutBytes());
+                countOutMsgs.recordLevel(statistics.getOutMsgs());
+                countInMsgs.recordLevel(statistics.getInMsgs());
+                countReconnects.recordLevel(statistics.getReconnects());
+            }
+        }
         metricsProcessor.process();
         int count = processReplyToQueue();
         return count + processResponses();

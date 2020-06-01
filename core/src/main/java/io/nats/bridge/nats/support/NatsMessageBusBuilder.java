@@ -38,6 +38,15 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
     private Metrics metrics;
     private MetricsProcessor metricsProcessor;
 
+    public static final String PFX_TLS = "io.nats.client.tls.";
+    public static final String JSSL_ENABLE =   PFX_TLS + "jssl.enable";
+    public static final String JSSL_TRUST_STORE_PATH =   PFX_TLS + "truststore.path";
+    public static final String JSSL_KEY_STORE_PATH =   PFX_TLS + "keystore.path";
+    public static final String JSSL_ALGORITHM =   PFX_TLS + "algorithm";
+    public static final String JSSL_STORE_PWD =   PFX_TLS + "store.password";
+    public static final String JSSL_TRUST_PWD =   PFX_TLS + "trust.password";
+
+
 
     private java.util.Queue<NatsMessageBus.NatsReply> replyQueue;
     private java.util.Queue<NatsMessageBus.NatsReply> replyQueueNotDone;
@@ -46,7 +55,17 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
     private SSLContext sslContext;
     private boolean useTls;
 
+
+
+    private Duration durationConnectionsMetrics;
+
     public boolean isUseTls() {
+
+        if (getOptionProperties().size() > 0) {
+            if (getOptionProperties().get(JSSL_ENABLE) != null) {
+                useTls = Boolean.parseBoolean(getOptionProperties().getProperty(JSSL_ENABLE, "false"));
+            }
+        }
         return useTls;
     }
 
@@ -64,7 +83,28 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
     public SslContextBuilder getSslContextBuilder() {
 
         if (sslContextBuilder == null) {
+
             sslContextBuilder = new SslContextBuilder();
+
+            if(getOptionProperties().getProperty(JSSL_KEY_STORE_PATH) != null) {
+                sslContextBuilder.withKeystorePath(getOptionProperties().getProperty(JSSL_KEY_STORE_PATH));
+            }
+
+            if(getOptionProperties().getProperty(JSSL_TRUST_STORE_PATH) != null) {
+                sslContextBuilder.withTruststorePath(getOptionProperties().getProperty(JSSL_TRUST_STORE_PATH));
+            }
+
+            if(getOptionProperties().getProperty(JSSL_TRUST_PWD) != null) {
+                sslContextBuilder.withStorePassword(getOptionProperties().getProperty(JSSL_TRUST_PWD));
+            }
+
+            if(getOptionProperties().getProperty(JSSL_STORE_PWD) != null) {
+                sslContextBuilder.withKeyPassword(getOptionProperties().getProperty(JSSL_STORE_PWD));
+            }
+
+            if(getOptionProperties().getProperty(JSSL_ALGORITHM) != null) {
+                sslContextBuilder.withAlgorithm(getOptionProperties().getProperty(JSSL_ALGORITHM));
+            }
         }
         return sslContextBuilder;
     }
@@ -276,6 +316,12 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
         return options;
     }
 
+
+
+
+
+
+
     public Options.Builder getOptionsBuilder() {
         if (optionsBuilder == null) {
             if (optionProperties == null) {
@@ -324,11 +370,23 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
         return this;
     }
 
+    public Duration getDurationConnectionsMetrics() {
+        if (durationConnectionsMetrics == null) {
+            durationConnectionsMetrics = Duration.ofSeconds(30);
+        }
+        return durationConnectionsMetrics;
+    }
+
+    public NatsMessageBusBuilder withDurationConnectionsMetrics(Duration durationConnectionsMetrics) {
+        this.durationConnectionsMetrics = durationConnectionsMetrics;
+        return this;
+    }
+
     public NatsMessageBus build() {
         return new NatsMessageBus(getName(), getSubject(),
                 getConnection(),
                 getQueueGroup(), getTryHandler(), getReplyQueue(),
                 getReplyQueueNotDone(), getTimeSource(),
-                getMetrics(), getMetricsProcessor());
+                getMetrics(), getMetricsProcessor(), getDurationConnectionsMetrics());
     }
 }

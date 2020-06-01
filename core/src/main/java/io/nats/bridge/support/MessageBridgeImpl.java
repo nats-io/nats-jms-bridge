@@ -16,8 +16,11 @@ package io.nats.bridge.support;
 
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
+import io.nats.bridge.jms.support.JMSMessageBusBuilder;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.metrics.Metrics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -38,6 +41,8 @@ public class MessageBridgeImpl implements MessageBridge {
     private final MessageBus destinationBus;
     private final boolean requestReply;
     private final String name;
+
+    private Logger runtimeLogger  = LoggerFactory.getLogger("runtime");
 
     private final Queue<MessageBridgeRequestReply> replyMessageQueue;
 
@@ -69,8 +74,11 @@ public class MessageBridgeImpl implements MessageBridge {
             if (receiveMessageFromSourceOption.isPresent()) count++;
 
             receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
-                        //ystem.out.println("GOT MESSAGE " + receiveMessageFromSource.bodyAsString());
                         destinationBus.request(receiveMessageFromSource, replyMessage -> {
+                            if (runtimeLogger.isTraceEnabled()) {
+                                runtimeLogger.info("The bridge {} got reply message {} \n for request message {} ",
+                                        name, replyMessage.bodyAsString(), receiveMessageFromSource);
+                            }
                             replyMessageQueue.add(new MessageBridgeRequestReply(receiveMessageFromSource, replyMessage));
                         });
                     }
@@ -87,6 +95,9 @@ public class MessageBridgeImpl implements MessageBridge {
     @Override
     public int process(final Duration duration) {
         final Optional<Message> receiveMessageFromSourceOption = sourceBus.receive(duration);
+        if (receiveMessageFromSourceOption.isPresent() && runtimeLogger.isTraceEnabled()) {
+            runtimeLogger.trace("The {} bridge received message with body {}", name(), receiveMessageFromSourceOption.get().bodyAsString());
+        }
         return doProcess(receiveMessageFromSourceOption);
     }
 

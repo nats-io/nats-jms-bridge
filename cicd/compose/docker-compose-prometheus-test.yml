@@ -1,10 +1,8 @@
-# Test that uses docker image of IBM MQ that sets every setting different than the default.
-# This is to test passing IBM MQ params in the Bridge admin.
 version: '3'
 services:
   nats-server:
     build:
-      context: ../bridge-nats-server-tls
+      context: ../bridge-nats-server
     ports:
       - "4222:4222"
       - "8222:8222"
@@ -17,10 +15,17 @@ services:
       - MQ_APP_PASSWORD=passw0rd
     ports:
       - "1414:1414"
-      - "8443:9443"
+      - "9443:9443"
   active-mq:
     build:
       context: ../bridge-activemq
     ports:
       - "8161:8161"
       - "61616:61616"
+  prometheus:
+    build:
+      context: ../prometheus
+    environment:
+      - TARGET=host.docker.internal
+    ports:
+      - "9090:9090"
