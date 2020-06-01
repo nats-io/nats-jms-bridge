@@ -117,7 +117,7 @@ tasks.getByName<CreateStartScripts>("startScripts") {
 }
 
 
-version = "0.6.0-beta2"
+version = "0.7.0-beta3"
 
 tasks {
 
@@ -189,7 +189,7 @@ tasks {
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.6.0-beta2")
+        implementation("io.nats.bridge:nats-jms-bridge:0.7.0-beta3")
 
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
