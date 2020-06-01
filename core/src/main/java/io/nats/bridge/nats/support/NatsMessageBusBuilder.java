@@ -46,6 +46,10 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
     private SSLContext sslContext;
     private boolean useTls;
 
+
+
+    private Duration durationConnectionsMetrics;
+
     public boolean isUseTls() {
         return useTls;
     }
@@ -324,11 +328,23 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
         return this;
     }
 
+    public Duration getDurationConnectionsMetrics() {
+        if (durationConnectionsMetrics == null) {
+            durationConnectionsMetrics = Duration.ofSeconds(30);
+        }
+        return durationConnectionsMetrics;
+    }
+
+    public NatsMessageBusBuilder withDurationConnectionsMetrics(Duration durationConnectionsMetrics) {
+        this.durationConnectionsMetrics = durationConnectionsMetrics;
+        return this;
+    }
+
     public NatsMessageBus build() {
         return new NatsMessageBus(getName(), getSubject(),
                 getConnection(),
                 getQueueGroup(), getTryHandler(), getReplyQueue(),
                 getReplyQueueNotDone(), getTimeSource(),
-                getMetrics(), getMetricsProcessor());
+                getMetrics(), getMetricsProcessor(), getDurationConnectionsMetrics());
     }
 }
