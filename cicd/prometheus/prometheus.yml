@@ -27,4 +27,4 @@ scrape_configs:
     # scheme defaults to 'http'.
 
     static_configs:
-    - targets: ['bridge-admin:8080']
+    - targets: ['host.docker.internal:8080']
