@@ -322,10 +322,10 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
             responseDestination = exceptionHandler.tryReturnOrRethrow(() -> {
 
                         if ((getResponseDestinationName().equals("TEMP_QUEUE"))) {
-                            System.out.println("Creating temp queue ");
+                            logger.info("Creating temp queue ");
                             return getSession().createTemporaryQueue();
                         } else {
-                            System.out.println("Creating response queue " + getResponseDestinationName());
+                            logger.info("Creating response queue " + getResponseDestinationName());
                             return getSession().createQueue(getResponseDestinationName());
                         }
 

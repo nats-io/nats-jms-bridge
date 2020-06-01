@@ -17,32 +17,56 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * Represents a message in the NATS MQ/JMS Bridge
+ */
 public interface Message {
 
 
     String NO_TYPE = "NO_TYPE";
 
+    /**
+     * Timestamp if set this value will not be -1.
+     * If set, then there will be headers sent.
+     * @return timestamp.
+     */
     default long timestamp() {
         return -1L;
     }
 
-    //TTL plus timestamp
+    /** TTL plus timestamp
+     *
+     * @return expirationTime
+     */
     default long expirationTime() {
         return -1L;
     }
 
-    //Delivery time is not instant
+
+    /**
+     * Delivery time is not instant
+     * @return deliveryTime
+     */
     default long deliveryTime() {
         return -1L;
     }
 
+    /**
+     * Delivery Mode in the JMS sense.
+     * @return deliveryMode
+     */
     default int deliveryMode() {
         return -1;
     }
 
+    /**
+     * The type of message in the JMS sense.
+     * @return type
+     */
     default String type() {
         return NO_TYPE;
     }
+
 
     default boolean redelivered() {
         return false;

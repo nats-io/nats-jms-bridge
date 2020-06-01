@@ -64,11 +64,11 @@ distributions {
             from("bin") {
                 into("bin")
             }
-            from("sampleConf") {
-                include("**/**")
-                into("config") {
-                    include("**/**")
-                }
+            from("sampleConf/") {
+                into("sampleConf/")
+            }
+            from("sampleConf/logback.xml") {
+                into("config/")
             }
         }
     }
@@ -110,9 +110,18 @@ tasks.getByName<Jar>("jar") {
     enabled = true
 }
 
+tasks.getByName<CreateStartScripts>("startScripts") {
+
+    val gen = unixStartScriptGenerator as org.gradle.api.internal.plugins.UnixStartScriptGenerator
+    gen.template = resources.text.fromFile(file("src/main/bash/unix.txt"))
+}
+
+
 version = "0.6.0-beta2"
 
 tasks {
+
+
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "1.8"
