@@ -23,6 +23,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
     private val startupLogs = getLogger("startup")
 
 
+
     data class Details(val bridge: MessageBridgeInfo, val sourceCluster: Cluster, val destinationCluster: Cluster)
 
     private fun doLoadMessageBridge(config: NatsBridgeConfig) = config.bridges.map { bridge ->
