@@ -23,6 +23,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
     private val startupLogs = getLogger("startup")
 
 
+
     data class Details(val bridge: MessageBridgeInfo, val sourceCluster: Cluster, val destinationCluster: Cluster)
 
     private fun doLoadMessageBridge(config: NatsBridgeConfig) = config.bridges.map { bridge ->
@@ -33,6 +34,8 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
 
         startupLogs.info("Bridge Details = {}", details)
 
+        val subscriptionName:String = UUID.randomUUID().toString()
+
         val list = if ((bridge.workers == 1 || bridge.workers == 0) && (bridge.tasks==1 || bridge.tasks==0)) {
             val bridgeBuilder = MessageBridgeBuilder()
             configureBridge(bridgeBuilder, details)
@@ -41,7 +44,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
             (1..bridge.workers!!).map { workerNum ->
                 (1..bridge.tasks!!).map { taskNum ->
                     val bridgeBuilder = MessageBridgeBuilder()
-                    configureBridge(bridgeBuilder, details, "_w_${workerNum}_t_${taskNum}")
+                    configureBridge(bridgeBuilder, details, "_w_${workerNum}_t_${taskNum}", subscriptionName)
                     bridgeBuilder
                 }
             }.flatten()
@@ -49,10 +52,12 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
         BridgeConfig(bridge.name, list, bridge)
     }
 
-    private fun configureBridge(b: MessageBridgeBuilder, details: Details, postFix: String = "") {
+    private fun configureBridge(b: MessageBridgeBuilder, details: Details, postFix: String = "", subscriptionName:String="") {
 
-        val dst = createMessageBusBuilder(details.bridge.destination, details.destinationCluster, details.bridge)
-        val src = createMessageBusBuilder(details.bridge.source, details.sourceCluster, details.bridge)
+
+
+        val dst = createMessageBusBuilder(details.bridge.destination, details.destinationCluster, details.bridge, subscriptionName)
+        val src = createMessageBusBuilder(details.bridge.source, details.sourceCluster, details.bridge, subscriptionName)
 
         b.withDestinationBusBuilder(dst)
                 .withSourceBusBuilder(src)
@@ -79,10 +84,10 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
                             ?: error("${bridge.destination.clusterName} not found"))
 
 
-    private fun createMessageBusBuilder(busInfo: MessageBusInfo, cluster: Cluster, bridge: MessageBridgeInfo): MessageBusBuilder? {
+    private fun createMessageBusBuilder(busInfo: MessageBusInfo, cluster: Cluster, bridge: MessageBridgeInfo, subscriptionName: String): MessageBusBuilder? {
         return if (busInfo.busType == BusType.NATS) {
             val natsClusterConfig = cluster.properties as NatsClusterConfig
-            configureNatsBusBuilder(busInfo, bridge, natsClusterConfig)
+            configureNatsBusBuilder(busInfo, bridge, natsClusterConfig, subscriptionName)
         } else {
             val jmsClusterConfig = cluster.properties as JmsClusterConfig
             configureJmsBusBuilder(busInfo, bridge, jmsClusterConfig)
@@ -121,13 +126,19 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
         return builder
     }
 
-    private fun configureNatsBusBuilder(busInfo: MessageBusInfo, bridge: MessageBridgeInfo, clusterConfig: NatsClusterConfig): MessageBusBuilder? {
+    private fun configureNatsBusBuilder(busInfo: MessageBusInfo, bridge: MessageBridgeInfo, clusterConfig: NatsClusterConfig, subscriptionName: String): MessageBusBuilder? {
         val builder = NatsMessageBusBuilder.builder()
                 .withSubject(busInfo.subject).withName(busInfo.name)
 
         if (metricsRegistry != null)
             builder.withMetricsProcessor(SpringMetricsProcessor(metricsRegistry, builder.metrics, 10,
                     Duration.ofSeconds(30), builder.timeSource, { builder.name }))
+
+        if (busInfo.subscriptionGroup != null && busInfo.subscriptionGroup.isNotEmpty()) {
+            builder.withQueueGroup(subscriptionName)
+        }else {
+            builder.withQueueGroup(subscriptionName)
+        }
 
         val port = clusterConfig.port ?: 4222
         if (clusterConfig.host != null && port > 0) {

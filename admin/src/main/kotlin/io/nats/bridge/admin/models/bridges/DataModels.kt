@@ -22,6 +22,7 @@ data class NatsBridgeConfig(val name: String,
  * A message bus has a subject which can be Nats subject or a JMS destination.
  */
 data class MessageBusInfo(val name: String, val busType: BusType, val subject: String, val responseSubject: String?=null,
+                          val subscriptionGroup:String?="",
                           val clusterName: String)
 
 /**
