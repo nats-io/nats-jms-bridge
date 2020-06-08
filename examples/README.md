@@ -152,9 +152,9 @@ clusters:
 
 ```
 
-# Example 2: JMS to NATS 
+# Example 2: JMS to NATS Request/Reply from JMS Client to NATS server 
 
-There is not a lot new here. It is very similar to the first example but in the opposite direciton. 
+There is not a lot new here. It is very similar to the first example but in the opposite direction. 
 
 
 ## SimpleNatsServer.java
