@@ -1,4 +1,4 @@
-package io.nats.bridge.examples.jms.nats2jms;
+package io.nats.bridge.examples.ibmmq.nats2mq;
 
 import io.nats.client.Connection;
 import io.nats.client.Message;
@@ -16,7 +16,7 @@ public class SimpleNatsClient {
             final Options.Builder builder = new Options.Builder().server("nats://localhost:4222");
             final Connection connect = Nats.connect(builder.build());
 
-            final Message replyFromJmsServer = connect.request("request_reply_jms",
+            final Message replyFromJmsServer = connect.request("request_reply_ibmmq",
                     "Hello World!".getBytes(StandardCharsets.UTF_8), Duration.ofSeconds(20));
 
             if (replyFromJmsServer != null) {

@@ -7,7 +7,7 @@ Included are simple examples to run the message bridge between JMS/IBM MQ and NA
 # Example 1: NATS to JMS Request/Reply Bridge
 
 
-In the package `io.nats.bridge.examples.nats2jms` there are three files:
+In the package `io.nats.bridge.examples.jms.jms2nats.nats2jms` there are three files:
 
 * `nats-bridge.yaml` sample config file 
 * `SimpleJmsServer.java` simple JMS example that sends a response message.
@@ -174,7 +174,7 @@ In the package `io.nats.bridge.examples.jms2Nats` there are three files:
 
 
 ```java
-package io.nats.bridge.examples.jms2nats;
+package io.nats.bridge.examples.jms.jms2nats;
 
 import io.nats.client.*;
 
@@ -225,7 +225,7 @@ This example specifies a correlation ID and passes the response queue to the JMS
 
 ## SimpleJmsClient.java - create message with correlation id, and response queue as the reply destination then send
 ```java 
-package io.nats.bridge.examples.jms2nats;
+package io.nats.bridge.examples.jms.jms2nats;
 
 import io.nats.bridge.examples.JmsBuildUtils;
 

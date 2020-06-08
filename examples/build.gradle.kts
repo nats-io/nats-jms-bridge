@@ -27,6 +27,9 @@ dependencies {
     // Use JUnit test framework
     testImplementation("junit:junit:4.12")
 
+    //
+    implementation("com.ibm.mq:com.ibm.mq.allclient:9.1.5.0")
+
 
     implementation( group= "io.nats", name= "jnats", version= "2.6.7")
     implementation( group= "org.apache.activemq", name= "artemis-jms-client-all", version= "2.11.0")

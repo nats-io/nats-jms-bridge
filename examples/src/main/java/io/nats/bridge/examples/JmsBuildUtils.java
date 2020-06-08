@@ -31,7 +31,6 @@ public class JmsBuildUtils {
 
     private Destination responseDestination;
     private Hashtable<String, Object> jndiProperties = new Hashtable<>();
-    private boolean ibmMQ = false;
     private String responseDestinationName = "TEMP_QUEUE";
 
     private Supplier<MessageProducer> producerSupplier;
@@ -276,11 +275,7 @@ public class JmsBuildUtils {
 
     public Destination getDestination() {
         if (destination == null) {
-
             try {
-                if (!ibmMQ) {
-                    destination = (Destination) getContext().lookup(getDestinationName());
-                } else
                     destination = getSessionCreator().apply(getConnection()).createQueue(getDestinationName());
             } catch (Exception e) {
                 throw new IllegalStateException(e);
@@ -378,29 +373,6 @@ public class JmsBuildUtils {
     }
 
 
-    public JmsBuildUtils useIBMMQ() {
-        ibmMQ = true;
-
-
-        final String queueManager = getIbmMQQueueManager();
-        final String channel = getIbmMQChannel();
-
-
-        jndiProperties.clear();
-        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"));
-        jndiProperties.put("nats.ibm.mq.host", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414"));
-        jndiProperties.put("nats.ibm.mq.channel", channel);
-        jndiProperties.put("nats.ibm.mq.queueManager", queueManager);
-
-        if (isRequestReply()) {
-            final String queueModelName = getIbmMQQueueModelName();
-            final String queueModelPrefix = getIbmMQQueueModelPrefix();
-            jndiProperties.put("nats.ibm.mq.queueModelName", queueModelName);
-            jndiProperties.put("nats.ibm.mq.queueModelPrefix", queueModelPrefix);
-        }
-
-        return this;
-    }
 
     public Hashtable<String, Object> getJndiProperties() {
         if (jndiProperties.size() == 0) {

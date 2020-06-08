@@ -1,5 +1,5 @@
 ---
-name: "Starter Config"
+name: "JMS to NATS Request/Reply Example"
 dateTime:
 - 2020
 - 4
