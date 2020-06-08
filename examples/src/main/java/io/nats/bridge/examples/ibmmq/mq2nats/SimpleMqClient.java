@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.UUID;
 
-public class SimpleJmsClient {
+public class SimpleMqClient {
 
     public static void main (String[] args) {
         try {
@@ -16,11 +16,7 @@ public class SimpleJmsClient {
 
             final JmsBuildUtils jmsBuildUtils = new JmsBuildUtils()
                     .withConnectionFactory(IbmMqUtils.createJmsConnectionFactoryWithQModel());
-
-
             final Session session = jmsBuildUtils.getSession();
-
-
             jmsBuildUtils.withDestination(session.createQueue("DEV.QUEUE.2"));
 
 
