@@ -32,7 +32,7 @@ class AdminControllerTest(@Autowired wac: WebApplicationContext
     }
 
 
-    @Test
+    //@Test
     fun ping() {
         //val valuesJson = AdminController::class.java.getResource("/LookupValues.json").readText()
 

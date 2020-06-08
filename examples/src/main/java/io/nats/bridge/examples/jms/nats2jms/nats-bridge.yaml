@@ -1,0 +1,46 @@
+---
+name: "Example NATS to JMS Request/Reply"
+dateTime:
+- 2020
+- 4
+- 30
+- 0
+- 53
+- 50
+- 423615000
+bridges:
+- name: "nats2JMS"
+  bridgeType: "REQUEST_REPLY"
+  source:
+    name: "nats"
+    busType: "NATS"
+    subject: "request_reply_jms"
+    clusterName: "natsCluster"
+  destination:
+    name: "activeMQ"
+    busType: "JMS"
+    subject: "dynamicQueues/requests"
+    clusterName: "jmsCluster"
+  copyHeaders: false
+  workers: 5
+  tasks : 2
+
+clusters:
+  jmsCluster:
+    name: "jmsCluster"
+    properties: !<jms>
+      config:
+        java.naming.factory.initial: "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory"
+        connectionFactory.ConnectionFactory: "tcp://localhost:61616"
+        queue.queue/testQueue: "queue.queue/testQueue=testQueue"
+      jmsDestinationType: "QUEUE"
+  natsCluster:
+    name: "natsCluster"
+    properties: !<nats>
+      host: "localhost"
+      port: 4222
+      servers: []
+      config:
+        io.nats.client.reconnect.wait: 3000
+        io.nats.client.reconnect.max: 10
+        io.nats.client.timeout: 4000

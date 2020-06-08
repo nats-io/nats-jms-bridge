@@ -10,6 +10,7 @@ import io.nats.bridge.admin.models.logins.TokenResponse
 import io.nats.bridge.admin.repos.ConfigRepoFromFiles
 import io.nats.bridge.admin.runner.support.impl.MessageBridgeLoaderImpl
 import io.nats.bridge.admin.util.ObjectMapperUtils
+import io.nats.bridge.admin.util.getLogger
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -17,6 +18,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
@@ -36,7 +38,6 @@ class IntegrationRequestReplyUtils {
     var token: String? = null
 
     val loader = MessageBridgeLoaderImpl(ConfigRepoFromFiles(configFile = File(Constants.natsBridgeConfigFileName)))
-
 
     fun adminUser() = conf.logins.find { it.subject == "admin" }!!
 
@@ -138,10 +139,10 @@ class IntegrationRequestReplyUtils {
         val startTime = System.currentTimeMillis()
 
         var totalSent = 0
-        for (a in 0..49) {
+        for (a in 0..9) {
             println("Run $a")
-            val latch = CountDownLatch(50)
-            for (x in 0..49) {
+            val latch = CountDownLatch(10)
+            for (x in 0..9) {
                 totalSent++
                 println("Call $x of run $a")
 
@@ -165,7 +166,7 @@ class IntegrationRequestReplyUtils {
             }
 
             for (x in 0..1000) {
-                if (latch.await(10, TimeUnit.MILLISECONDS)) {
+                if (latch.await(5, TimeUnit.MILLISECONDS)) {
                     break
                 }
                 clientBus.process()

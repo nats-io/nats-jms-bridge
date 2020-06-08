@@ -71,8 +71,11 @@ public class JMSMessageBus implements MessageBus {
     private FunctionWithException<Message, javax.jms.Message> bridgeMessageConverter;
 
     public JMSMessageBus(final String name, final Destination destination, final Session session,
-                         final Connection connection, final Destination responseDestination,
-                         final MessageConsumer responseConsumer, final TimeSource timeSource, final Metrics metrics,
+                         final Connection connection,
+                         final Destination responseDestination,
+                         final MessageConsumer responseConsumer,
+                         final TimeSource timeSource,
+                         final Metrics metrics,
                          final Supplier<MessageProducer> producerSupplier,
                          final Supplier<MessageConsumer> consumerSupplier,
                          final MetricsProcessor metricsProcessor,
@@ -308,7 +311,8 @@ public class JMSMessageBus implements MessageBus {
                     count++;
                     final byte[] messageBody = reply.getReply().getBodyBytes();
                     final String correlationId = reply.getCorrelationID();
-                    final MessageProducer replyProducer = session.createProducer(reply.getJmsReplyTo());
+                    final Destination jmsReplyTo = reply.getJmsReplyTo();
+                    final MessageProducer replyProducer = session.createProducer(jmsReplyTo);
                     final BytesMessage jmsReplyMessage = session.createBytesMessage();
                     jmsReplyMessage.writeBytes(messageBody);
                     timerReceiveReply.recordTiming(timeSource.getTime() - reply.getSentTime());
