@@ -877,3 +877,546 @@ public class IbmMqUtils {
 }
 
 ```
+
+
+_____
+
+
+
+# Example 5: NATS to IBM MQ Request/Reply Bridge with NO QModel
+
+
+In the package `io.nats.bridge.examples.ibmmq.noqmodel.nats2mq2` there are four files:
+
+* `nats-bridge.yaml` sample config file for NATS to IBM MQ
+* `ibm.mqsc` IBM MQ Config file that configures the Queues and the Queue model 
+* `SimpleMqServerNoQModel.java` simple IBM MQ example that sends a response message.
+* `SimpleNatsClient.java` simple NATS example that sends a NATS request. 
+
+
+
+## SimpleMqServerNoQModel.java Walkthrough 
+
+`SimpleMqServerNoQModel` create a `MessageConsumer` to listen for messages and respond. 
+
+#### SimpleMqServerNoQModel.java - Create the `MessageConsumer` to listen for messages and respond.
+
+```java 
+
+            final JmsBuildUtils jmsBuildUtils = new JmsBuildUtils()
+                    .withConnectionFactory(IbmMqUtils.createJmsConnectionFactoryWithNoQModel());
+
+
+            final Session session = jmsBuildUtils.getSession();
+
+
+            jmsBuildUtils.withDestination(session.createQueue("DEV.QUEUE.1"));
+
+
+            final MessageConsumer messageConsumer = jmsBuildUtils.getConsumerSupplier().get();
+
+```
+
+
+Notice to create the builder, the `SimpleMqServerNoQModel` creates an IBM JMSConnectionFactory as follows and passed it with `withConnectionFactory`.
+
+This is because IBM MQ's JMS support does not support remote clients with JNDI like most JMS remote clients do.
+
+Also, notice that a QModel is not configured.  
+
+
+#### IbmMqUtils - create JMS Connection Factory with no QModel
+
+```java
+
+package io.nats.bridge.examples.ibmmq;
+
+import com.ibm.msg.client.jms.JmsConnectionFactory;
+import com.ibm.msg.client.jms.JmsFactoryFactory;
+import com.ibm.msg.client.wmq.WMQConstants;
+
+import javax.jms.JMSException;
+
+public class IbmMqUtils {
+ 
+    //...
+
+    public static JmsConnectionFactory createJmsConnectionFactoryWithNoQModel() throws JMSException {
+        final JmsFactoryFactory factoryFactory = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
+        final JmsConnectionFactory connectionFactory = factoryFactory.createConnectionFactory();
+
+
+        final String HOST = "localhost";
+        final int PORT = 1414;
+        final String QUEUE_MANAGER = "QM1";
+        final String CHANNEL = "DEV.APP.SVRCONN";
+        final String USER = "app";
+        final String PASSWORD = "passw0rd";
+
+
+        connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, HOST);
+        connectionFactory.setIntProperty(WMQConstants.WMQ_PORT, PORT);
+        connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, CHANNEL);
+        connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
+        connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, QUEUE_MANAGER);
+        connectionFactory.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
+        connectionFactory.setStringProperty(WMQConstants.USERID, USER);
+        connectionFactory.setStringProperty(WMQConstants.PASSWORD, PASSWORD);
+
+        return connectionFactory;
+    }
+}
+
+
+```
+
+
+
+
+Next, `SimpleMqServerNoQModel` reads a message from the JMS queue. 
+
+#### SimpleMqServerNoQModel.java - Read a message from the queue. 
+
+```java
+   final Message messageFromClient = messageConsumer.receive(waitForMessage.toMillis());
+```
+
+
+Then, `SimpleMqServerNoQModel` read the contents of the message, and creates the responseText.
+
+#### SimpleMqServerNoQModel.java - Read the contents of the message, and responseText. 
+
+```java 
+
+    final BytesMessage requestMessage = (BytesMessage) messageFromClient;
+
+    final int length =  (int) requestMessage.getBodyLength();
+
+    final byte buffer[] = new byte[length];
+
+    requestMessage.readBytes(buffer);
+
+
+    final String message = new String(buffer, StandardCharsets.UTF_8);
+    final String responseText = "Server Got: " + message + " thank you";
+
+
+```
+
+Lastly, `SimpleMqServerNoQModel` create a reply message, passes the response text and the JMS Correlation ID into the reply message. 
+And then, `SimpleMqServerNoQModel` sends the reply message. 
+
+#### SimpleMqServerNoQModel.java - Create a response message, passing the response text and the JMS Correlation ID
+
+```java
+
+    final BytesMessage replyMessage = session.createBytesMessage();
+    replyMessage.setJMSCorrelationID(messageFromClient.getJMSCorrelationID());
+    replyMessage.writeBytes(responseText.getBytes(StandardCharsets.UTF_8));
+    producer.send(replyMessage);
+
+```
+
+## NATS client 
+The NATS example client is simpler. It uses the request method on the NATS connection which expects a reply. 
+
+#### SimpleNatsClient.java - The NATS example client is simpler
+```java 
+
+           final Options.Builder builder = new Options.Builder().server("nats://localhost:4222");
+            final Connection connect = Nats.connect(builder.build());
+
+            final Message replyFromJmsServer = connect.request("sendmq_queue",
+                    "Hello World!".getBytes(StandardCharsets.UTF_8), Duration.ofSeconds(20));
+
+            if (replyFromJmsServer != null) {
+                System.out.println("RESPONSE FROM SERVER " + new String(replyFromJmsServer.getData(), StandardCharsets.UTF_8));
+            } else {
+                System.out.println("No reply message sent from JMS server");
+            }
+```
+
+## Bridge config 
+For these two to work together, you need a IBM MQ server and NATS running. 
+Here is an example NATS JMS/IBM MQ Bridge config file that works for this example. 
+
+#### nats-bridge.yaml - Bridge config for simple NATS to IBM MQ example. 
+
+```yaml 
+---
+name: "IBM MQ to NATS Request/Reply Example No QModel"
+dateTime:
+  - 2020
+  - 4
+  - 30
+  - 0
+  - 53
+  - 50
+  - 423615000
+bridges:
+  - name: "natsToIBMMq"
+    bridgeType: "REQUEST_REPLY"
+    source:
+      name: "nats"
+      busType: "NATS"
+      subject: "sendmq_queue"
+      clusterName: "natsCluster"
+    destination:
+      name: "ibmMQ"
+      busType: "JMS"
+      subject: "DEV.QUEUE.1"
+      responseSubject: "DEV.QUEUE.2"
+      clusterName: "ibmMqCluster"
+
+    copyHeaders: false
+    workers: 1
+    tasks : 1
+
+clusters:
+  ibmMqCluster:
+    name: "ibmMqCluster"
+    properties: !<jms>
+      config:
+        java.naming.factory.initial: "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"
+        nats.ibm.mq.host: "tcp://localhost:1414"
+        nats.ibm.mq.channel: "DEV.APP.SVRCONN"
+        nats.ibm.mq.queueManager: "QM1"
+      userName: "app"
+      password: "passw0rd"
+      jmsDestinationType: "QUEUE"
+  natsCluster:
+    name: "natsCluster"
+    properties: !<nats>
+      host: "localhost"
+      port: 4222
+      servers: []
+      config:
+        io.nats.client.reconnect.wait: 3000
+        io.nats.client.reconnect.max: 10
+        io.nats.client.timeout: 4000
+
+```
+
+Lastly, you need to configure IBM MQ with the correct QModel and Queue for this example to work. 
+Here is a sample IBM MQ config file. 
+
+```shell script
+* Developer queues config for IBM MQ
+DEFINE QLOCAL('DEV.QUEUE.1') REPLACE
+DEFINE QLOCAL('DEV.QUEUE.2') REPLACE
+DEFINE QLOCAL('DEV.QUEUE.3') REPLACE
+DEFINE QLOCAL('DEV.DEAD.LETTER.QUEUE') REPLACE
+* Creating a model queue to dynamic queues
+* https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.1.0/com.ibm.mq.ref.dev.doc/prx_wmq_tempy_model.htm
+* https://www.ibm.com/support/knowledgecenter/SSFKSJ_9.0.0/com.ibm.mq.dev.doc/q032240_.htm
+DEFINE QMODEL('DEV.MODEL') REPLACE
+* Use a different dead letter queue, for undeliverable messages
+ALTER QMGR DEADQ('DEV.DEAD.LETTER.QUEUE')
+* Developer topics
+DEFINE TOPIC('DEV.BASE.TOPIC') TOPICSTR('dev/') REPLACE
+* Developer connection authentication
+DEFINE AUTHINFO('DEV.AUTHINFO') AUTHTYPE(IDPWOS) CHCKCLNT(REQDADM) CHCKLOCL(OPTIONAL) ADOPTCTX(YES) REPLACE
+ALTER QMGR CONNAUTH('DEV.AUTHINFO')
+REFRESH SECURITY(*) TYPE(CONNAUTH)
+* Developer channels (Application + Admin)
+* Developer channels (Application + Admin)
+DEFINE CHANNEL('DEV.ADMIN.SVRCONN') CHLTYPE(SVRCONN) REPLACE
+DEFINE CHANNEL('DEV.APP.SVRCONN') CHLTYPE(SVRCONN) MCAUSER('app') REPLACE
+* Developer channel authentication rules
+SET CHLAUTH('*') TYPE(ADDRESSMAP) ADDRESS('*') USERSRC(NOACCESS) DESCR('Back-stop rule - Blocks everyone') ACTION(REPLACE)
+SET CHLAUTH('DEV.APP.SVRCONN') TYPE(ADDRESSMAP) ADDRESS('*') USERSRC(CHANNEL) CHCKCLNT(ASQMGR) DESCR('Allows connection via APP channel') ACTION(REPLACE)
+SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(BLOCKUSER) USERLIST('nobody') DESCR('Allows admins on ADMIN channel') ACTION(REPLACE)
+SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(USERMAP) CLNTUSER('admin') USERSRC(CHANNEL) DESCR('Allows admin user to connect via ADMIN channel') ACTION(REPLACE)
+SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(USERMAP) CLNTUSER('admin') USERSRC(MAP) MCAUSER ('mqm') DESCR ('Allow admin as MQ-admin') ACTION(REPLACE)
+* Developer authority records
+SET AUTHREC PRINCIPAL('app') OBJTYPE(QMGR) AUTHADD(CONNECT,INQ)
+SET AUTHREC PROFILE('DEV.**') PRINCIPAL('app') OBJTYPE(QUEUE) AUTHADD(BROWSE,GET,INQ,PUT,DSP)
+SET AUTHREC PROFILE('DEV.**') PRINCIPAL('app') OBJTYPE(TOPIC) AUTHADD(PUB,SUB)
+
+```
+
+____
+
+
+
+# Example 6: IBM MQ to NATS Request/Reply from JMS Client to NATS server using QModel
+
+There is not a lot new here. It is very similar to the last example but in the opposite direction. 
+
+
+## SimpleNatsServer.java
+
+
+The NATS SimpleNatsServer is very similar to the JMS version earlier, with the exception that it is using NATS
+and not JMS and IBM MQ. 
+
+In the package `io.nats.bridge.examples.ibmmq.noqmodel.mq2nats2` there are three files:
+
+* `nats-bridge.yaml` sample config file 
+* `SimpleMqClientNoQModel.java` simple IBM MQ / JMS example that sends a request message.
+* `SimpleNatsServer.java` simple NATS example that sends a NATS reply message. 
+
+
+#### SimpleNatsServer.java - simple NATS server 
+
+
+```java
+package io.nats.bridge.examples.ibmmq.noqmodel.mq2nats2;
+
+import io.nats.client.*;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+
+public class SimpleNatsServer {
+
+    public static void main(final String[] args) {
+        try {
+
+            final Options.Builder builder = new Options.Builder().server("nats://localhost:4222");
+            final Connection connect = Nats.connect(builder.build());
+            final Subscription subscription = connect.subscribe("reply_mq2");
+            final Duration requestTimeoutDuration = Duration.ofSeconds(30);
+            int count = 0;
+
+            while (count < 100) {
+                System.out.println("About to get Message");
+                final Message messageFromClient = subscription.nextMessage(requestTimeoutDuration);
+                System.out.println("Attempted to get Message");
+
+                if (messageFromClient != null) {
+                    System.out.println("Got the producer now respond ");
+                    final byte buffer[] = messageFromClient.getData();
+                    final String message = new String(buffer, StandardCharsets.UTF_8);
+                    final String responseText = "Server Got: " + message + " thank you";
+                    connect.publish(messageFromClient.getReplyTo(), responseText.getBytes(StandardCharsets.UTF_8));
+                    System.out.println("SENT: " + responseText);
+                } else {
+                    System.out.println("No message found");
+                    count++;
+                }
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+}
+
+
+```
+
+## SimpleMqClientNoQModel 
+
+The simple MQ client uses a temporary queue which is very common with JMS Request/Reply pattern. 
+This uses the QModel and QModel pattern which is shown in the `IbmMqUtils.createJmsConnectionFactoryWithQModel` method.
+This example specifies a correlation ID and passes the response queue to the JMS message before sending it. 
+
+## SimpleMqClientNoQModel.java - create message with correlation id, and response queue as the reply destination then send
+
+```java 
+package io.nats.bridge.examples.ibmmq.noqmodel.mq2nats2;
+
+import io.nats.bridge.examples.JmsBuildUtils;
+import io.nats.bridge.examples.ibmmq.IbmMqUtils;
+
+import javax.jms.*;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.UUID;
+
+public class SimpleMqClientNoQModel {
+
+    public static void main (String[] args) {
+        try {
+
+
+            final JmsBuildUtils jmsBuildUtils = new JmsBuildUtils()
+                    .withConnectionFactory(IbmMqUtils.createJmsConnectionFactoryWithNoQModel());
+            final Session session = jmsBuildUtils.getSession();
+            jmsBuildUtils.withDestination(session.createQueue("DEV.QUEUE.1"));
+
+            final Destination replyDestination = session.createQueue("DEV.QUEUE.2");
+
+
+            final MessageProducer messageProducer = jmsBuildUtils.getProducerSupplier().get();
+            final Duration replyTimeoutDuration = Duration.ofSeconds(30);
+
+
+
+            final BytesMessage requestMessage = session.createBytesMessage();
+            requestMessage.writeBytes("Hello World!".getBytes(StandardCharsets.UTF_8));
+            requestMessage.setJMSCorrelationID(UUID.randomUUID().toString());
+            requestMessage.setJMSReplyTo(replyDestination);
+
+            messageProducer.send(requestMessage);
+
+            final MessageConsumer replyConsumer = session.createConsumer(replyDestination);
+
+            final Message reply = replyConsumer.receive(replyTimeoutDuration.toMillis());
+
+            if (reply instanceof BytesMessage) {
+                final BytesMessage bytesReply = (BytesMessage) reply;
+                final byte[] buffer = new  byte[(int)bytesReply.getBodyLength()];
+                bytesReply.readBytes(buffer);
+
+                System.out.println("REPLY: " + new String(buffer, StandardCharsets.UTF_8));
+            } else {
+                System.out.println("No reply message came back or wrong type");
+            }
+
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+    }
+}
+
+
+```
+
+Notice the above does not use a temporary queue, thus it does not need an IBM QModel. 
+
+## Bridge Config 
+
+The bridge config sets up the subject and queue names for this example. 
+
+## nats-bridge.yaml - Bridge Config for JMS to NATS Request/reply bridge 
+
+```yaml 
+---
+name: "IBM MQ to NATS Request/Reply Example No QModel"
+dateTime:
+  - 2020
+  - 4
+  - 30
+  - 0
+  - 53
+  - 50
+  - 423615000
+bridges:
+  - name: "natsToIBMMq"
+    bridgeType: "REQUEST_REPLY"
+    source:
+      name: "ibmMQ"
+      busType: "JMS"
+      subject: "DEV.QUEUE.1"
+      responseSubject : "DEV.QUEUE.2"
+      clusterName: "ibmMqCluster"
+    destination:
+      name: "nats"
+      busType: "NATS"
+      subject: "reply_mq2"
+      clusterName: "natsCluster"
+
+    copyHeaders: false
+    workers: 5
+    tasks : 2
+
+clusters:
+  ibmMqCluster:
+    name: "ibmMqCluster"
+    properties: !<jms>
+      config:
+        java.naming.factory.initial: "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"
+        nats.ibm.mq.host: "tcp://localhost:1414"
+        nats.ibm.mq.channel: "DEV.APP.SVRCONN"
+        nats.ibm.mq.queueManager: "QM1"
+      userName: "app"
+      password: "passw0rd"
+      jmsDestinationType: "QUEUE"
+  natsCluster:
+    name: "natsCluster"
+    properties: !<nats>
+      host: "localhost"
+      port: 4222
+      servers: []
+      config:
+        io.nats.client.reconnect.wait: 3000
+        io.nats.client.reconnect.max: 10
+        io.nats.client.timeout: 4000
+
+```
+
+Lastly, note that this example does not need QModel for this to work. 
+Here is a sample IBM MQ config file. 
+
+```shell script
+* Developer queues config for IBM MQ
+DEFINE QLOCAL('DEV.QUEUE.1') REPLACE
+DEFINE QLOCAL('DEV.QUEUE.2') REPLACE
+DEFINE QLOCAL('DEV.QUEUE.3') REPLACE
+DEFINE QLOCAL('DEV.DEAD.LETTER.QUEUE') REPLACE
+* Creating a model queue to dynamic queues
+* https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.1.0/com.ibm.mq.ref.dev.doc/prx_wmq_tempy_model.htm
+* https://www.ibm.com/support/knowledgecenter/SSFKSJ_9.0.0/com.ibm.mq.dev.doc/q032240_.htm
+DEFINE QMODEL('DEV.MODEL') REPLACE
+* Use a different dead letter queue, for undeliverable messages
+ALTER QMGR DEADQ('DEV.DEAD.LETTER.QUEUE')
+* Developer topics
+DEFINE TOPIC('DEV.BASE.TOPIC') TOPICSTR('dev/') REPLACE
+* Developer connection authentication
+DEFINE AUTHINFO('DEV.AUTHINFO') AUTHTYPE(IDPWOS) CHCKCLNT(REQDADM) CHCKLOCL(OPTIONAL) ADOPTCTX(YES) REPLACE
+ALTER QMGR CONNAUTH('DEV.AUTHINFO')
+REFRESH SECURITY(*) TYPE(CONNAUTH)
+* Developer channels (Application + Admin)
+* Developer channels (Application + Admin)
+DEFINE CHANNEL('DEV.ADMIN.SVRCONN') CHLTYPE(SVRCONN) REPLACE
+DEFINE CHANNEL('DEV.APP.SVRCONN') CHLTYPE(SVRCONN) MCAUSER('app') REPLACE
+* Developer channel authentication rules
+SET CHLAUTH('*') TYPE(ADDRESSMAP) ADDRESS('*') USERSRC(NOACCESS) DESCR('Back-stop rule - Blocks everyone') ACTION(REPLACE)
+SET CHLAUTH('DEV.APP.SVRCONN') TYPE(ADDRESSMAP) ADDRESS('*') USERSRC(CHANNEL) CHCKCLNT(ASQMGR) DESCR('Allows connection via APP channel') ACTION(REPLACE)
+SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(BLOCKUSER) USERLIST('nobody') DESCR('Allows admins on ADMIN channel') ACTION(REPLACE)
+SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(USERMAP) CLNTUSER('admin') USERSRC(CHANNEL) DESCR('Allows admin user to connect via ADMIN channel') ACTION(REPLACE)
+SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(USERMAP) CLNTUSER('admin') USERSRC(MAP) MCAUSER ('mqm') DESCR ('Allow admin as MQ-admin') ACTION(REPLACE)
+* Developer authority records
+SET AUTHREC PRINCIPAL('app') OBJTYPE(QMGR) AUTHADD(CONNECT,INQ)
+SET AUTHREC PROFILE('DEV.**') PRINCIPAL('app') OBJTYPE(QUEUE) AUTHADD(BROWSE,GET,INQ,PUT,DSP)
+SET AUTHREC PROFILE('DEV.**') PRINCIPAL('app') OBJTYPE(TOPIC) AUTHADD(PUB,SUB)
+
+```
+Recall that the `IbmMQUtils.createJmsConnectionFactoryWithNoQModel` uses the Queue without a QModel. 
+
+#### IbmMqUtils
+
+```java
+package io.nats.bridge.examples.ibmmq;
+
+import com.ibm.msg.client.jms.JmsConnectionFactory;
+import com.ibm.msg.client.jms.JmsFactoryFactory;
+import com.ibm.msg.client.wmq.WMQConstants;
+
+import javax.jms.JMSException;
+
+public class IbmMqUtils {
+    //...
+
+
+    public static JmsConnectionFactory createJmsConnectionFactoryWithNoQModel() throws JMSException {
+        final JmsFactoryFactory factoryFactory = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
+        final JmsConnectionFactory connectionFactory = factoryFactory.createConnectionFactory();
+
+
+        final String HOST = "localhost";
+        final int PORT = 1414;
+        final String QUEUE_MANAGER = "QM1";
+        final String CHANNEL = "DEV.APP.SVRCONN";
+        final String USER = "app";
+        final String PASSWORD = "passw0rd";
+
+
+        connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, HOST);
+        connectionFactory.setIntProperty(WMQConstants.WMQ_PORT, PORT);
+        connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, CHANNEL);
+        connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
+        connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, QUEUE_MANAGER);
+        connectionFactory.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
+        connectionFactory.setStringProperty(WMQConstants.USERID, USER);
+        connectionFactory.setStringProperty(WMQConstants.PASSWORD, PASSWORD);
+
+        return connectionFactory;
+    }
+}
+
+```

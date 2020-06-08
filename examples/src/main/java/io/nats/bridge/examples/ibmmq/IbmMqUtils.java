@@ -36,4 +36,29 @@ public class IbmMqUtils {
 
         return connectionFactory;
     }
+
+    public static JmsConnectionFactory createJmsConnectionFactoryWithNoQModel() throws JMSException {
+        final JmsFactoryFactory factoryFactory = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
+        final JmsConnectionFactory connectionFactory = factoryFactory.createConnectionFactory();
+
+
+        final String HOST = "localhost";
+        final int PORT = 1414;
+        final String QUEUE_MANAGER = "QM1";
+        final String CHANNEL = "DEV.APP.SVRCONN";
+        final String USER = "app";
+        final String PASSWORD = "passw0rd";
+
+
+        connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, HOST);
+        connectionFactory.setIntProperty(WMQConstants.WMQ_PORT, PORT);
+        connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, CHANNEL);
+        connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
+        connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, QUEUE_MANAGER);
+        connectionFactory.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
+        connectionFactory.setStringProperty(WMQConstants.USERID, USER);
+        connectionFactory.setStringProperty(WMQConstants.PASSWORD, PASSWORD);
+
+        return connectionFactory;
+    }
 }

@@ -562,6 +562,8 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         final Session session = getSession();
         final Destination destination = getDestination();
         if (isRequestReply()) {
+
+
             return new JMSMessageBus(getName(), destination, session, connection,
                     getResponseDestination(),
                     source ? null : getResponseConsumer(),
