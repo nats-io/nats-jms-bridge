@@ -1,4 +1,4 @@
-package io.nats.bridge.examples.jms2nats;
+package io.nats.bridge.examples.jms.jms2nats;
 
 import io.nats.bridge.examples.JmsBuildUtils;
 

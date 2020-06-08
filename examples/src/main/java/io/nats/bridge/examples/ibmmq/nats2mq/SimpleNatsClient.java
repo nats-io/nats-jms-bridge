@@ -1,4 +1,4 @@
-package io.nats.bridge.examples.nats2jms;
+package io.nats.bridge.examples.jms.nats2jms;
 
 import io.nats.client.Connection;
 import io.nats.client.Message;
