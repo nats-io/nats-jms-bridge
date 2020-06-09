@@ -9,12 +9,15 @@ import io.nats.bridge.admin.models.bridges.MessageBridgeInfo
 import io.nats.bridge.admin.models.bridges.NatsBridgeConfig
 import io.nats.bridge.admin.models.bridges.defaultDataModel
 import io.nats.bridge.admin.util.ObjectMapperUtils
+import io.nats.bridge.admin.util.PathUtils
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.nio.file.Path
 import java.time.LocalDateTime
+import java.nio.file.Files
 
-class ConfigRepoFromFiles(private val configFile: File = File("./config/nats-bridge.yaml"),
-                          private val mapper: ObjectMapper = ObjectMapperUtils.getYamlObjectMapper()) : ConfigRepo {
+class ConfigRepoFromPath(private val configFile: Path = File("./config/nats-bridge.yaml").toPath(),
+                         private val mapper: ObjectMapper = ObjectMapperUtils.getYamlObjectMapper()) : ConfigRepo {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -23,8 +26,9 @@ class ConfigRepoFromFiles(private val configFile: File = File("./config/nats-bri
     }
 
     override fun readConfig(): NatsBridgeConfig {
-        if (!configFile.exists()) saveConfig(defaultDataModel)
-        return mapper.readValue(configFile)
+
+        if (!Files.exists(configFile) && Files.isWritable(configFile)) saveConfig(defaultDataModel)
+        return mapper.readValue(PathUtils.read(configFile))
     }
 
     override fun readClusterConfigs() = readConfig().clusters
@@ -57,9 +61,9 @@ class ConfigRepoFromFiles(private val configFile: File = File("./config/nats-bri
     }
 
     override fun saveConfig(conf: NatsBridgeConfig) {
-        logger.info("Saving Nats Bridge config... " + LocalDateTime.now())
-        configFile.parentFile.mkdirs()
-        mapper.writeValue(configFile, conf)
+        logger.info("Saving NATS Bridge config... " + LocalDateTime.now())
+        Files.createDirectories(configFile.parent)
+        Files.writeString(configFile, mapper.writeValueAsString(conf))
     }
 
 

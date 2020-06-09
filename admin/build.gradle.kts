@@ -213,5 +213,8 @@ tasks {
         implementation("com.squareup.okhttp3:okhttp:4.5.0")
 
 
+        implementation("com.github.ajalt:clikt:2.7.1")
+
+
     }
 }

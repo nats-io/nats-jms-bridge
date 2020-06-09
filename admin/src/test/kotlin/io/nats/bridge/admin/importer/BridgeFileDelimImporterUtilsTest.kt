@@ -3,7 +3,7 @@ package io.nats.bridge.admin.importer
 import io.nats.bridge.admin.models.bridges.BridgeType
 import io.nats.bridge.admin.models.bridges.BusType
 import io.nats.bridge.admin.models.bridges.Cluster
-import io.nats.bridge.admin.repos.ConfigRepoFromFiles
+import io.nats.bridge.admin.repos.ConfigRepoFromPath
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -20,7 +20,7 @@ internal class BridgeFileDelimImporterUtilsTest {
     @BeforeEach
     fun before() {
         file = File("./data/" + UUID.randomUUID().toString() + "+.yaml")
-        configMap = ConfigRepoFromFiles().readConfig().clusters
+        configMap = ConfigRepoFromPath().readConfig().clusters
     }
 
     @AfterEach

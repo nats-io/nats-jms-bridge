@@ -1,10 +1,9 @@
 package io.nats.bridge.admin.runner
 
 import io.nats.bridge.admin.ConfigRepo
-import io.nats.bridge.admin.repos.ConfigRepoFromFiles
+import io.nats.bridge.admin.repos.ConfigRepoFromPath
 
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -20,7 +19,7 @@ internal class BridgeRunnerManagerIntegrationTest {
     @BeforeEach
     fun before() {
         createYamlFile()
-        configRepo = ConfigRepoFromFiles(fileConf!!)
+        configRepo = ConfigRepoFromPath(fileConf!!)
         //manager = BridgeRunnerManager(configRepo!!)
     }
 

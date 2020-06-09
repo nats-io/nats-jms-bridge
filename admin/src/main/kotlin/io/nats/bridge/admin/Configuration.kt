@@ -1,11 +1,12 @@
 package io.nats.bridge.admin
 
 import io.micrometer.core.instrument.MeterRegistry
-import io.nats.bridge.admin.repos.ConfigRepoFromFiles
-import io.nats.bridge.admin.repos.LoginRepoFromFiles
+import io.nats.bridge.admin.repos.ConfigRepoFromPath
+import io.nats.bridge.admin.repos.LoginRepoFromPath
 import io.nats.bridge.admin.runner.support.MessageBridgeLoader
 import io.nats.bridge.admin.runner.support.MessageBridgeRunner
 import io.nats.bridge.admin.runner.support.impl.MessageBridgeLoaderImpl
+import io.nats.bridge.admin.util.ClasspathUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -26,11 +27,23 @@ class Configuration {
         return env
     }
 
+    @Bean fun appConfig() : ApplicationConfig {
+        return AppConfig.getConfig()
+    }
+
     @Bean
-    fun bridgeConfigRepo(env: Environment): ConfigRepo {
-        val repo = ConfigRepoFromFiles()
-        repo.init()
-        return repo
+    fun bridgeConfigRepo(env: Environment, app:ApplicationConfig): ConfigRepo {
+        return if (app.bridgeConfigFile.startsWith("classpath://") ) {
+            val configFile = app.bridgeConfigFile.substring("classpath://".length)
+            val paths = ClasspathUtils.paths(this.javaClass, configFile)
+            val repo = ConfigRepoFromPath(configFile = paths[0])
+            repo.init()
+            repo
+        } else {
+            val repo = ConfigRepoFromPath(File(app.bridgeConfigFile).toPath())
+            repo.init()
+            repo
+        }
     }
 
     @Bean
@@ -44,11 +57,22 @@ class Configuration {
     @Bean
     fun loginRepo(env: Environment,
                   @Value(value = "\${security.secretKey}") secretKey: String,
-                  @Value(value = "\${repo.logins.configFile}") confFile: String
+                  @Value(value = "\${repo.logins.configFile}") confFile: String,
+                  app:ApplicationConfig
     ): LoginRepo {
-        val repo = LoginRepoFromFiles(File(confFile), systemSecret = secretKey)
-        repo.init()
-        return repo
+
+        return if (app.loginConfigFile.startsWith("classpath://") ) {
+            val configFile = app.bridgeConfigFile.substring("classpath://".length)
+            val paths = ClasspathUtils.paths(this.javaClass, configFile)
+            val repo = LoginRepoFromPath(configFile = paths[0], systemSecret = secretKey)
+            repo.init()
+            repo
+        } else {
+            val repo = LoginRepoFromPath(File(app.loginConfigFile).toPath(), systemSecret = secretKey)
+            repo.init()
+            repo
+        }
+
     }
 
 }

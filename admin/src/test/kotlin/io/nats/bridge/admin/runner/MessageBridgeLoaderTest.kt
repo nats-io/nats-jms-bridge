@@ -3,7 +3,7 @@ package io.nats.bridge.admin.runner
 import io.nats.bridge.jms.support.JMSMessageBusBuilder
 import io.nats.bridge.nats.support.NatsMessageBusBuilder
 import io.nats.bridge.admin.ConfigRepo
-import io.nats.bridge.admin.repos.ConfigRepoFromFiles
+import io.nats.bridge.admin.repos.ConfigRepoFromPath
 import io.nats.bridge.admin.runner.support.impl.MessageBridgeLoaderImpl
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -26,7 +26,7 @@ internal class MessageBridgeLoaderTest {
         configYamlContents = runTemplate()
         fileConf = File("./data/" + UUID.randomUUID().toString() + "+.yaml")
         fileConf?.writeText(configYamlContents)
-        configRepo = ConfigRepoFromFiles(fileConf!!)
+        configRepo = ConfigRepoFromPath(fileConf!!)
     }
 
     @AfterEach

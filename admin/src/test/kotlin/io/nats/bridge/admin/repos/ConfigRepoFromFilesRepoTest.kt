@@ -12,7 +12,7 @@ internal class ConfigRepoFromFilesRepoTest {
     @Test
     fun readConfig() {
         val file = File("./data/" + UUID.randomUUID().toString() + "+.yaml")
-        val readConfig = ConfigRepoFromFiles(file).readConfig()
+        val readConfig = ConfigRepoFromPath(file).readConfig()
         assertNotNull(readConfig)
         file.delete()
     }
@@ -20,7 +20,7 @@ internal class ConfigRepoFromFilesRepoTest {
     @Test
     fun addBridge() {
         val file = File("./data/" + UUID.randomUUID().toString() + "+.yaml")
-        val repo = ConfigRepoFromFiles(file)
+        val repo = ConfigRepoFromPath(file)
         val readConfig = repo.readConfig()
         assertNotNull(readConfig)
 
@@ -37,7 +37,7 @@ internal class ConfigRepoFromFilesRepoTest {
     @Test
     fun addBridgeErrorSourceClusterDoesNotExist() {
         val file = File("./data/" + UUID.randomUUID().toString() + "+.yaml")
-        val repo = ConfigRepoFromFiles(file)
+        val repo = ConfigRepoFromPath(file)
         val readConfig = repo.readConfig()
         assertNotNull(readConfig)
 
