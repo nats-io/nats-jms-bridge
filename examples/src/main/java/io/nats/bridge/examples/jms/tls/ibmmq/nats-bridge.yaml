@@ -1,5 +1,5 @@
 ---
-name: "IBM MQ to NATS Request/Reply Example"
+name: "IBM MQ to NATS Request/Reply Example No QModel"
 dateTime:
   - 2020
   - 4
@@ -12,19 +12,20 @@ bridges:
   - name: "natsToIBMMq"
     bridgeType: "REQUEST_REPLY"
     source:
-      name: "ibmMQ"
-      busType: "JMS"
-      subject: "DEV.QUEUE.2"
-      clusterName: "ibmMqCluster"
-    destination:
       name: "nats"
       busType: "NATS"
-      subject: "reply_mq"
+      subject: "request_reply_jms_tls"
       clusterName: "natsCluster"
+    destination:
+      name: "ibmMQ"
+      busType: "JMS"
+      subject: "DEV.QUEUE.1"
+      responseSubject: "DEV.QUEUE.2"
+      clusterName: "ibmMqCluster"
 
     copyHeaders: false
-    workers: 5
-    tasks : 2
+    workers: 1
+    tasks : 1
 
 clusters:
   ibmMqCluster:
@@ -35,8 +36,6 @@ clusters:
         nats.ibm.mq.host: "tcp://localhost:1414"
         nats.ibm.mq.channel: "DEV.APP.SVRCONN"
         nats.ibm.mq.queueManager: "QM1"
-        nats.ibm.mq.queueModelName: "DEV.MODEL"
-        nats.ibm.mq.queueModelPrefix: "DEV*"
       userName: "app"
       password: "passw0rd"
       jmsDestinationType: "QUEUE"
@@ -50,3 +49,9 @@ clusters:
         io.nats.client.reconnect.wait: 3000
         io.nats.client.reconnect.max: 10
         io.nats.client.timeout: 4000
+        io.nats.client.tls.jssl.enable: true
+        io.nats.client.tls.truststore.path: ../certs/truststore.jks
+        io.nats.client.tls.keystore.path: ../certs/keystore.jks
+        io.nats.client.tls.algorithm: SunX509
+        io.nats.client.tls.store.password: cloudurable
+        io.nats.client.tls.trust.password: cloudurable

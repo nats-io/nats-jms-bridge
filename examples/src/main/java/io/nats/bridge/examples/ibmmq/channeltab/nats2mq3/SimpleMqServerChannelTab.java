@@ -1,23 +1,27 @@
-package io.nats.bridge.examples.jms.nats2jms;
+package io.nats.bridge.examples.ibmmq.channeltab.nats2mq3;
 
 import io.nats.bridge.examples.JmsBuildUtils;
+import io.nats.bridge.examples.ibmmq.IbmMqUtils;
 
 import javax.jms.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-public class SimpleJmsServer {
+public class SimpleMqServerChannelTab {
     public static void main(final String[] args) {
 
         final Duration waitForMessage = Duration.ofSeconds(20);
 
         try {
             final JmsBuildUtils jmsBuildUtils = new JmsBuildUtils()
-                    //.withUserNameConnection("cloudurable")
-                    //.withPasswordConnection("cloudurable")
-                    .withDestinationName("dynamicQueues/requests2");
+                    .withConnectionFactory(IbmMqUtils.createJmsConnectionFactoryWithChannelTab());
+
 
             final Session session = jmsBuildUtils.getSession();
+
+
+            jmsBuildUtils.withDestination(session.createQueue("DEV.QUEUE.1"));
+
 
             final MessageConsumer messageConsumer = jmsBuildUtils.getConsumerSupplier().get();
 
@@ -30,7 +34,7 @@ public class SimpleJmsServer {
 
                 if (messageFromClient == null) {
                     System.out.println("No message found");
-                    count ++;
+                    count++;
                 } else {
 
                     System.out.println("Got the message now respond " + messageFromClient.getJMSReplyTo()
@@ -42,7 +46,7 @@ public class SimpleJmsServer {
                     if (messageFromClient instanceof BytesMessage) {
                         final BytesMessage requestMessage = (BytesMessage) messageFromClient;
 
-                        final int length =  (int) requestMessage.getBodyLength();
+                        final int length = (int) requestMessage.getBodyLength();
 
                         final byte buffer[] = new byte[length];
 
@@ -71,4 +75,6 @@ public class SimpleJmsServer {
             System.exit(1);
         }
     }
+
+
 }

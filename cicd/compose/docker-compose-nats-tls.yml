@@ -21,6 +21,9 @@ services:
   active-mq:
     build:
       context: ../bridge-activemq
+    environment:
+        - ARTEMIS_USERNAME=cloudurable
+        - ARTEMIS_PASSWORD=cloudurable
     ports:
       - "8161:8161"
       - "61616:61616"

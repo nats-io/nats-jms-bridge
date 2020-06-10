@@ -1,5 +1,5 @@
 ---
-name: "JMS to NATS Request/Reply Example"
+name: "IBM MQ to NATS Request/Reply Example No QModel"
 dateTime:
   - 2020
   - 4
@@ -9,32 +9,35 @@ dateTime:
   - 50
   - 423615000
 bridges:
-  - name: "jms2Nats"
+  - name: "natsToIBMMq"
     bridgeType: "REQUEST_REPLY"
     source:
-      name: "activeMQ"
+      name: "ibmMQ"
       busType: "JMS"
-      subject: "dynamicQueues/client-requests"
-      clusterName: "jmsCluster"
+      subject: "DEV.QUEUE.1"
+      responseSubject : "DEV.QUEUE.2"
+      clusterName: "ibmMqCluster"
     destination:
       name: "nats"
       busType: "NATS"
-      subject: "natsClientRequests"
+      subject: "reply_mq2"
       clusterName: "natsCluster"
+
     copyHeaders: false
     workers: 5
     tasks : 2
 
 clusters:
-  jmsCluster:
-    name: "jmsCluster"
+  ibmMqCluster:
+    name: "ibmMqCluster"
     properties: !<jms>
       config:
-        java.naming.factory.initial: "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory"
-        connectionFactory.ConnectionFactory: "tcp://localhost:61616"
-        queue.queue/testQueue: "queue.queue/testQueue=testQueue"
-      userName: "cloudurable"
-      password: "cloudurable"
+        java.naming.factory.initial: "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"
+        nats.ibm.mq.host: "tcp://localhost:1414"
+        nats.ibm.mq.channel: "DEV.APP.SVRCONN"
+        nats.ibm.mq.queueManager: "QM1"
+      userName: "app"
+      password: "passw0rd"
       jmsDestinationType: "QUEUE"
   natsCluster:
     name: "natsCluster"

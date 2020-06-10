@@ -12,14 +12,14 @@ import java.util.*
 
 internal class LoginRepoFromFilesTest {
 
-    var repo = LoginRepoFromFiles(systemSecret = "")
+    var repo = LoginRepoFromPath(systemSecret = "")
     var file = File("./data/logins-" + UUID.randomUUID().toString() + "+.yaml")
 
 
     @BeforeEach
     fun before() {
         file = File("./data/logins-" + UUID.randomUUID().toString() + "+.yaml")
-        repo = LoginRepoFromFiles(file, systemSecret = "")
+        repo = LoginRepoFromPath(file, systemSecret = "")
 
         repo.addLogin(Login("Rick Hightower", roles = listOf(Role("Admin")),
                 secret = "sk-" + UUID.randomUUID().toString(), publicKey = "pk-" + UUID.randomUUID().toString()))

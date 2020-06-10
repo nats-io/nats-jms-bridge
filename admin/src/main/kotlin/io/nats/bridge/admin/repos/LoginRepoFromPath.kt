@@ -8,13 +8,16 @@ import io.nats.bridge.admin.RepoException
 import io.nats.bridge.admin.models.logins.*
 import io.nats.bridge.admin.util.EncryptUtils
 import io.nats.bridge.admin.util.ObjectMapperUtils
+import io.nats.bridge.admin.util.PathUtils
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 import java.time.LocalDateTime
 
-class LoginRepoFromFiles(private val configFile: File = File("./config/nats-bridge-logins.yaml"),
-                         private val mapper: ObjectMapper = ObjectMapperUtils.getYamlObjectMapper(),
-                         private val systemSecret: String) : LoginRepo {
+class LoginRepoFromPath(private val configFile: Path = File("./config/nats-bridge-logins.yaml").toPath(),
+                        private val mapper: ObjectMapper = ObjectMapperUtils.getYamlObjectMapper(),
+                        private val systemSecret: String) : LoginRepo {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -23,23 +26,33 @@ class LoginRepoFromFiles(private val configFile: File = File("./config/nats-brid
     }
 
     private fun readConfig(): LoginConfig {
-        if (!configFile.exists()) {
+        if (!Files.exists(configFile) && Files.isWritable(configFile)) {
             saveConfig(defaultLoginConfig)
-            val backup = LoginRepoFromFiles(configFile = File(configFile.parentFile, "initial-nats-bridge-logins.yaml"), mapper = mapper, systemSecret = "")
-            jacksonObjectMapper().writeValue(File(configFile.parentFile, "initial-nats-bridge-logins.json"), defaultLoginConfig)
+            val backupFile = File(configFile.parent.toFile(), "initial-nats-bridge-logins.yaml")
+            val backup = LoginRepoFromPath(configFile = backupFile.toPath(), mapper = mapper, systemSecret = "")
+            jacksonObjectMapper().writeValue(backupFile, defaultLoginConfig)
             backup.saveConfig(defaultLoginConfig)
         }
-        return mapper.readValue(configFile)
+        return mapper.readValue(PathUtils.read(configFile))
     }
 
     private fun saveConfig(conf: LoginConfig) {
         logger.info("Saving LoginConfig config... " + LocalDateTime.now())
-        configFile.parentFile.mkdirs()
+
+        if (!Files.exists(configFile.parent)) {
+            try {
+                Files.createDirectories(configFile.parent)
+            } catch (ex:Exception) {
+                logger.info("Unable to write config file {}", ex.message)
+            }
+        }
+
 
         val loginsToEncrypt = conf.logins.filter { it.secret.startsWith("sk-") }
 
         if (systemSecret.isBlank() || loginsToEncrypt.isEmpty()) {
-            mapper.writeValue(configFile, conf)
+            val configAsString = mapper.writeValueAsString(conf)
+            Files.writeString(configFile, configAsString)
         } else {
             val newLogins = conf.logins.map { login ->
                 if (login.secret.startsWith("sk-")) {
@@ -48,7 +61,8 @@ class LoginRepoFromFiles(private val configFile: File = File("./config/nats-brid
                     login.copy(secret = encrypt.encrypt(login.secret))
                 } else login
             }
-            mapper.writeValue(configFile, conf.copy(logins = newLogins))
+            val configAsString = mapper.writeValueAsString(conf.copy(logins = newLogins))
+            Files.writeString(configFile, configAsString)
         }
     }
 

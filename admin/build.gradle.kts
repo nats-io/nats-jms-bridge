@@ -117,7 +117,7 @@ tasks.getByName<CreateStartScripts>("startScripts") {
 }
 
 
-version = "0.8.0-beta4"
+version = "0.9.0-beta5"
 
 tasks {
 
@@ -189,7 +189,7 @@ tasks {
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.8.0-beta4")
+        implementation("io.nats.bridge:nats-jms-bridge:0.9.0-beta5")
 
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
@@ -211,6 +211,9 @@ tasks {
 
         // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
         implementation("com.squareup.okhttp3:okhttp:4.5.0")
+
+
+        implementation("com.github.ajalt:clikt:2.7.1")
 
 
     }

@@ -4,7 +4,7 @@ import io.nats.bridge.admin.ConfigRepo
 import io.nats.bridge.admin.models.bridges.BridgeType
 import io.nats.bridge.admin.models.bridges.BusType
 import io.nats.bridge.admin.models.bridges.Cluster
-import io.nats.bridge.admin.repos.ConfigRepoFromFiles
+import io.nats.bridge.admin.repos.ConfigRepoFromPath
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -31,7 +31,7 @@ internal class BridgeFileDelimImporterTest {
         fileConf = File("./data/" + UUID.randomUUID().toString() + "+.yaml")
         fileInput = File("./data/" + UUID.randomUUID().toString() + "+.tsv")
         fileInput?.writeText(inputStr)
-        configRepo = ConfigRepoFromFiles()
+        configRepo = ConfigRepoFromPath()
         configMap = configRepo?.readConfig()?.clusters
 
         println(inputStr.replace("\t", "<TAB>"))

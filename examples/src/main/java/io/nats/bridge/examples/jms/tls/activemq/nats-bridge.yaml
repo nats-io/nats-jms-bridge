@@ -1,5 +1,5 @@
 ---
-name: "JMS to NATS Request/Reply Example"
+name: "Example NATS to JMS Request/Reply using NATS JSSL"
 dateTime:
   - 2020
   - 4
@@ -9,22 +9,21 @@ dateTime:
   - 50
   - 423615000
 bridges:
-  - name: "jms2Nats"
+  - name: "natsJSSL2JMS"
     bridgeType: "REQUEST_REPLY"
     source:
-      name: "activeMQ"
-      busType: "JMS"
-      subject: "dynamicQueues/client-requests"
-      clusterName: "jmsCluster"
-    destination:
       name: "nats"
       busType: "NATS"
-      subject: "natsClientRequests"
+      subject: "request_reply_jms"
       clusterName: "natsCluster"
+    destination:
+      name: "activeMQ"
+      busType: "JMS"
+      subject: "dynamicQueues/requests"
+      clusterName: "jmsCluster"
     copyHeaders: false
     workers: 5
     tasks : 2
-
 clusters:
   jmsCluster:
     name: "jmsCluster"
@@ -46,3 +45,9 @@ clusters:
         io.nats.client.reconnect.wait: 3000
         io.nats.client.reconnect.max: 10
         io.nats.client.timeout: 4000
+        io.nats.client.tls.jssl.enable: true
+        io.nats.client.tls.truststore.path: ../certs/truststore.jks
+        io.nats.client.tls.keystore.path: ../certs/keystore.jks
+        io.nats.client.tls.algorithm: SunX509
+        io.nats.client.tls.store.password: cloudurable
+        io.nats.client.tls.trust.password: cloudurable

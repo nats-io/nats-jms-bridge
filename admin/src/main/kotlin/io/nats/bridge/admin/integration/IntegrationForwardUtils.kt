@@ -7,7 +7,7 @@ import io.nats.bridge.jms.support.JMSMessageBusBuilder
 import io.nats.bridge.admin.models.logins.LoginConfig
 import io.nats.bridge.admin.models.logins.LoginRequest
 import io.nats.bridge.admin.models.logins.TokenResponse
-import io.nats.bridge.admin.repos.ConfigRepoFromFiles
+import io.nats.bridge.admin.repos.ConfigRepoFromPath
 import io.nats.bridge.admin.runner.support.impl.MessageBridgeLoaderImpl
 import io.nats.bridge.admin.util.ObjectMapperUtils
 import okhttp3.MediaType
@@ -35,7 +35,7 @@ class IntegrationForwardUtils {
     val conf = yamlMapper.readValue<LoginConfig>(File(Constants.initialYaml))
     var token: String? = null
 
-    val loader = MessageBridgeLoaderImpl(ConfigRepoFromFiles(configFile = File(Constants.natsBridgeConfigFileName)))
+    val loader = MessageBridgeLoaderImpl(ConfigRepoFromPath(configFile = File(Constants.natsBridgeConfigFileName).toPath()))
 
 
     fun adminUser() = conf.logins.find { it.subject == "admin" }!!
