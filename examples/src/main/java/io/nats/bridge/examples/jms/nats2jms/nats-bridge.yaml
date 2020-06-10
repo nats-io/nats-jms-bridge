@@ -19,7 +19,7 @@ bridges:
   destination:
     name: "activeMQ"
     busType: "JMS"
-    subject: "dynamicQueues/requests"
+    subject: "dynamicQueues/requests2"
     clusterName: "jmsCluster"
   copyHeaders: false
   workers: 5

@@ -4,14 +4,12 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.types.enum
 import io.nats.bridge.admin.util.ClasspathUtils
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import java.io.File
 import java.lang.IllegalStateException
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.system.exitProcess
 
 @SpringBootApplication
 class Application

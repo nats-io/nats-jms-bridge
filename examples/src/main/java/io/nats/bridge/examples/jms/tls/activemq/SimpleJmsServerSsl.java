@@ -1,4 +1,4 @@
-package io.nats.bridge.examples.jms.nats2jms;
+package io.nats.bridge.examples.jms.tls.activemq;
 
 import io.nats.bridge.examples.JmsBuildUtils;
 
@@ -6,20 +6,23 @@ import javax.jms.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-public class SimpleJmsServer {
-    public static void main(final String[] args) {
+public class SimpleJmsServerSsl {
+    public static void main(String[] args) {
 
         final Duration waitForMessage = Duration.ofSeconds(20);
 
         try {
-            final JmsBuildUtils jmsBuildUtils = new JmsBuildUtils()
-                    //.withUserNameConnection("cloudurable")
-                    //.withPasswordConnection("cloudurable")
-                    .withDestinationName("dynamicQueues/requests2");
+
+
+
+            final JmsBuildUtils jmsBuildUtils = new JmsBuildUtils().withUserNameConnection("cloudurable")
+                    .withPasswordConnection("cloudurable").withDestinationName("dynamicQueues/requests");
 
             final Session session = jmsBuildUtils.getSession();
 
             final MessageConsumer messageConsumer = jmsBuildUtils.getConsumerSupplier().get();
+
+
 
             int count = 0;
 
@@ -64,11 +67,13 @@ public class SimpleJmsServer {
 
                 }
             }
+        }
+        catch (Exception ex){
 
-
-        } catch (Exception ex) {
             ex.printStackTrace();
             System.exit(1);
+
         }
+
     }
 }
