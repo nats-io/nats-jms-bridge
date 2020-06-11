@@ -13,26 +13,24 @@ object ClasspathUtils {
 
 
     fun paths(clazz: Class<*>, resource: String): List<Path> {
-        var resource = resource
+
         var list = pathsFromClassLoader(Thread.currentThread().contextClassLoader, resource)
         if (list.isEmpty()) {
             list = pathsFromClassLoader(clazz.classLoader, resource)
         }
         if (list.isEmpty() && resource.startsWith("/")) {
-            resource = resource.substring(1)
-            return paths(clazz, resource)
+            return paths(clazz,  resource.substring(1))
         }
         return list
     }
 
 
     private fun classpathResources(loader: ClassLoader, resource: String): List<URL> {
-        var resource = resource
+
         val resources = loader.getResources(resource)
         val list: List<URL> = resources.toList()
         if (list.isEmpty() && resource.startsWith("/")) {
-            resource = resource.substring(1)
-            return classpathResources(loader, resource)
+            return classpathResources(loader, resource.substring(1))
         }
         return list
     }
@@ -81,7 +79,7 @@ object ClasspathUtils {
     }
 
     private fun uriToPath(uri: URI): Path {
-        var thePath: Path? = null
+        val thePath: Path?
         if (isWindows) {
             var newPath = uri.path
             if (newPath.startsWith("/C:")) {

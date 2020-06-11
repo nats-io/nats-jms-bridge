@@ -215,6 +215,8 @@ tasks {
 
         implementation("com.github.ajalt:clikt:2.7.1")
 
+        implementation("io.nats.bridge:nats-jms-bridge-message:0.9.0-beta5")
+
 
     }
 }
