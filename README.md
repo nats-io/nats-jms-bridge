@@ -49,28 +49,13 @@ This all happens async.
 ![Admin Console Swagger Open API](https://user-images.githubusercontent.com/382678/82646981-5598d580-9bca-11ea-9bc8-5dfa6875c61e.png)
 
 
-# 0.4.0-beta1 NATS JMS/MQ Bridge
+# NATS JMS/MQ Bridge
 
-
-This release is an [beta release](https://en.wikipedia.org/wiki/Software_release_life_cycle). This [beta release](https://stackoverflow.com/questions/40067469/what-is-the-difference-between-alpha-and-beta-release) lacks full perf testing and full integration testing. Efforts were made to improve performance. You can now use `workers` and `tasks` as part of the bridge configuration to speed up throughput.  
 
 In the core NATS bridge, there are working integration tests to Bridge REQUEST/REPLY queues between NATS and IBM MQ as well as ActiveMQ JMS. This bridging is bi-directional. The bridge can perform a QUEUE to QUEUE FORWARD or a REQUEST/REPLAY DELEGATION. The bridge can also copy JMS headers from NATS to JMS and back.
 
 The NATS JMS/MQ Bridge is broken up into two parts. The `admin` and the `core` lib. The `admin` is written with Spring Boot and consists of an executable jar file, an application zip file, and now a docker container. The docker container uses NGINX to do SSL/TLS termination.
 
-
-## Improvements
-
-* More load and perf testing
-* Added the concepts of workers and tasks as part the bridge config to increase throughput (this part was completely rewritten from the alpha1 release).
-* Health check now actually check status of bridge runner.
-* NGINX set up with TLS termination.
-* Added a docker container for NATS admin.
-* Improved IBM MQ support via queue models for faster request/reply throughput.
-* Added support for IBM MQ QMODEL and DSP config for QMODEL Name and QMODEL prefix params to JNDI context.
-* Created IBM MQ image with QMODEL for request/reply with the correct authority added to users to create dynamic reply queues.
-* NATS TLS config support added.
-* Improved error handling around slow consumers and connection exceptions.
 
 
 ## Adding Workers and Tasks
@@ -94,8 +79,7 @@ bridges:
   tasks : 5
 ```
 
-See [Admin guide](https://github.com/nats-io/nats-jms-mq-bridge/tree/master/admin) for information on how to set up bridges and import new
-bridge data with csv files.
+See [Admin guide](https://github.com/nats-io/nats-jms-mq-bridge/tree/master/admin) for information on how to set up bridges and import new bridge data with csv files.
 
 ## Bridge works with JMS and NATS
 The NATS bridge works with JMS and NATS.
@@ -103,19 +87,6 @@ The NATS bridge works with JMS and NATS.
 It has been tested with ActiveMQ and IBM MQ.
 As part of the install, you can run this bridge against a docker images that has IBM MQ installed.
 
-
-## Artifacts
-
-Artifact | Description | Type
--- | -- | --
-nats-bridge-admin-0.4.0-beta1.tar | Application with start up script and lib folder. Start up scripts, utilities and libs expanded. | Spring Boot App
-nats-bridge-admin-0.4.0-beta1.zip | Application with start up script and lib folder. Start up scripts, utilities and libs expanded. | Spring Boot App
-nats-bridge-admin-boot-0.4.0-beta1.tar | Application with start up script and lib folder. Single executable jar files. No libs. | Spring Boot App
-nats-bridge-admin-boot-0.4.0-beta1.zip | Application with start up script and lib folder. Single executable jar files. No libs. | Spring Boot App
-nats-bridge-admin-0.4.0-beta1-boot.jar | Executable jar file | Spring Boot App
-nats-bridge-admin-0.4.0-beta1.jar | Admin classes only | Lib
-nats-jms-bridge-0.4.0-beta1.jar | Core Bridge Classes Only | Lib
-nats-jms-bridge-0.4.0-beta1.pom | Maven POM file for Bridge | Manifest
 
 # The Admin Console uses Open API REST
 
@@ -168,7 +139,7 @@ SET AUTHREC PROFILE('DEV.**') PRINCIPAL('app') OBJTYPE(TOPIC) AUTHADD(PUB,SUB)
 Note that the user app has `DSP` authority added to access the `DEV.MODEL` queue model,.
 
 
-## The Install guide for 0.4.0-beta1 NATS JMS/MQ Bridge
+## The Install guide for NATS JMS/MQ Bridge
 
 Use this install guide to download and test the NATS JMS/MQ Bridge with IBM MQ.
 
@@ -201,12 +172,10 @@ The command `bin/build.sh localdev` uses `docker-deploy` to deploy IBM MQ, NATS 
 ## Run the application
 
 ```sh
-cd nats-bridge-admin-0.4.0-beta1
+cd nats-bridge-admin-*
 
 mkdir config
 
-## Copy the test servers the correspond to the docker compose earlier
-mv nats-bridge.yaml config/
 
 ## Run the server
 bin/nats-bridge-admin
@@ -269,24 +238,64 @@ To use this tool you must install `jq`.
 https://stedolan.github.io/jq/
 (brew install jq or sudo apt-get install jq or https://stedolan.github.io/jq/download/)
 
+
+If you did not run the integration test then you need to generate the token file before you use the admin.
+
+
+## To generate a token for a user use `generate-token`
+
+```sh
+  $ pwd
+  /opt/synadia/nats-bridge/admin
+
+  $ bin/admin.sh generate-token $SUBJECT $PUBLIC_KEY $SECRET
+```
+
+When you first run the NATS Bridge Admin for JMS/IBM MQ, it creates the following starter config files:
+
+* `config/initial-nats-bridge-logins.yaml` Login config file with unencoded password (delete after set up)
+* `config/nats-bridge-logins.yaml` Login config file with password encoded.
+* `config/nats-bridge.yaml` Bridge configuration file.
+
+To create a token file you need to use the `subject`, `publicKey` and `secretKey` out of `config/initial-nats-bridge-logins.yaml`.
+
+
+#### config/initial-nats-bridge-logins.yaml
+
+```yaml
+---
+logins:
+- subject: "admin"
+  secret: "sk-4bfa1d86-0ac0-48a5-8ae1-626a272f12c2"
+  publicKey: "pk-55145a05-ec8e-4c33-8b84-b6331f500f2c"
+  roles:
+  - name: "Admin"
+roles:
+- name: "Admin"
+- name: "User"
+
+```
+
+Once you know the parameters above, you can generate the admin token as follows.
+
+#### To generate the admin.token do this.
+
+```
+SUBJECT=admin
+SECRET=sk-4bfa1d86-0ac0-48a5-8ae1-626a272f12c2
+PUBLIC_KEY=pk-55145a05-ec8e-4c33-8b84-b6331f500f2c
+bin/admin.sh generate-token $SUBJECT $PUBLIC_KEY $SECRET
+```
+
 ## To set up admin tool for the first time from the NATS Bridge Admin directory run `set-up-admin`
 
 ```sh
-
-  $ pwd
-    /opt/synadia/nats-bridge/admin
 
   $ bin/admin.sh set-up-admin
 
 ```
 
-## To generate a token for a user use `generate-token`
 
-```sh
-
-  $ bin/admin.sh SUBJECT PUBLIC_KEY SECRET
-
-```
 ## To check server health run `health`
 
 ```sh

@@ -26,11 +26,12 @@ class LoginRepoFromPath(private val configFile: Path = File("./config/nats-bridg
     }
 
     private fun readConfig(): LoginConfig {
-        if (!Files.exists(configFile) && Files.isWritable(configFile)) {
+        if (!Files.exists(configFile) && Files.isWritable(configFile.parent)) {
             saveConfig(defaultLoginConfig)
             val backupFile = File(configFile.parent.toFile(), "initial-nats-bridge-logins.yaml")
             val backup = LoginRepoFromPath(configFile = backupFile.toPath(), mapper = mapper, systemSecret = "")
-            jacksonObjectMapper().writeValue(backupFile, defaultLoginConfig)
+            val backupJsonFile = File(configFile.parent.toFile(), "initial-nats-bridge-logins.json")
+            jacksonObjectMapper().writeValue(backupJsonFile, defaultLoginConfig)
             backup.saveConfig(defaultLoginConfig)
         }
         return mapper.readValue(PathUtils.read(configFile))
