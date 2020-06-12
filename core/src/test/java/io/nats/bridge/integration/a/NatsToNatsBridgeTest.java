@@ -144,10 +144,10 @@ public class NatsToNatsBridgeTest {
 
 
     @Test
-    public void test100KMore() throws Exception {
-        resultSignal = new CountDownLatch(100_000);
-        serverStopped = new CountDownLatch(100_000);
-        bridgeStopped = new CountDownLatch(100_000);
+    public void test10KMore() throws Exception {
+        resultSignal = new CountDownLatch(10_000);
+        serverStopped = new CountDownLatch(10_000);
+        bridgeStopped = new CountDownLatch(10_000);
         final AtomicInteger counter = new AtomicInteger();
 
         runServerLoop();
@@ -155,14 +155,14 @@ public class NatsToNatsBridgeTest {
 
 
         for (int y = 0; y < 4; y++) {
-            for (int i = 0; i < 25_000; i++) {
+            for (int i = 0; i < 2_500; i++) {
                 clientMessageBus.request("RICK", s -> {
                     responseFromServer.set(s);
                     resultSignal.countDown();
                     counter.incrementAndGet();
                 });
             }
-            Thread.sleep(1000);
+            Thread.sleep(200);
         }
 
         for (int i = 0; i < 1000; i++) {
@@ -170,7 +170,7 @@ public class NatsToNatsBridgeTest {
             clientMessageBus.process();
             if (i % 100 == 0) {
                 System.out.println("COUNT " + counter.get());
-                if (counter.get() == 100_000) {
+                if (counter.get() == 10_000) {
                     break;
                 }
             }
@@ -179,7 +179,7 @@ public class NatsToNatsBridgeTest {
 
         assertEquals("Hello RICK", responseFromServer.get());
 
-        assertEquals(100_000, counter.get());
+        assertEquals(10_000, counter.get());
 
         stopServerAndBridgeLoops();
     }

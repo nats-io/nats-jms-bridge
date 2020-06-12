@@ -217,6 +217,8 @@ tasks {
 
         implementation("io.nats.bridge:nats-jms-bridge-message:0.9.0-beta5")
 
+        implementation("io.nats.bridge:nats-jms-bridge:0.9.0-beta5")
+
 
     }
 }

@@ -70,6 +70,7 @@ public class MessageBridgeImpl implements MessageBridge {
     private int doProcess(Optional<Message> receiveMessageFromSourceOption) {
         int count = 0;
 
+
         if (requestReply) {
             if (receiveMessageFromSourceOption.isPresent()) count++;
 

@@ -56,13 +56,17 @@ public class MessageBridgeTasksManagerImpl implements MessageBridgeTasksManager 
 
     @Override
     public void start() {
-        for (int worker = 0; worker < workers; worker++) {
-            List<MessageBridge> bridges = new ArrayList<>(tasks);
-            for (int task = 0; task < tasks; task++) {
-                bridges.add(bridgeBuilder.apply(createName(task, worker)));
+        try {
+            for (int worker = 0; worker < workers; worker++) {
+                List<MessageBridge> bridges = new ArrayList<>(tasks);
+                for (int task = 0; task < tasks; task++) {
+                    bridges.add(bridgeBuilder.apply(createName(task, worker)));
+                }
+                final BridgeTaskRunner runner = createBridgeTaskRunner(worker, bridges);
+                pool.submit(runner::process);
             }
-            final BridgeTaskRunner runner = createBridgeTaskRunner(worker, bridges);
-            pool.submit(runner::process);
+        }catch (Exception ex) {
+            logger.error("Error starting message bridge task manager", ex);
         }
     }
 

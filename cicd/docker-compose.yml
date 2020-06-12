@@ -4,7 +4,7 @@ version: '3'
 services:
   nats-server:
     build:
-      context: ../cicd/bridge-nats-server
+      context: ../cicd/bridge-nats-server-tls
     ports:
       - "4222:4222"
       - "8222:8222"

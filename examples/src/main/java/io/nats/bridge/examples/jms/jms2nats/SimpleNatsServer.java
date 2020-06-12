@@ -1,5 +1,6 @@
 package io.nats.bridge.examples.jms.jms2nats;
 
+import io.nats.bridge.examples.ssl.SslContextBuilder;
 import io.nats.client.*;
 
 import java.nio.charset.StandardCharsets;
@@ -10,7 +11,17 @@ public class SimpleNatsServer {
     public static void main(final String[] args) {
         try {
 
-            final Options.Builder builder = new Options.Builder().server("nats://localhost:4222");
+            final SslContextBuilder sslContextBuilder = new SslContextBuilder();
+            sslContextBuilder.withTruststorePath("../certs/truststore.jks");
+            sslContextBuilder.withKeystorePath("../certs/keystore.jks");
+            sslContextBuilder.withKeyPassword("cloudurable");
+            sslContextBuilder.withStorePassword("cloudurable");
+
+            var sslContext = sslContextBuilder.build();
+
+            final Options.Builder builder = new Options.Builder().sslContext(sslContext)
+                    .server("nats://localhost:4222");
+
             final Connection connect = Nats.connect(builder.build());
             final Subscription subscription = connect.subscribe("natsClientRequests");
             final Duration requestTimeoutDuration = Duration.ofSeconds(30);

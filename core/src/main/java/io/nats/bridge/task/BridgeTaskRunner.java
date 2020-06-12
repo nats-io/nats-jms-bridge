@@ -29,6 +29,7 @@ public class BridgeTaskRunner {
         boolean pause = false;
         try {
             //Process
+
             while (processNotifier.keepRunning()) {
                 for (int index = 0; index < 100; index++) { //reduce calling atomic by 100x
                     for (MessageBridge messageBridge : messageBridges) {
@@ -54,6 +55,10 @@ public class BridgeTaskRunner {
         } catch (final Exception ex){
             logger.error(String.format("Bridge Task Runner %s Stopped by Exception %s", name, ex.getClass().getSimpleName()), ex);
             processNotifier.notifyStoppedByError(ex);
+        }
+        catch (final Throwable ex){
+            logger.error(String.format("Bridge Task Runner %s Stopped by Exception %s", name, ex.getClass().getSimpleName()), ex);
+            //processNotifier.notifyStoppedByError(ex);
         }
     }
 }
