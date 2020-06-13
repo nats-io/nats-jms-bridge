@@ -233,14 +233,25 @@ Errors? false
 
 
 ## Using the command line tools
+
 To use this tool you must install `jq`.
 `jq` is a lightweight command-line JSON processor.
 https://stedolan.github.io/jq/
 (brew install jq or sudo apt-get install jq or https://stedolan.github.io/jq/download/)
 
 
+
 If you did not run the integration test then you need to generate the token file before you use the admin.
 
+## To set up admin tool for the first time from the NATS Bridge Admin directory run `set-up-admin`
+
+```sh
+
+  $ bin/admin.sh set-up-admin
+
+```
+This will create the admin token under `config/admin.token`. This token is a JWT token that gets used
+by the admin. Once you generate the admin.token, you may want to delete the `config/initial-nats-bridge-logins.yaml` and `config/initial-nats-bridge-logins.json` files. To generate a admin.token for another user follow the procedures in the next section.  
 
 ## To generate a token for a user use `generate-token`
 
@@ -287,13 +298,6 @@ PUBLIC_KEY=pk-55145a05-ec8e-4c33-8b84-b6331f500f2c
 bin/admin.sh generate-token $SUBJECT $PUBLIC_KEY $SECRET
 ```
 
-## To set up admin tool for the first time from the NATS Bridge Admin directory run `set-up-admin`
-
-```sh
-
-  $ bin/admin.sh set-up-admin
-
-```
 
 
 ## To check server health run `health`

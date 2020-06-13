@@ -50,5 +50,5 @@ clusters:
         io.nats.client.tls.truststore.path: ../certs/truststore.jks
         io.nats.client.tls.keystore.path: ../certs/keystore.jks
         io.nats.client.tls.algorithm: SunX509
-        io.nats.client.tls.store.password: cloudurable
-        io.nats.client.tls.trust.password: cloudurable
+        io.nats.client.tls.keystore.password: cloudurable
+        io.nats.client.tls.truststore.password: cloudurable
