@@ -1,25 +1,40 @@
 package io.nats.bridge.examples.ssl;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public class DecodeCertBase64 {
 
-    static String line = "MO+/vQsZAgEDMO+/vQrvv70GCSrvv71I77+977+9CgEHAe+/ve+/vQrvv70E77+9Cu+/vTDvv70K77+9MO+/vQVfBgkq77+9SO+/ve+/vQoBBwHvv73vv70FUATvv70FTDDvv70FSDDvv70FRAYLKu+/vUjvv73vv70KAQwKAQLvv73vv70E77+9MO+/vQTvv70wKQYKKu+/vUjvv73vv70KAQwBAzAbBBR177+9PCHvv73vv73vv70XUu+/vUwK77+9YiYW77+977+977+977+9AgMA77+9UATvv70E77+9Y1wY77+977+9Ae+/vR/Uq30+NO+/vVASIO+/vd6B77+977+9Te+/ve+/ve+/vV7vv73vv70C77+9DxLvv71dGAbvv70MJO+/ve+/ve+/ve+/ve+/vRpyLWDvv73qlIsV77+9CA7vv70H77+977+977+9Qu+/vVTvv73vv73vv73vv71DAu+/ve+/vRFY77+9YwJj77+977+9He+/ve+/ve+/ve+/ve+/ve+/ve+/ve+/vWnvv73EqRHvv73vv73vv73QtzHvv70zbnrvv70R77+9TBLvv73vv71YUO+/vWREzbwgK0Pvv73vv70bMBRyZSnvv70CQ24u77+9A2gt77+9CO+/ve+/ve+/ve+/vX1v77+9T1B977+977+977+9YO+/vSbvv71J77+9MzRFSNm9Zu+/vVzvv73vv71aKntz77+977+977+977+977+977+977+977+977+9Eu+/vR/vv73vv70f77+977+9Hu+/vSHvv73vv73vv73Sge+/ve+/vQXvv71L77+9Bu+/vRM4BO+/vQHvv73vv70l77+977+977+9X++/vXcJfu+/vRLvv71L77+9Re+/vT1777+9dRp+P23vv73vv73vv73vv706cgoW77+977+9Iu+/vWc7Te+/vUnvv73vv73vv73vv73vv73vv73VsErvv73vv71B77+977+9aHrvv70DfO+/ve+/vTHvv70w77+9TFlaBQpi77+9Au+/ve+/ve+/vR3vv73vv71F77+977+9TVfvv73bggJE77+977+93Z7vv71Ac1fJgTfvv73vv70HAu+/vcyxahRYS++/vT7vv73vv70uWyoYNe+/ve+/vUss77+977+9U++/ve+/vR8H77+977+9EmXFo37vv71F77+93K9eTu+/vUjvv71g77+977+977+9bmvvv73vv73vv716Unrvv71bSX3vv70K77+977+977+9Vu+/vRFz77+977+9YxdhA++/ve+/ve+/vTx277+977+9J++/vTTvv70v77+9AC4f77+977+9We+/vSZ+5LSv77+9Zjk477+977+977+9XhLvv70677+977+977+977+9aATvv71eXnDvv71AS++/ve+/ve+/vQl477+977+977+977+9L++/ve+/vRXvv70xI++/vSESMe+/vXFq77+9anvvv73vv73vv705b++/vX7vv73vv70T77+9D++/vWYL77+977+92a0977+977+9Uu+/vWsWZO+/ve+/ve+/ve+/vUzvv70kHu+/vRceKMKP77+977+9ei0C77+9eO+/vQZsE0kd77+9E++/vVfvv73vv73vv73vv73ZsjXvv73vv73vv70JUO+/ve+/ve+/vWo077+977+9Lw9X77+9VFjvv71QQCgkBMeXbVVLIwHvv71Y77+977+977+9TALvv73vv73vv73vv71d77+9VlDvv71RFu+/vVzvv73vv71WWu+/vQrvv70Kxr3vv73XgXQA77+9TVXvv71UF++/vUIKYe+/vUhf77+977+9UCPvv71GZO+/ve+/vcKN77+9K++/vR0w77+9Tkbvv73vv73vv71I77+9P0zvv73vv73vv73vv70xSu+/vQAK77+955mgJ++/vVTvv71IMe+/ve+/ve+/vU3vv71P77+9aTvvv73vv73vv73vv70977+9F++/vVl077+977+9KTpCT1PHju+/ve+/vXvvv71277+9TXjvv71m77+9EltN77+9OO+/ve+/ve+/vVUb77+977+9MV3Vs++/vSVD77+9Yu+/vXgT77+977+977+9QjtYK391X34G77+9ZO+/vRdy77+9dO+/vR/vv707KO+/ve+/ve+/ve+/vXQh77+9G2zvv70rF++/vXDvv71rGtCH77+9Oe+/vQXvv70Q77+9V++/vRBsNO+/vR1uMe+/vSrvv73vv73vv73vv73vv71Hf++/vUDSr++/ve+/ve+/vWzvv71+77+9fu+/vVVDce+/vdmT77+9TSYBd29o77+977+9Ie+/vTE/77+9He+/vSzvv71W77+9GFvvv73vv71V77+9Slfvv73vv73XrRRY77+9L++/vTzvv70zJu+/vXzvv70S77+977+977+977+9Le+/vd+e77+9A2E1F3Dvv70oSe+/vVgOfO+/vUdb77+977+977+9MTNG77+9260/77+9UE5Syahg77+977+977+9V++/vSs277+9SHcZIgAqBu+/vXzvv73vv71177+977+9Yu+/vQrvv73vv73vv70B77+9YO+/vVfLjBZb77+9LmPUnH1kfGQm77+9EO+/vVXvv71j77+977+977+9CxBn77+9Oe+/vWco77+977+977+977+9VNOx24J7fh7vv71rSwAL77+9bu+/ve+/vVzvv70U77+977+977+9NHZc77+9CO+/ve+/vQ45eO+/vQzvv73vv73vv71977+9Hgrvv73vv73vv73vv70Z77+977+9QyHvv73vv73vv70X77+9I3xTEe+/vX3vv70H77+977+977+9Au+/vdiu77+977+9IigS77+977+9Du+/vRhl77+977+977+9E2nvv702aVZsOe+/vR8V77+9dQjvv73vv70BaCRW77+977+977+977+9eQfvv70Ka23vv70R77+9DlRm77+977+9XO+/vRpzZlx+77+977+977+9FWvvv73vv73vv73vv71777+9He+/vWLvv703O0dl77+9GDnvv73vv70IQe+/ve+/ve+/vRvvv73vv73vv71h77+9Be+/vSFnGCN777+9OC3dh0bvv73vv73vv70v77+977+9JO+/ve+/ve+/ve+/ve+/ve+/vQfvv71eSxnvv713LU/vv70L77+9AHkDU++/vVvvv70l77+9YVAq77+9Zwvvv70WSgkI77+9Iu+/vQggARgY77+9IO+/vdOT77+9We+/ve+/vVzJg++/ve+/vRBJFQQ077+9LO+/vQYuXDpU77+977+9XjE2MBEGCSrvv71I77+977+9CgEJFDEEHgIAMTAhBgkq77+9SO+/ve+/vQoBCRUxFAQSVGltZSAxNTkxNzI5MzQ4MTA1MO+/vQVUBgkq77+9SO+/ve+/vQoBBwbvv73vv70FRTDvv70FQQIBADDvv70FOgYJKu+/vUjvv73vv70KAQcBMCkGCirvv71I77+977+9CgEMAQYwGwQU77+9NVxNUVbvv73vv70W77+977+977+977+9TFfvv70TL1gSAgMA77+9UO+/ve+/vQUAxLjvv73nlIfvv73vv73DmTzvv70Zau+/vQ7vv73vv70IT3nvv73vv71M2pdj77+9GHLvv73vv73vv73vv70U77+977+9Ckfvv71Q77+9G++/ve+/vSTvv71u0JkKNiZq77+977+977+977+977+9JAFY77+9ezB577+9Se+/vTbvv70J77+9LO+/ve+/ve+/vWA0LO+/vcS077+977+977+977+9G++/vT/vv73vv70HVC13UQYs77+9W++/vUzvv71x77+977+977+9RG/vv73vv71tA1BY77+9PO+/vX7vv70V77+9ES/vv73vv73vv73vv71c77+9I++/vS9edQDDiR0a77+977+977+977+9WO+/vWVGOu+/ve+/vSHvv70j77+977+9Mz5ZAu+/vTIPBe+/vRRaFGXvv73vv73vv73vv73vv73vv71y77+977+9Te+/vXTvv70l77+977+977+9MwME77+977+9B++/vWN40KLvv71FQA9B77+9IO+/vVYhWO+/vT3vv73vv70yL34yJe+/vSdwB++/vWPvv71677+9MEx4MSvvv71a77+977+9DC5cS++/vScy77+9dO+/vQ7vv70Fbe+/vRd677+9My7vv70W77+92Z/vv70O77+9ee+/vUMEfO+/ve+/ve+/ve+/ve+/ve+/ve+/vW/vv71277+9U++/ve+/vTDvv73JpQnvv70nOxTvv71qSe+/ve+/vW/vv73vv71d77+9bu+/ve+/vSnvv73vv73vv73vv71N77+977+9Se+/vVt2A++/vRdc77+9XO+/ve+/ve+/ve+/vS4v77+9ewrvv73vv73vv71k77+977+9Ye+/vQl4Ue+/vT/vv71+bR1TE9+Q77+9Qyjvv70Z77+977+977+9Su+/vW8dGQpj77+9Pu+/vXDvv70KOXMY77+9EUvvv70sb04f77+977+977+9RHEm77+977+9Uzk7LwXvv70oSO+/ve+/ve+/vQ/vv71X77+977+977+9BxgjJSQffxhu77+9STZEDO+/ve+/vULvv71cGFBby41U77+9Z17vv71577+977+9Mnc+ElUZG1gH77+977+9FF/vv73vv73vv73vv73vv73vv73vv70k77+92ofvv73vv70+77+9PBsGGe+/ve+/vRpRTjvvv73vv71Yx61477+977+9LO+/vV/vv70rM++/vRXvv73Qq++/ve+/vUDvv73vv71xGk9c77+9WXQf77+977+977+977+977+9A1tU77+9FO+/vWfvv73vv71U77+977+9Ae+/ve+/vQDvv73vv71c77+9eu+/vQPvv71r77+977+9G++/vX7vv70bfRvvv70r77+9CCYXUEHvv70Z77+977+977+9YAEx77+977+9Vxhz77+977+977+9fu+/vX/vv73vv711J++/vTRbd9WBPwLvv73vv71h77+9Eh8677+977+9Pi3vv73vv70C77+977+9PDV477+977+9RUjvv73vv70177+9J3Dvv71N77+977+977+9UTjvv71GfBF+LWQvS0Tvv71e77+977+9Q++/vTIKSe+/vX4cMVHvv73vv71h77+9bwgKKe+/ve+/vT/vv73vv73vv73vv73vv73vv71JVRgbOe+/vQo+PA43OBZFeWQa77+9WhIV77+977+977+9Hk7vv73vv73Ei2Ru77+9OdqRF++/vTvvv70W77+9Ld67A3ITAe+/vXvvv71ERM+K77+9TTbvv70Y77+977+9AiXvv705Te+/ve+/ve+/vTEBbu+/vTJdUVV/77+9Je+/ve+/vcarYxbvv71JCx3vv70GMe+/vTnvv71bZmYFHu+/vVvvv70lSu+/ve+/ve+/vQtXPwYMDF7vv73vv70z77+9QhFbUO+/ve+/vQIXQmXvv70FfG9bIO+/vT4l77+9Wu+/ve+/vUDvv73vv70JcVjvv70z77+977+9Qu+/vS7vv71jRRTvv70jFO+/ve+/ve+/vUXvv71U243vv73vv70F77+977+9fu+/ve+/vWPvv73vv73vv71D77+977+977+9A++/vShk77+977+977+9A++/vWcPR++/vR8sX3bvv73vv71W77+977+9Z++/vW7vv73vv70fcT1y77+9T++/vV5LZ++/vV0f77+9VO+/vThuS0ZvUy7vv73vv73vv73vv70F77+9HXrvv70E77+9R++/vVA177+9Z++/ve+/vU0OdO+/ve+/vUhqWu+/vW/vv71FeAgFXXoUXD3vv71AOEEjB2hK77+977+977+9wo/vv73vv73vv73vv73vv716QHwg77+977+977+9Sk7vv73vv71ANzhmWu+/vSHvv71577+9FO+/vQPvv701Ce+/ve+/ve+/ve+/ve+/ve+/ve+/ve+/vSDvv70P77+9BHQmRjXvv73vv71mEu+/vTTvv71u77+9TFJOVO+/ve+/vVvvv70n77+9I17vv73vv71dWSVU77+977+9Im/vv71D77+977+9M2jEhe+/vcaNMu+/ve+/vV8577+9ypYV77+977+9F1Hvv70977+9Mu+/ve+/ve+/vT/vv73vv73vv73vv73vv73vv71h77+977+977+9PU/vv73vv71R77+977+977+977+977+9CiDvv70YZe+/vQnvv70wNu+/ve+/vXgQcnLvv71K5YKeB++/ve+/ve+/vTZg77+9e++/vcmVau+/vWxKM++/vTxe77+9An/vv73vv73vv71I77+9Oe+/vTkPI8yj77+977+9E++/vQge77+977+9xrjvv73vv711QO+/vRhO77+9agYZ77+9UXQjCsaYEu+/ve+/vVHvv73vv73vv71977+9S3zvv70u77+9B++/ve+/ve+/vWI9S2Dvv71c3osZ77+977+9yYAhEO+/ve+/ve+/ve+/vVpHD++/ve+/vTvvv73vv70a77+977+9Ru+/ve+/ve+/vUFSVls2P++/vTLEh3Xvv70Ffu+/vVfvv70jTu+/vX5lRSTvv71777+9AWXvv73vv70z77+9Oe+/ve+/vR/vv73vv73Ote+/ve+/ve+/vUgG77+9SO+/ve+/ve+/vd6v77+9STA+MCEwCQYFKw4DAhoFAAQU77+977+977+9D++/vREzBe+/vTzvv706ae+/vS7vv70377+977+9MgQUPB7vv70sZ++/ve+/vSZYdO+/ve+/ve+/vRRM77+977+977+977+9IwIDAe+/ve+/vQ==";
+    public static void main(String[] args) throws Exception {
 
-    public static void main(String[] args) {
-        try {
-            String decodedCert = new String(Base64.getDecoder().decode(line));
-            System.out.println(decodedCert);
-            File fileKeystore = new File("../certs/keystore_2.jks");
-            FileWriter fw = new FileWriter(fileKeystore);
-            fw.write(decodedCert);
-            fw.close();
+        final File binFile = new File("../certs/keystore.jks");
+        final FileInputStream inputStream = new FileInputStream(binFile);
+
+        byte[] bytes = inputStream.readAllBytes();
+
+        byte[] encodedBytes = Base64.getEncoder().encode(bytes);
+
+        System.out.println(new String(encodedBytes, StandardCharsets.UTF_8));
+
+        byte[] decodedBytes = Base64.getDecoder().decode(encodedBytes);
+
+
+        if (bytes.length != decodedBytes.length) {
+            throw new IllegalStateException("Did not match");
         }
-        catch (IOException ex){
-           ex.printStackTrace();
+
+        for (int index = 0; index < bytes.length; index++) {
+            if (decodedBytes[index] != bytes[index]) {
+                System.out.println("Index " + index + " not equal ");
+                throw new IllegalStateException("Did not match " + decodedBytes[index] + "!=" + bytes[index] + " at " + index);
+            }
         }
+
+        System.out.println("Equal");
+        inputStream.close();
+
     }
 }
+

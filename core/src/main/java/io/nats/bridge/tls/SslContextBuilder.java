@@ -28,7 +28,7 @@ public class SslContextBuilder {
         return trustStoreValueEnvVariable;
     }
 
-    public SslContextBuilder setTrustStoreValueEnvVariable(String trustStoreValueEnvVariable) {
+    public SslContextBuilder withTrustStoreValueEnvVariable(String trustStoreValueEnvVariable) {
         this.trustStoreValueEnvVariable = trustStoreValueEnvVariable;
         return this;
     }
@@ -37,7 +37,7 @@ public class SslContextBuilder {
         return keyStoreValueEnvVariable;
     }
 
-    public SslContextBuilder setKeyStoreValueEnvVariable(String keyStoreValueEnvVariable) {
+    public SslContextBuilder withKeyStoreValueEnvVariable(String keyStoreValueEnvVariable) {
         this.keyStoreValueEnvVariable = keyStoreValueEnvVariable;
         return this;
     }
@@ -46,7 +46,7 @@ public class SslContextBuilder {
         return trustStorePathEnvVariable;
     }
 
-    public SslContextBuilder setTrustStorePathEnvVariable(String trustStorePathEnvVariable) {
+    public SslContextBuilder withTrustStorePathEnvVariable(String trustStorePathEnvVariable) {
         this.trustStorePathEnvVariable = trustStorePathEnvVariable;
         return this;
     }
@@ -55,20 +55,11 @@ public class SslContextBuilder {
         return keyStorePathEnvVariable;
     }
 
-    public SslContextBuilder setKeyStorePathEnvVariable(String keyStorePathEnvVariable) {
+    public SslContextBuilder withKeyStorePathEnvVariable(String keyStorePathEnvVariable) {
         this.keyStorePathEnvVariable = keyStorePathEnvVariable;
         return this;
     }
 
-    public SslContextBuilder setTruststorePath(String truststorePath) {
-        this.truststorePath = truststorePath;
-        return this;
-    }
-
-    public SslContextBuilder setKeystorePath(String keystorePath) {
-        this.keystorePath = keystorePath;
-        return this;
-    }
 
 
     private static KeyStore loadKeystore(final InputStream in, final char[] password) throws Exception {
@@ -104,16 +95,16 @@ public class SslContextBuilder {
     private void validatePath(String name, String path) {
 
         if (path == null) {
-            throw new IllegalStateException(String.format("%s cannot be null", name));
+            throw new SslContextBuilderException(String.format("%s cannot be null", name));
         }
 
         if (path.trim().isEmpty()) {
-            throw new IllegalStateException(String.format("%s cannot be empty", name));
+            throw new SslContextBuilderException(String.format("%s cannot be empty", name));
         }
 
         File filePath = new File(path);
         if (!filePath.exists()) {
-            throw new IllegalStateException(String.format("%s path must exist", name));
+            throw new SslContextBuilderException(String.format("%s path must exist", name));
         }
 
 
@@ -215,9 +206,9 @@ public class SslContextBuilder {
                     factory.init(store);
                     trustStoreKeyManagers = factory.getTrustManagers();
                 } catch (FileNotFoundException e) {
-                    throw new IllegalStateException("Trust store path not found" + truststorePath, e);
+                    throw new SslContextBuilderException("Trust store path not found" + truststorePath, e);
                 } catch (Exception e) {
-                    throw new IllegalStateException("Unable to load Trust store with path" + truststorePath, e);
+                    throw new SslContextBuilderException("Unable to load Trust store with path" + truststorePath, e);
                 }
             }
         }
