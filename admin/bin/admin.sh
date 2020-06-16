@@ -5,7 +5,13 @@ set -e
 NATS_BRIDGE_HOME="${NATS_BRIDGE_HOME:-$PWD}"
 NATS_ADMIN_HOST="${NATS_ADMIN_HOST:-http://localhost:8080}"
 
-TOKEN=$(cat "$NATS_BRIDGE_HOME/config/admin.token")
+
+TOKEN_FILE="$NATS_BRIDGE_HOME/config/admin.token"
+if test -f "$TOKEN_FILE"; then
+    TOKEN=$(cat "$NATS_BRIDGE_HOME/config/admin.token")
+fi
+
+
 COMMAND="$1"
 
 
@@ -86,7 +92,9 @@ generatetoken | generateToken | generate-token | token | logins-generate-token)
 
   TOKEN=$(curl -k -s  -X POST -d "$JSON" \
     -H "Content-Type: application/json" \
-    "$NATS_ADMIN_HOST/api/v1/login/generateToken | jq -r .token")
+    "$NATS_ADMIN_HOST/api/v1/login/generateToken" | jq -r .token)
+
+
   echo "$TOKEN" >config/admin.token
   echo "$TOKEN"
   ;;

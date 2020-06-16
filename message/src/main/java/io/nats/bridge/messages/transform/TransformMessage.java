@@ -1,4 +1,4 @@
-package io.nats.bridge.transform;
+package io.nats.bridge.messages.transform;
 
 import io.nats.bridge.messages.Message;
 
@@ -24,7 +24,7 @@ public interface TransformMessage {
      * @param inputMessage message to be transformed.
      * @return the new transformed message.
      */
-    Message transform(Message inputMessage);
+    TransformResult transform(Message inputMessage);
 
     /**
      * Order of importance.

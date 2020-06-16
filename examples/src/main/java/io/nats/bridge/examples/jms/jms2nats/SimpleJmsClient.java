@@ -12,8 +12,8 @@ public class SimpleJmsClient {
     public static void main (String[] args) {
         try {
 
-            final JmsBuildUtils jmsBuildUtils = new JmsBuildUtils().withDestinationName("dynamicQueues/client-requests");
-                    //.withUserNameConnection("cloudurable").withPasswordConnection("cloudurable");
+            final JmsBuildUtils jmsBuildUtils = new JmsBuildUtils().withDestinationName("dynamicQueues/client-requests")
+                    .withUserNameConnection("cloudurable").withPasswordConnection("cloudurable");
             final Session session = jmsBuildUtils.getSession();
             final MessageProducer messageProducer = jmsBuildUtils.getProducerSupplier().get();
             final Destination replyQueue = session.createTemporaryQueue();

@@ -22,6 +22,7 @@ import io.nats.bridge.jms.support.JMSMessageBusBuilder;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.nats.support.NatsMessageBusBuilder;
+import io.nats.bridge.tls.SslContextBuilder;
 
 import javax.jms.*;
 import java.io.IOException;
@@ -31,7 +32,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+
+
+
 public class TestUtils {
+
+
     public static MessageBus getMessageBusJms(final String name, final String topicPostFix) {
         final String queueName = "dynamicQueues/message-only-" + topicPostFix;
         final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName).withName("JMS_" + name);
@@ -44,7 +50,7 @@ public class TestUtils {
             final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder()
                     .withName("IBM_MQ_" + name).useIBMMQ().withDestinationName("DEV.QUEUE.1")
                     .withResponseDestinationName("DEV.QUEUE.2");
-             jmsMessageBusBuilder.withUserNameConnection("app").withPasswordConnection("passw0rd");
+            jmsMessageBusBuilder.withUserNameConnection("app").withPasswordConnection("passw0rd");
             if (src) {
                 jmsMessageBusBuilder.asSource();
             }
@@ -122,7 +128,7 @@ public class TestUtils {
                     //.withConnection(connection).withDestination(destination).withResponseDestination(responseDestination)
                     .withName("IBM_MQ_" + name).useIBMMQ().withDestinationName("DEV.QUEUE.1");
             //.withDestinationName("DEV.QUEUE.1");
-                    //.withResponseDestinationName("DEV.QUEUE.2");
+            //.withResponseDestinationName("DEV.QUEUE.2");
             jmsMessageBusBuilder.withUserNameConnection("app").turnOnCopyHeaders().withPasswordConnection("passw0rd");
 
             System.out.println("JNDI " + jmsMessageBusBuilder.getJndiProperties());
@@ -189,9 +195,20 @@ public class TestUtils {
 
     public static MessageBus getMessageBusNats(final String name, final String topicPostFix) throws IOException, InterruptedException {
 
+
+        SslContextBuilder sslContextBuilder = new SslContextBuilder();
+        sslContextBuilder.withTruststorePath("../certs/truststore.jks");
+        sslContextBuilder.withKeystorePath("../certs/keystore.jks");
+        sslContextBuilder.withKeyPassword("cloudurable");
+        sslContextBuilder.withStorePassword("cloudurable");
+        sslContextBuilder.withAlgorithm("SunX509");
+
         final String subject = topicPostFix + "NatsMessageBus";
 
-        final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withName("NATS_" + name).withSubject(subject);
+        final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withSslContext(sslContextBuilder.build())
+                .withName("NATS_" + name).withSubject(subject);
+        natsMessageBusBuilder.withUseTls(true);
+
         natsMessageBusBuilder.getOptionsBuilder().noReconnect();
         return natsMessageBusBuilder.build();
     }

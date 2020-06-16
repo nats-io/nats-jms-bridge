@@ -50,8 +50,8 @@ clusters:
         io.nats.client.tls.truststore.path : /foo/bar/path/truststore.jks
         io.nats.client.tls.keystore.path : /foo/bar/path/keystore.jks
         io.nats.client.tls.algorithm : "SunX509"
-        io.nats.client.tls.store.password: cowboy
-        io.nats.client.tls.trust.password: cowboy
+        io.nats.client.tls.keystore.password: cowboy
+        io.nats.client.tls.truststore.password: cowboy
 
 
   ibmMqCluster:

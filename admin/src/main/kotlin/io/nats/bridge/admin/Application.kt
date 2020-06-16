@@ -82,7 +82,7 @@ class Run(val args : Array<String>) : CliktCommand(help = "Run NATS JMS/IBM MQ B
                     echo("Using configuration file $configFile")
                     configFile.toString()
                 } else {
-                    if (configFile.canWrite()) {
+                    if (configFile.parentFile.canWrite()) {
                         echo("Using configuration file $configFile which does not exist but can be written to")
                         configFile.toString()
                     } else {
