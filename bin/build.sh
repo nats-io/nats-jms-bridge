@@ -9,7 +9,7 @@ build_prometheus_image() {
 }
 
 build_bridge_nats_server_image() {
-  bin/build_deploy_docker.sh "$VERSION" "$DOCKER_NAMESPACE" cicd/bridge-nats-server bridge-nats-server
+  bin/build_deploy_docker.sh "$VERSION" "$DOCKER_NAMESPACE" cicd/bridge-nats-server-tls bridge-nats-server
 }
 
 build_bridge_activemq() {
