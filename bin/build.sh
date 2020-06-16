@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-0.4.0-beta1}
+VERSION=${VERSION:-0.10.0-beta6}
 DOCKER_NAMESPACE=${DOCKER_NAMESPACE:-synadia}
 
 build_prometheus_image() {
@@ -115,7 +115,7 @@ copy_ibm_test_config() {
 docker_deploy_ibm_mq_test() {
   copy_ibm_test_config
   cd cicd
-  docker-compose  -f compose/docker-compose-ibm-test.yml build 
+  docker-compose  -f compose/docker-compose-ibm-test.yml build
   docker-compose  -f compose/docker-compose-ibm-test.yml up
   cd ..
 }

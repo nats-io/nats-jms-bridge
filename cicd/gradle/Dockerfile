@@ -20,6 +20,10 @@ RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install gradle"
 
 ENV JAVA_HOME /root/.sdkman/candidates/java/current
 
+#Build Message
+WORKDIR /usr/app/message
+RUN bash -c "./gradlew wrapper"
+RUN bash -c "./gradlew clean build publishToMavenLocal -x test"
 
 #Build Core
 WORKDIR /usr/app/core
