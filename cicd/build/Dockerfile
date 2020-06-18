@@ -1,7 +1,7 @@
 # Use an existing docker image as a base. This gets used by Travis integration testing to test core
 # This is used to run the travis tests
 # Copies code to this container and then runs gradle build
-FROM synadia/bridge-gradle:0.11.1-beta7
+FROM synadia/bridge-gradle:0.10.0-beta6
 
 #Copying files
 COPY . ./usr/app
@@ -21,4 +21,4 @@ RUN bash -c "./gradlew clean build publishToMavenLocal -x test"
 
 
 WORKDIR /usr/app/core
-CMD bash -c "ls && pwd && sleep 30 && $GRADLE_HOME/bin/gradle clean test"
+CMD bash -c "cd /usr/app/message && $GRADLE_HOME/bin/gradle clean build publishToMavenLocal -x test && cd /usr/app/core && $GRADLE_HOME/bin/gradle clean test"
