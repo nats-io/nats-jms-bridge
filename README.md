@@ -171,7 +171,7 @@ The command `bin/build.sh localdev` uses `docker-deploy` to deploy IBM MQ, NATS 
 
 ## Use the sample JSSL certs
 
-This copies the sample cert files so that the sample bridge config can find the JSSL certs. 
+This copies the sample cert files so that the sample bridge config can find the JSSL certs.
 
 ```sh
 $ pwd
@@ -441,6 +441,8 @@ The file format of the TSV and CSV is described below.
 ## Run an integration test
 
 ```sh
+
+cp sampleConf/nats-bridge.yaml config/nats-bridge.yaml
 
 bin/integration.sh
 
