@@ -179,7 +179,19 @@ val defaultDataModel = NatsBridgeConfig(
 
                         properties = NatsClusterConfig(
                                 host = "localhost",
-                                port = 4222
+                                port = 4222,
+                                config = mapOf(
+                                        "io.nats.client.reconnect.wait" to "3000",
+                                        "io.nats.client.reconnect.max" to "10",
+                                        "io.nats.client.timeout" to "4000",
+                                        "io.nats.client.tls.jssl.enable" to "true",
+                                        "io.nats.client.tls.truststore.path" to "../certs/truststore.jks",
+                                        "io.nats.client.tls.keystore.path" to "../certs/keystore.jks",
+                                        "io.nats.client.tls.algorithm" to "SunX509",
+                                        "io.nats.client.tls.keystore.password" to "cloudurable",
+                                        "io.nats.client.tls.truststore.password" to "cloudurable"
+                                )
+
                         )
                 ),
                 "ibmMqCluster" to Cluster(

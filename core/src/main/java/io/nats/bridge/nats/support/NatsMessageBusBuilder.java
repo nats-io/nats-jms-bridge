@@ -43,8 +43,8 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
     public static final String JSSL_TRUST_STORE_PATH =   PFX_TLS + "truststore.path";
     public static final String JSSL_KEY_STORE_PATH =   PFX_TLS + "keystore.path";
     public static final String JSSL_ALGORITHM =   PFX_TLS + "algorithm";
-    public static final String JSSL_STORE_PWD =   PFX_TLS + "store.password";
-    public static final String JSSL_TRUST_PWD =   PFX_TLS + "trust.password";
+    public static final String JSSL_KEY_STORE_PWD =   PFX_TLS + "keystore.password";
+    public static final String JSSL_TRUST_STORE_PWD =   PFX_TLS + "truststore.password";
 
     public static final String JSSL_KEYSTORE_ENV_VAR_VALUE =   PFX_TLS + "keystore.env_var.value";
     public static final String JSSL_KEYSTORE_ENV_VAR_PATH =   PFX_TLS + "keystore.env_var.path";
@@ -98,12 +98,12 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
                 sslContextBuilder.withTruststorePath(getOptionProperties().getProperty(JSSL_TRUST_STORE_PATH));
             }
 
-            if(getOptionProperties().getProperty(JSSL_TRUST_PWD) != null) {
-                sslContextBuilder.withStorePassword(getOptionProperties().getProperty(JSSL_TRUST_PWD));
+            if(getOptionProperties().getProperty(JSSL_TRUST_STORE_PWD) != null) {
+                sslContextBuilder.withStorePassword(getOptionProperties().getProperty(JSSL_TRUST_STORE_PWD));
             }
 
-            if(getOptionProperties().getProperty(JSSL_STORE_PWD) != null) {
-                sslContextBuilder.withKeyPassword(getOptionProperties().getProperty(JSSL_STORE_PWD));
+            if(getOptionProperties().getProperty(JSSL_KEY_STORE_PWD) != null) {
+                sslContextBuilder.withKeyPassword(getOptionProperties().getProperty(JSSL_KEY_STORE_PWD));
             }
 
             if(getOptionProperties().getProperty(JSSL_ALGORITHM) != null) {

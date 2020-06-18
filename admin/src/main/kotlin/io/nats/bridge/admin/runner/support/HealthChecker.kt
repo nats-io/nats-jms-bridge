@@ -12,7 +12,10 @@ class HealthChecker(private val messageBridgeRunner: MessageBridgeRunner,
     override fun health(): Health {
         return if (!messageBridgeRunner.isHealthy()) {
             Health.down().withDetail("NATS_MessageBridge", "Not Available - Was Started? ${messageBridgeRunner.wasStarted()} Is Running? ${messageBridgeRunner.isRunning()} ${messageBridgeRunner.getLastError()?.message} ${messageBridgeRunner.getLastError()?.javaClass?.simpleName}").build()
-        } else Health.up().withDetail("NATS_MessageBridge", "Available")
+        } else if (!messageBridgeRunner.wasStarted() ) {
+            Health.down().withDetail("NATS_MessageBridge", "Could not start the bridge! Was started? See logs for startup errors. ${messageBridgeRunner.wasStarted()} Is Running? ${messageBridgeRunner.isRunning()} ${messageBridgeRunner.getLastError()?.message} ${messageBridgeRunner.getLastError()?.javaClass?.simpleName}").build()
+        }
+        else Health.up().withDetail("NATS_MessageBridge", "Available")
                 .withDetail("upTimeSeconds", (System.currentTimeMillis() / 1000) - startTime)
                 .build()
     }

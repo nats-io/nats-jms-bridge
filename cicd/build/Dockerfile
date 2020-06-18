@@ -21,4 +21,4 @@ RUN bash -c "./gradlew clean build publishToMavenLocal -x test"
 
 
 WORKDIR /usr/app/core
-CMD bash -c "ls && pwd && sleep 30 && $GRADLE_HOME/bin/gradle clean test"
+CMD bash -c "cd /usr/app/message && $GRADLE_HOME/bin/gradle clean build publishToMavenLocal -x test && cd /usr/app/core && $GRADLE_HOME/bin/gradle clean test"
