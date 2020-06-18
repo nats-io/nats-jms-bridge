@@ -43,10 +43,15 @@ clusters:
       port: 4222
       servers: []
       config:
-        io.nats.client.reconnect.wait: 3000
-        io.nats.client.reconnect.max: 10
-        io.nats.client.timeout: 4000
-        io.nats.client.opentls: true
+        io.nats.client.reconnect.wait: "3000"
+        io.nats.client.reconnect.max: "10"
+        io.nats.client.timeout: "4000"
+        io.nats.client.tls.jssl.enable: "true"
+        io.nats.client.tls.truststore.path: "../certs/truststore.jks"
+        io.nats.client.tls.keystore.path: "../certs/keystore.jks"
+        io.nats.client.tls.algorithm: "SunX509"
+        io.nats.client.tls.keystore.password: "cloudurable"
+        io.nats.client.tls.truststore.password: "cloudurable"
   ibmMqCluster:
     name: "ibmMqCluster"
     properties: !<jms>
