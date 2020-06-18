@@ -9,9 +9,9 @@ NATS MQ JMS Bridge.
 
 
 
-## Early version
+## Beta 7
 
-The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nats.io`.
+The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nats.io`, but queue to queue forwarding should also work. More focus has been put on to IBM MQ's JMS support.
 
 1. A request gets sent to `nats.io` which then sends that request to IBM/MQ/JMS.
 2. Bridge gets the response and sends it back to the original client.
@@ -151,8 +151,8 @@ Use this install guide to download and test the NATS JMS/MQ Bridge with IBM MQ.
 mkdir bridge
 cd bridge
 
-wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.10.0-beta6/nats-bridge-admin-0.10.0-beta6.zip
-unzip nats-bridge-admin-0.10.0-beta6.zip
+wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.11.1-beta7/nats-bridge-admin-0.11.1-beta7.zip
+unzip nats-bridge-admin-0.11.1-beta7.zip
 rm *.zip
 ```
 
@@ -172,18 +172,22 @@ The command `bin/build.sh localdev` uses `docker-deploy` to deploy IBM MQ, NATS 
 ## Run the application
 
 ```sh
+
+cd ..
+pwd
+~/bridge
+
 cd nats-bridge-admin-*
 
-mkdir config
 
 
 ## Run the server
 bin/nats-bridge-admin
 ```
 
-
 #### Output
-```sh
+
+```
 
  .   ____          _            __ _ _
 /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -193,43 +197,24 @@ bin/nats-bridge-admin
 =========|_|==============|___/=/_/_/_/
 :: Spring Boot ::        (v2.2.6.RELEASE)
 
-2020-05-01 03:22:06.114  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Starting ApplicationMain on Richards-MacBook-Pro.local with PID 92828 (/Users/richardhightower/bridge/nats-bridge-admin-0.10.0-beta6/lib/nats-bridge-admin-0.10.0-beta6.jar started by richardhightower in /Users/richardhightower/bridge/nats-bridge-admin-0.10.0-beta6)
+2020-05-01 03:22:06.114  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Starting ApplicationMain on Richards-MacBook-Pro.local with PID 92828 (/Users/richardhightower/bridge/nats-bridge-admin-0.11.1-beta7/lib/nats-bridge-admin-0.11.1-beta7.jar started by richardhightower in /Users/richardhightower/bridge/nats-bridge-admin-0.11.1-beta7)
 2
 ...
 2020-05-01 03:22:09.211  INFO 92828 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
 2020-05-01 03:22:09.214  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Started ApplicationMain in 3.409 seconds (JVM running for 3.688)
+
 ```
 
 
-## Run an integration test
+Note that after you run the bridge for the first time the following files should be present in the config folder.
 
 ```sh
+ls config/*
 
-bin/integration.sh
-
-```
-
-If all goes well, you should see this output.
-
-```sh
-======== Counts for nats ===========
-                 publish_count          0
-                 request_count         90
-        request_response_count         91
-                received_count          0
-          received_reply_count          0
-   received_reply_count_errors          0
-======== Gauges for nats ===========
-======== Timers for nats ===========
-       request_response_timing         53
-          receive_reply_timing          0
-REPLY COUNT 100
-Running? true
-Started? true
-Errors? false
+config/initial-nats-bridge-logins.json	config/logback.xml			config/nats-bridge.yaml
+config/initial-nats-bridge-logins.yaml	config/nats-bridge-logins.yaml
 
 ```
-
 
 
 ## Using the command line tools
@@ -253,7 +238,18 @@ If you did not run the integration test then you need to generate the token file
 This will create the admin token under `config/admin.token`. This token is a JWT token that gets used
 by the admin. Once you generate the admin.token, you may want to delete the `config/initial-nats-bridge-logins.yaml` and `config/initial-nats-bridge-logins.json` files. To generate a admin.token for another user follow the procedures in the next section.  
 
+See that the token file exists:
+
+```sh
+ls config/*
+config/admin.token			config/initial-nats-bridge-logins.yaml	config/nats-bridge-logins.yaml
+config/initial-nats-bridge-logins.json	config/logback.xml			config/nats-bridge.yaml
+```
+Note the `config/admin.token` file that was generated from `set-up-admin`.
+
 ## To generate a token for a user use `generate-token`
+
+This is an optional step.
 
 ```sh
   $ pwd
@@ -289,7 +285,7 @@ roles:
 
 Once you know the parameters above, you can generate the admin token as follows.
 
-#### To generate the admin.token do this.
+#### To generate an admin.token as an example do this
 
 ```
 SUBJECT=admin
@@ -298,16 +294,36 @@ PUBLIC_KEY=pk-55145a05-ec8e-4c33-8b84-b6331f500f2c
 bin/admin.sh generate-token $SUBJECT $PUBLIC_KEY $SECRET
 ```
 
-
+You do not need to do this for the admin. This step would be for other users.
 
 ## To check server health run `health`
 
 ```sh
 
-  $ bin/admin.sh health
+  bin/admin.sh health
 
   {
-    "status": "UP"
+    "status": "UP",
+    "components": {
+      "diskSpace": {
+        "status": "UP",
+        "details": {
+          "total": 2000796545024,
+          "free": 1640526839808,
+          "threshold": 10485760
+        }
+      },
+      "healthChecker": {
+        "status": "UP",
+        "details": {
+          "NATS_MessageBridge": "Available",
+          "upTimeSeconds": 511
+        }
+      },
+      "ping": {
+        "status": "UP"
+      }
+    }
   }
 ```
 
@@ -389,7 +405,7 @@ $ bin/admin.sh clear-error
 ## To See KPI and metrics for the admin
 
 ```sh
-  $ bin/admin.sh metrics
+  $ bin/admin.sh kpi
 
 ```
 
@@ -406,6 +422,38 @@ $ bin/admin.sh clear-error
 ```
 
 The file format of the TSV and CSV is described below.
+
+
+## Run an integration test
+
+```sh
+
+bin/integration.sh
+
+```
+
+If all goes well, you should see this output.
+
+```sh
+======== Counts for nats ===========
+                 publish_count          0
+                 request_count         90
+        request_response_count         91
+                received_count          0
+          received_reply_count          0
+   received_reply_count_errors          0
+======== Gauges for nats ===========
+======== Timers for nats ===========
+       request_response_timing         53
+          receive_reply_timing          0
+REPLY COUNT 100
+Running? true
+Started? true
+Errors? false
+
+```
+
+
 
 # NATS JMS MQ Bridge Service service
 
