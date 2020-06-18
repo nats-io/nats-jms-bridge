@@ -169,6 +169,20 @@ bin/build.sh localdev
 The command `bin/build.sh localdev` uses `docker-deploy` to deploy IBM MQ, NATS Server, and ActiveMQ for testing and development.
 
 
+## Use the sample JSSL certs
+
+This copies the sample cert files so that the sample bridge config can find the JSSL certs. 
+
+```sh
+$ pwd
+~/bridge
+
+$ mkdir certs                       
+
+$ cp nats-jms-mq-bridge/certs/* certs/
+
+```
+
 ## Run the application
 
 ```sh
