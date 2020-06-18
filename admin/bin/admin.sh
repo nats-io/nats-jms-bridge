@@ -99,7 +99,7 @@ generatetoken | generateToken | generate-token | token | logins-generate-token)
   echo "$TOKEN"
   ;;
 
-health)
+health | ok)
   curl -s -k  "$NATS_ADMIN_HOST/manage/health" | jq .
   ;;
 
@@ -107,7 +107,7 @@ info)
   curl -s -k "$NATS_ADMIN_HOST/manage/info"  | jq .
   ;;
 
-kpi)
+kpi | metric | metrics)
   curl -s -k "$NATS_ADMIN_HOST/manage/prometheus"
   ;;
 

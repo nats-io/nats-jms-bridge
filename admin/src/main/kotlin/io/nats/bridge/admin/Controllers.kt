@@ -237,7 +237,7 @@ class Runner(
 
 
     @GetMapping(path = ["/running"])
-    fun isRunning() = Flag("Running?", flag = bridgeRunner.isRunning())
+    fun isRunning() = Flag("Running?", flag = bridgeRunner.wasStarted() && bridgeRunner.isRunning())
 
     @GetMapping(path = ["/started"])
     fun wasStarted() = Flag("Started?", flag = bridgeRunner.wasStarted())

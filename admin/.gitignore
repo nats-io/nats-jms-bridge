@@ -10,8 +10,9 @@ build/
 /keys/public_key.pem
 /data
 /admin
+/config.old2/
 /config/
 /out
-/config/
+/config.old2/
 /config.old/
 /logs/
