@@ -199,8 +199,8 @@ public class TestUtils {
         SslContextBuilder sslContextBuilder = new SslContextBuilder();
         sslContextBuilder.withTruststorePath("../certs/truststore.jks");
         sslContextBuilder.withKeystorePath("../certs/keystore.jks");
-        sslContextBuilder.withKeyPassword("cloudurable");
-        sslContextBuilder.withStorePassword("cloudurable");
+        sslContextBuilder.withKeyPassword("cloudurable1");
+        sslContextBuilder.withStorePassword("cloudurable2");
         sslContextBuilder.withAlgorithm("SunX509");
 
         final String subject = topicPostFix + "NatsMessageBus";
