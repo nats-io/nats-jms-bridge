@@ -63,6 +63,8 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
                 .withSourceBusBuilder(src)
                 .withRequestReply(details.bridge.bridgeType == BridgeType.REQUEST_REPLY)
                 .withName(details.bridge.name + postFix)
+                .withTransforms(details.bridge.transforms)
+
 
         if (src is JMSMessageBusBuilder) {
             src.withName(src.name + postFix)

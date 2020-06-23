@@ -119,7 +119,7 @@ public class MessageBridgeImpl implements MessageBridge {
                             }
                         }
 
-                        Message currentMessageFinal = currentMessage;
+                        final Message currentMessageFinal = currentMessage;
                         destinationBus.request(currentMessage, replyMessage -> {
                             if (runtimeLogger.isTraceEnabled()) {
                                 runtimeLogger.info("The bridge {} got reply message {} \n for request message {} ",
