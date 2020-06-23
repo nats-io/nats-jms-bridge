@@ -1,0 +1,2 @@
+io.nats.bridge.messages.transform.transforms.NoOpTransform
+io.nats.bridge.messages.transform.transforms.SkipTransform

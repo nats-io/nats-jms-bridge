@@ -8,13 +8,13 @@ import java.util.Optional;
 public class TransformResult {
 
     private final Optional<Throwable> error;
-    private final Optional<String> tranformationMessage;
+    private final Optional<String> statusMessage;
     private final Result result;
     private final Optional<Message> message;
 
     public TransformResult(Throwable error, String transformationMessage, Result result, Message message) {
         this.error = Optional.ofNullable(error);
-        this.tranformationMessage = Optional.ofNullable(transformationMessage);
+        this.statusMessage = Optional.ofNullable(transformationMessage);
         this.message = Optional.ofNullable(message);
         this.result = Objects.requireNonNullElse(result, Result.TRANSFORMED);
     }
@@ -77,6 +77,6 @@ public class TransformResult {
     }
 
     public Optional<String> getStatusMessage() {
-        return tranformationMessage;
+        return statusMessage;
     }
 }
