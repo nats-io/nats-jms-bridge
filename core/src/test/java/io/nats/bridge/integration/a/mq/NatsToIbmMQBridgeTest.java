@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,7 +41,7 @@ public class NatsToIbmMQBridgeTest {
         bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SRC","A");
         bridgeMessageBusJMSDestination = TestUtils.getMessageBusIbmMQ("BRIDGE_DEST", false);
 
-        messageBridgeFomrNatsToJMS = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJMSDestination, true, null);
+        messageBridgeFomrNatsToJMS = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJMSDestination, true, null, Collections.emptyList());
 
     }
 

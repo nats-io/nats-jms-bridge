@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,7 +43,7 @@ public class NatsToJmsBridgeWithHeadersTest {
 
         bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE","A");
         bridgeMessageBusJmsDestination = TestUtils.getMessageBusJmsWithHeaders("BRIDGE_DEST","A");
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true, null);
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true, null, Collections.emptyList());
 
     }
 

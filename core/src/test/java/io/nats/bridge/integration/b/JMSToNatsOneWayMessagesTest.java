@@ -9,6 +9,7 @@ import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -76,7 +77,7 @@ public class JMSToNatsOneWayMessagesTest {
 
         responseBusServer = TestUtils.getMessageBusNats("",responseName);
         responseBusClient = TestUtils.getMessageBusNats("",responseName);
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, false, null);
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, false, null, Collections.emptyList());
 
     }
 

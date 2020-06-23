@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -78,7 +79,7 @@ public class IbmMqToNatsOneWayMessageTest  {
 
         responseBusServer = TestUtils.getMessageBusNats("",responseName);
         responseBusClient = TestUtils.getMessageBusNats("",responseName);
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSourceForIbmMQ, bridgeMessageBusDestinationForNats, false, null);
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSourceForIbmMQ, bridgeMessageBusDestinationForNats, false, null, Collections.emptyList());
 
     }
 

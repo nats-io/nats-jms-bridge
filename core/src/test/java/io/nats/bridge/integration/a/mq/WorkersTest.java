@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -49,7 +50,7 @@ public class WorkersTest {
                 final MessageBus bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE", "A");
                 final MessageBus bridgeMessageBusJmsDestination = TestUtils.getMessageBusIbmMQWithHeaders4("BRIDGE_DEST", false);
 
-                final MessageBridge messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true, null);
+                final MessageBridge messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true, null, Collections.emptyList());
                 return messageBridge;
             }catch (Exception ex) {
                 throw new IllegalStateException(ex);

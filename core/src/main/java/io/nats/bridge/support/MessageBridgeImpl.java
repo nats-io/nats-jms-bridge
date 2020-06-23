@@ -16,16 +16,16 @@ package io.nats.bridge.support;
 
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.jms.support.JMSMessageBusBuilder;
 import io.nats.bridge.messages.Message;
+import io.nats.bridge.messages.transform.TransformMessage;
+import io.nats.bridge.messages.transform.TransformResult;
+import io.nats.bridge.messages.transform.Transformers;
 import io.nats.bridge.metrics.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.time.Duration;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.LinkedTransferQueue;
 
 
@@ -41,19 +41,33 @@ public class MessageBridgeImpl implements MessageBridge {
     private final MessageBus destinationBus;
     private final boolean requestReply;
     private final String name;
+    private final boolean transformMessage;
 
-    private Logger runtimeLogger  = LoggerFactory.getLogger("runtime");
+    private Logger runtimeLogger = LoggerFactory.getLogger("runtime");
+
+    private Logger logger = LoggerFactory.getLogger(MessageBridgeImpl.class);
 
     private final Queue<MessageBridgeRequestReply> replyMessageQueue;
 
+    private final List<String> transforms;
+
+    private final Map<String, TransformMessage> transformers;
+
 
     public MessageBridgeImpl(final String name, final MessageBus sourceBus, final MessageBus destinationBus, boolean requestReply,
-                             final Queue<MessageBridgeRequestReply> replyMessageQueue) {
+                             final Queue<MessageBridgeRequestReply> replyMessageQueue, final List<String> transforms) {
         this.sourceBus = sourceBus;
         this.destinationBus = destinationBus;
         this.requestReply = requestReply;
         this.replyMessageQueue = (replyMessageQueue != null) ? replyMessageQueue : new LinkedTransferQueue<>();
         this.name = "bridge-" + name.toLowerCase().replace(".", "-").replace(" ", "-");
+        this.transforms = transforms;
+
+        this.transformMessage = transforms != null && transforms.size() > 0;
+
+
+        transformers = transformMessage ? Transformers.loadTransforms() : Collections.emptyMap();
+
     }
 
     @Override
@@ -75,12 +89,43 @@ public class MessageBridgeImpl implements MessageBridge {
             if (receiveMessageFromSourceOption.isPresent()) count++;
 
             receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
-                        destinationBus.request(receiveMessageFromSource, replyMessage -> {
+                        Message currentMessage = receiveMessageFromSource;
+                        if (transformMessage) {
+                            TransformResult result = Transformers.runTransforms(transformers, transforms, currentMessage);
+                            switch (result.getResult()) {
+                                case SKIP:
+                                    if (runtimeLogger.isTraceEnabled())
+                                        runtimeLogger.trace("Message was skipped");
+                                    return;
+                                case SYSTEM_ERROR:
+                                case ERROR:
+                                    if (result.getStatusMessage().isPresent()) {
+                                        logger.error(result.getStatusMessage().get(), result.getError());
+                                    } else {
+                                        logger.error("Error handling transform ", result.getError());
+                                    }
+                                    return;
+                                case TRANSFORMED:
+                                    if (runtimeLogger.isTraceEnabled()) {
+                                        if (!result.getStatusMessage().isPresent()) {
+                                            runtimeLogger.trace("Message was transformed");
+                                        } else {
+                                            runtimeLogger.trace("Message was transformed " + result.getStatusMessage().get());
+                                        }
+                                    }
+                                    currentMessage = result.getTransformedMessage();
+                                case NOT_TRANSFORMED:
+                                    //no op
+                            }
+                        }
+
+                        Message currentMessageFinal = currentMessage;
+                        destinationBus.request(currentMessage, replyMessage -> {
                             if (runtimeLogger.isTraceEnabled()) {
                                 runtimeLogger.info("The bridge {} got reply message {} \n for request message {} ",
-                                        name, replyMessage.bodyAsString(), receiveMessageFromSource);
+                                        name, replyMessage.bodyAsString(), currentMessageFinal);
                             }
-                            replyMessageQueue.add(new MessageBridgeRequestReply(receiveMessageFromSource, replyMessage));
+                            replyMessageQueue.add(new MessageBridgeRequestReply(currentMessageFinal, replyMessage));
                         });
                     }
             );
@@ -114,7 +159,7 @@ public class MessageBridgeImpl implements MessageBridge {
     }
 
     @Override
-    public void close()  {
+    public void close() {
         sourceBus.close();
         destinationBus.close();
     }
