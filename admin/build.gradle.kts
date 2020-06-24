@@ -117,7 +117,7 @@ tasks.getByName<CreateStartScripts>("startScripts") {
 }
 
 
-version = "0.11.1-beta7"
+version = "0.12.0-beta8"
 
 tasks {
 
@@ -189,7 +189,7 @@ tasks {
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.11.1-beta7")
+        implementation("io.nats.bridge:nats-jms-bridge:0.12.0-beta8")
 
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
@@ -215,9 +215,9 @@ tasks {
 
         implementation("com.github.ajalt:clikt:2.7.1")
 
-        implementation("io.nats.bridge:nats-jms-bridge-message:0.11.1-beta7")
+        implementation("io.nats.bridge:nats-jms-bridge-message:0.12.0-beta8")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.11.1-beta7")
+        implementation("io.nats.bridge:nats-jms-bridge:0.12.0-beta8")
 
 
     }

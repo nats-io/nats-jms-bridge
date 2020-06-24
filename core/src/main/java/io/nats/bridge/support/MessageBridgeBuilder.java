@@ -3,7 +3,10 @@ package io.nats.bridge.support;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
 
+import java.util.List;
 import java.util.Queue;
+
+import static java.util.Collections.emptyList;
 
 public class MessageBridgeBuilder {
 
@@ -15,9 +18,19 @@ public class MessageBridgeBuilder {
 
     private MessageBusBuilder sourceBusBuilder;
     private MessageBusBuilder destinationBusBuilder;
+    private List<String> transforms= emptyList();
 
     public MessageBusBuilder getSourceBusBuilder() {
         return sourceBusBuilder;
+    }
+
+    public List<String> getTransforms() {
+        return transforms;
+    }
+
+    public MessageBridgeBuilder withTransforms(List<String> transforms) {
+        this.transforms = transforms;
+        return this;
     }
 
     public MessageBridgeBuilder withSourceBusBuilder(MessageBusBuilder sourceBusBuilder) {
@@ -90,7 +103,7 @@ public class MessageBridgeBuilder {
     }
 
     public MessageBridge build() {
-        return new MessageBridgeImpl(getName(), getSourceBus(), getDestinationBus(), isRequestReply(), getReplyMessageQueue());
+        return new MessageBridgeImpl(getName(), getSourceBus(), getDestinationBus(), isRequestReply(), getReplyMessageQueue(), getTransforms());
     }
 
     public static MessageBridgeBuilder builder() {

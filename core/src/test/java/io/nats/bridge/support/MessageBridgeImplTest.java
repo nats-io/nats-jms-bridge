@@ -9,6 +9,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedTransferQueue;
@@ -50,11 +52,8 @@ public class MessageBridgeImplTest {
                 .withName("SERVER").build();
 
 
-
-
-
         messageBridge =  MessageBridgeBuilder.builder().withName ("bridge").withDestinationBus(bridgeMessageBusDestination)
-                .withSourceBus(bridgeMessageBusSource).withRequestReply(true).build();
+                .withSourceBus(bridgeMessageBusSource).withRequestReply(true).withTransforms(Collections.singletonList("noop")).build();
 
     }
 

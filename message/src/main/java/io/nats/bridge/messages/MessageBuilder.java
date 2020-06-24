@@ -189,7 +189,17 @@ public class MessageBuilder {
     }
 
 
-    public Message buildFromBytes(byte[] buffer) {
+    public MessageBuilder initFromMessage(final Message inputMessage) {
+        buildFromBytes(inputMessage.getMessageBytes());
+        return this;
+    }
+
+    public Message buildFromBytes(final byte[] buffer) {
+        this.initFromBytes(buffer);
+        return this.build();
+    }
+
+    public MessageBuilder initFromBytes(byte[] buffer) {
 
         Map<String, Object> headersRead = Collections.emptyMap();
 
@@ -342,20 +352,20 @@ public class MessageBuilder {
                     /* Set the builder headers and body. */
                     withHeaders(headers);
                     withBody(bodyBuffer);
-                    return build();
+                    return this;
                 } catch (final Exception ex) {
                     /* Exception resort to returning the message as a normal byte buffer message, but it sends a warning to logs. */
                     logger.warn("Unable to parse the message after detecting that headers are present", ex);
                     withBody(buffer);
-                    return build();
+                    return this;
                 }
             } else {
                 withBody(buffer);
-                return build();
+                return this;
             }
         } else {
             withBody(buffer);
-            return build();
+            return this;
         }
     }
 
