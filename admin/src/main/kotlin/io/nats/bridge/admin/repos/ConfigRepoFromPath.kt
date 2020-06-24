@@ -63,7 +63,7 @@ class ConfigRepoFromPath(private val configFile: Path = File("./config/nats-brid
     override fun saveConfig(conf: NatsBridgeConfig) {
         logger.info("Saving NATS Bridge config... " + LocalDateTime.now())
         Files.createDirectories(configFile.parent)
-        Files.writeString(configFile, mapper.writeValueAsString(conf))
+        Files.write(configFile, mapper.writeValueAsBytes(conf))
     }
 
 

@@ -53,7 +53,8 @@ class LoginRepoFromPath(private val configFile: Path = File("./config/nats-bridg
 
         if (systemSecret.isBlank() || loginsToEncrypt.isEmpty()) {
             val configAsString = mapper.writeValueAsString(conf)
-            Files.writeString(configFile, configAsString)
+            //Files.writeString(configFile, configAsString)
+            Files.write(configFile, configAsString.toByteArray())
         } else {
             val newLogins = conf.logins.map { login ->
                 if (login.secret.startsWith("sk-")) {
@@ -63,7 +64,8 @@ class LoginRepoFromPath(private val configFile: Path = File("./config/nats-bridg
                 } else login
             }
             val configAsString = mapper.writeValueAsString(conf.copy(logins = newLogins))
-            Files.writeString(configFile, configAsString)
+            //Files.writeString(configFile, configAsString)
+            Files.write(configFile, configAsString.toByteArray())
         }
     }
 

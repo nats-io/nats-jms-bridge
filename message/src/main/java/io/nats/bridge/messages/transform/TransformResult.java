@@ -16,7 +16,7 @@ public class TransformResult {
         this.error = Optional.ofNullable(error);
         this.statusMessage = Optional.ofNullable(transformationMessage);
         this.message = Optional.ofNullable(message);
-        this.result = Objects.requireNonNullElse(result, Result.TRANSFORMED);
+        this.result = result != null ? result : Result.TRANSFORMED;
     }
 
     public TransformResult() {

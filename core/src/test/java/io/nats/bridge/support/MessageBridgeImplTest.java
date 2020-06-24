@@ -52,9 +52,6 @@ public class MessageBridgeImplTest {
                 .withName("SERVER").build();
 
 
-
-
-
         messageBridge =  MessageBridgeBuilder.builder().withName ("bridge").withDestinationBus(bridgeMessageBusDestination)
                 .withSourceBus(bridgeMessageBusSource).withRequestReply(true).withTransforms(Collections.singletonList("noop")).build();
 
