@@ -26,7 +26,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = "io.nats.bridge"
-            artifactId = "nats-jms-bridge-message"
+            artifactId = "nats-jms-bridge-example-transforms"
             version = "0.12.0-beta8"
             from(components["java"])
         }
@@ -45,8 +45,6 @@ dependencies {
     // Use JUnit test framework
     testImplementation("junit:junit:4.12")
 
-    //
-    implementation("com.ibm.mq:com.ibm.mq.allclient:9.1.5.0")
 
 
     implementation (group= "com.fasterxml.jackson.core", name= "jackson-databind", version= "2.10.3")
@@ -54,8 +52,8 @@ dependencies {
     implementation ( "org.slf4j:slf4j-api:[1.7,1.8)")
     testImplementation ("ch.qos.logback:logback-classic:1.1.2")
 
+    implementation("io.nats.bridge:nats-jms-bridge-message:0.12.0-beta8")
+
 
 
 }
-
-
