@@ -219,7 +219,7 @@ tasks {
 
         implementation("io.nats.bridge:nats-jms-bridge:0.12.0-beta8")
 
-        implementation("io.nats.bridge:nats-jms-bridge-example-transforms:0.12.0-beta8")
+        //implementation("io.nats.bridge:nats-jms-bridge-example-transforms:0.12.0-beta8")
 
 
 
