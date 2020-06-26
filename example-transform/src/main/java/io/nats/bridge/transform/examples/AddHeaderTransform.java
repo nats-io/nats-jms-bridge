@@ -25,7 +25,7 @@ public class AddHeaderTransform implements TransformMessage {
             builder.withHeader("H1", "Say hello please! The world awaits");
         }
 
-        builder.withReplyHandler(inputMessage::reply);
+        // builder.withReplyHandler(inputMessage::reply); NOTE: initFromMessage does this by default!
         return TransformResult.success("Added a new header", builder.build());
     }
 
