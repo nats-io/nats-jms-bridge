@@ -34,18 +34,21 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
             final JmsFactoryFactory factoryFactory = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
             final JmsConnectionFactory connectionFactory = factoryFactory.createConnectionFactory();
 
-            final String hostURL = getStringProp(jndiProperties, HOST);
-            final URI uri = new URI(hostURL);
-            final String host = uri.getHost();
-            final int port = uri.getPort();
+            final String hostURL = getOptionalStringProp(jndiProperties, HOST);
+
+            if (hostURL != null) {
+                final URI uri = new URI(hostURL);
+                final String host = uri.getHost();
+                final int port = uri.getPort();
+                connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
+                connectionFactory.setIntProperty(WMQConstants.WMQ_PORT, port);
+            }
+
             final String channel = getStringProp(jndiProperties, CHANNEL);
             final String queueManagerName = getStringProp(jndiProperties, QUEUE_MANAGER);
             final String queueModelName = getOptionalStringProp(jndiProperties, QUEUE_MODEL_NAME);
             final String queueModelPrefix = getOptionalStringProp(jndiProperties, QUEUE_MODEL_PREFIX);
 
-
-            connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
-            connectionFactory.setIntProperty(WMQConstants.WMQ_PORT, port);
             connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
             connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
             connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
