@@ -1,3 +1,15 @@
+// Copyright 2020 The NATS Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at:
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package io.nats.bridge.messages;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +26,10 @@ import java.util.function.Consumer;
 
 import static io.nats.bridge.messages.Protocol.*;
 
+/**
+ * MessageBuilder builds a message.
+ * Messages are immutable.
+ */
 public class MessageBuilder {
     private final static ObjectMapper mapper = new ObjectMapper();
     static Logger logger = LoggerFactory.getLogger(MessageBuilder.class);
@@ -29,6 +45,8 @@ public class MessageBuilder {
     private Map<String, Object> headers;
     private byte[] body;
     private String correlationID;
+    private String creator;
+    private Consumer<Message> replyHandler;
 
     public String getCreator() {
         if (creator==null) {
@@ -42,9 +60,7 @@ public class MessageBuilder {
         return this;
     }
 
-    private String creator;
 
-    private Consumer<Message> replyHandler;
 
     public MessageBuilder() {
     }
@@ -189,8 +205,16 @@ public class MessageBuilder {
     }
 
 
+    /** Init the builder with an input message to modify
+     * Note: This will call withReplyHandler and will delegate the reply to the original message.
+     * This method uses buildFromBytes and builds the whole message from the bytes of the input message including headers. git
+     *
+     * @param inputMessage
+     * @return
+     */
     public MessageBuilder initFromMessage(final Message inputMessage) {
         buildFromBytes(inputMessage.getMessageBytes());
+        this.withReplyHandler(inputMessage::reply);
         return this;
     }
 

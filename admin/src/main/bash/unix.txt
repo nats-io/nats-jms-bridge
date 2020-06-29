@@ -68,7 +68,8 @@ case "`uname`" in
     ;;
 esac
 
-CLASSPATH=$classpath
+# CLASSPATH=$classpath
+CLASSPATH=\$(find \$APP_HOME/lib  -name "*.jar" | xargs echo | sed 's/ /:/g')
 
 # Determine the Java command to use to start the JVM.
 if [ -n "\$JAVA_HOME" ] ; then
