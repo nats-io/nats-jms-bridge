@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-0.12.0-beta8}
+VERSION=${VERSION:-0.14.0-beta9}
 DOCKER_NAMESPACE=${DOCKER_NAMESPACE:-synadia}
 
 build_prometheus_image() {

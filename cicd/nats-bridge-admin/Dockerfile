@@ -4,7 +4,7 @@ FROM nginx:1.17.10
 
 ## Some environment variables
 # Bridge Version
-ENV BRIDGE_VERSION 0.12.0-beta8
+ENV BRIDGE_VERSION 0.14.0-beta9
 
 
 ## Install some dependencies
