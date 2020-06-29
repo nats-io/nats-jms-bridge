@@ -1,8 +1,11 @@
 package io.nats.bridge.integration.ibmmq;
 
+import com.ibm.msg.client.jms.JmsPropertyContext;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
 import java.util.stream.Collectors;
 
 public class PropertyUtils {
@@ -119,6 +122,46 @@ public class PropertyUtils {
         }
 
         return propValues;
+
+    }
+
+    public static void initJMSContext(JmsPropertyContext jmsPropertyContext, List<PropertyValue> propertyValues) {
+
+        try {
+
+            for (PropertyValue propertyValue : propertyValues) {
+
+                switch (propertyValue.getPropertyType()) {
+                    case INT:
+                        jmsPropertyContext.setIntProperty(propertyValue.getName(), (int) propertyValue.getValue());
+                        break;
+                    case LONG:
+                        jmsPropertyContext.setLongProperty(propertyValue.getName(), (long) propertyValue.getValue());
+                        break;
+                    case FLOAT:
+                        jmsPropertyContext.setFloatProperty(propertyValue.getName(), (float) propertyValue.getValue());
+                        break;
+                    case BOOLEAN:
+                        jmsPropertyContext.setBooleanProperty(propertyValue.getName(), (boolean) propertyValue.getValue());
+                        break;
+                    case DOUBLE:
+                        jmsPropertyContext.setDoubleProperty(propertyValue.getName(), (double) propertyValue.getValue());
+                        break;
+                    case STRING:
+                        jmsPropertyContext.setStringProperty(propertyValue.getName(), (String) propertyValue.getValue());
+                        break;
+                    case SHORT:
+                        jmsPropertyContext.setShortProperty(propertyValue.getName(), (short) propertyValue.getValue());
+                        break;
+                    default:
+                        jmsPropertyContext.setStringProperty(propertyValue.getName(), propertyValue.toString());
+                        break;
+                }
+            }
+
+        }catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
 
     }
 }

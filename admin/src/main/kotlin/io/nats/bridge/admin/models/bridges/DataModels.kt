@@ -87,15 +87,24 @@ enum class JmsDestinationType { QUEUE, TOPIC }
 data class JmsClusterConfig(override val config: Map<String, String> = emptyMap(),
                             override val userName: String? = null, override val password: String? = null,
                             val jmsDestinationType: JmsDestinationType = JmsDestinationType.QUEUE,
-                            val autoConfig:JmsAutoConfig?=JmsAutoConfig.NONE) : ClusterConfig
+                            val autoConfig:JmsAutoConfig?=JmsAutoConfig.NONE) : ClusterConfig {
+    override fun toString(): String {
+        return "JmsClusterConfig(config=${config.filter { !it.key.contains("password") }}, " +
+                "jmsDestinationType=$jmsDestinationType, autoConfig=$autoConfig)"
+    }
+}
+
 
 /**
  * Specific cluster config object for NATS.
  */
 data class NatsClusterConfig(override val userName: String? = null, override val password: String? = null,
                              val host: String? = null, val port: Int? = -1, val servers: List<String>? = emptyList(),
-                             override val config: Map<String, String> = emptyMap()) : ClusterConfig
-
+                             override val config: Map<String, String> = emptyMap()) : ClusterConfig {
+    override fun toString(): String {
+        return "NatsClusterConfig(host=$host, port=$port, servers=$servers, config=${config.filter { !it.key.contains("password") }})"
+    }
+}
 
 /** Used to generate initial config file examples. */
 val defaultDataModel = NatsBridgeConfig(

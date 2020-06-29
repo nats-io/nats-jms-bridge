@@ -13,6 +13,7 @@ import javax.naming.spi.InitialContextFactory;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 public class IbmMqInitialContextFactory implements InitialContextFactory {
@@ -53,6 +54,10 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
             connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
             connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
             connectionFactory.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
+
+            final List<PropertyValue> propertyValues = PropertyUtils.extractProperties((Hashtable<String, String>) jndiProperties);
+
+            PropertyUtils.initJMSContext(connectionFactory, propertyValues);
 
             if (queueModelName != null)
                 connectionFactory.setStringProperty(WMQConstants.WMQ_TEMPORARY_MODEL, queueModelName);

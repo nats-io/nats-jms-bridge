@@ -20,6 +20,14 @@ public class PropertyUtilsTest {
         ht.put(PropertyUtils.PROP_PREFIX+"one", "1");
         ht.put(PropertyUtils.PROP_PREFIX+"int.three", "3");
         ht.put(PropertyUtils.PROP_PREFIX+"boolean.four", "true");
+        ht.put(PropertyUtils.PROP_PREFIX+"five", "1.1");
+        ht.put(PropertyUtils.PROP_PREFIX+"long.six", "1");
+        ht.put(PropertyUtils.PROP_PREFIX+"double.seven", "7.0");
+        ht.put(PropertyUtils.PROP_PREFIX+"float.eight", "8.0");
+        ht.put(PropertyUtils.PROP_PREFIX+"short.nine", "9");
+        ht.put(PropertyUtils.PROP_PREFIX+"string.ten", "ten");
+        ht.put(PropertyUtils.PROP_PREFIX+"boolean.eleven", "true");
+        ht.put(PropertyUtils.PROP_PREFIX+"twelve", "true");
 
         List<PropertyValue> propertyValues = PropertyUtils.extractProperties(ht);
 
