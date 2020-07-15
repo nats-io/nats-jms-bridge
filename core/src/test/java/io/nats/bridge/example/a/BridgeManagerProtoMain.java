@@ -29,7 +29,7 @@ public class BridgeManagerProtoMain {
         try {
             final MessageBus messageBusSource = ServiceAUtil.getMessageBusNats();
             final MessageBus messageBusDestination = ServiceAUtil.getMessageBusJms();
-            final MessageBridge messageBridge = new MessageBridgeImpl("", messageBusSource, messageBusDestination, true, null, Collections.emptyList());
+            final MessageBridge messageBridge = new MessageBridgeImpl("", messageBusSource, messageBusDestination, true, null, Collections.emptyList(), Collections.emptyList());
 
             final AtomicBoolean stop = new AtomicBoolean(false);
 

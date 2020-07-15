@@ -50,7 +50,7 @@ public class WorkersTest {
                 final MessageBus bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE", "A");
                 final MessageBus bridgeMessageBusJmsDestination = TestUtils.getMessageBusIbmMQWithHeaders4("BRIDGE_DEST", false);
 
-                final MessageBridge messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true, null, Collections.emptyList());
+                final MessageBridge messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true, null, Collections.emptyList(), Collections.emptyList());
                 return messageBridge;
             }catch (Exception ex) {
                 throw new IllegalStateException(ex);

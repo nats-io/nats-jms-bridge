@@ -19,9 +19,19 @@ public class MessageBridgeBuilder {
     private MessageBusBuilder sourceBusBuilder;
     private MessageBusBuilder destinationBusBuilder;
     private List<String> transforms= emptyList();
+    private List<String> replyTransforms= emptyList();
 
     public MessageBusBuilder getSourceBusBuilder() {
         return sourceBusBuilder;
+    }
+
+    public List<String> getReplyTransforms() {
+        return replyTransforms;
+    }
+
+    public MessageBridgeBuilder withReplyTransforms(final List<String> replyTransforms) {
+        this.replyTransforms = replyTransforms;
+        return this;
     }
 
     public List<String> getTransforms() {
@@ -103,7 +113,7 @@ public class MessageBridgeBuilder {
     }
 
     public MessageBridge build() {
-        return new MessageBridgeImpl(getName(), getSourceBus(), getDestinationBus(), isRequestReply(), getReplyMessageQueue(), getTransforms());
+        return new MessageBridgeImpl(getName(), getSourceBus(), getDestinationBus(), isRequestReply(), getReplyMessageQueue(), getTransforms(), getReplyTransforms());
     }
 
     public static MessageBridgeBuilder builder() {
