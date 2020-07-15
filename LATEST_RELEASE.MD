@@ -1,6 +1,6 @@
-# 0.14.0-beta9 NATS JMS/MQ Bridge
+# 0.15.0-beta10 NATS JMS/MQ Bridge
 
-#### TAG: 0.14.0-beta9
+#### TAG: 0.15.0-beta10
 
 ## Issues
 
@@ -14,7 +14,7 @@
 
 ## Transform Library example improvements
 
-To use transforms use the library messages (`implementation("io.nats.bridge:nats-jms-bridge-message:0.14.0-beta9")`).
+To use transforms use the library messages (`implementation("io.nats.bridge:nats-jms-bridge-message:0.15.0-beta10")`).
 
 Import the above jar file into your project. Then create a project that builds a jar file that uses
 the [ServiceLoader](https://docs.oracle.com/javase/7/docs/api/java/util/ServiceLoader.html). Read about the ServiceLoader before continuing.

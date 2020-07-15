@@ -26,7 +26,7 @@ internal class MessageBridgeLoaderTest {
         configYamlContents = runTemplate()
         fileConf = File("./data/" + UUID.randomUUID().toString() + "+.yaml")
         fileConf?.writeText(configYamlContents)
-        configRepo = ConfigRepoFromPath(fileConf!!)
+        configRepo = ConfigRepoFromPath(fileConf!!.toPath())
     }
 
     @AfterEach

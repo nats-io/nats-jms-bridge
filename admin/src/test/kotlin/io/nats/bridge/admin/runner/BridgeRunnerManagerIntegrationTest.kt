@@ -19,7 +19,7 @@ internal class BridgeRunnerManagerIntegrationTest {
     @BeforeEach
     fun before() {
         createYamlFile()
-        configRepo = ConfigRepoFromPath(fileConf!!)
+        configRepo = ConfigRepoFromPath(fileConf!!.toPath())
         //manager = BridgeRunnerManager(configRepo!!)
     }
 

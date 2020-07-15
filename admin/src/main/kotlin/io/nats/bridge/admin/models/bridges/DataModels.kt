@@ -94,7 +94,6 @@ data class JmsClusterConfig(override val config: Map<String, String> = emptyMap(
     }
 }
 
-
 /**
  * Specific cluster config object for NATS.
  */
@@ -105,6 +104,7 @@ data class NatsClusterConfig(override val userName: String? = null, override val
         return "NatsClusterConfig(host=$host, port=$port, servers=$servers, config=${config.filter { !it.key.contains("password") }})"
     }
 }
+
 
 /** Used to generate initial config file examples. */
 val defaultDataModel = NatsBridgeConfig(

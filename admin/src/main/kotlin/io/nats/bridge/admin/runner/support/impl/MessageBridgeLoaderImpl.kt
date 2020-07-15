@@ -26,13 +26,23 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
 
     data class Details(val bridge: MessageBridgeInfo, val sourceCluster: Cluster, val destinationCluster: Cluster)
 
+
+    private fun displayIfNeeded(details: Details) {
+
+        if (startupLogs.isInfoEnabled) {
+
+            startupLogs.info("Bridge Details = {}", details)
+        }
+
+    }
     private fun doLoadMessageBridge(config: NatsBridgeConfig) = config.bridges.map { bridge ->
 
         logger.info("Loading configuration")
 
         val details = extractDetails(bridge, config)
 
-        startupLogs.info("Bridge Details = {}", details)
+        displayIfNeeded(details)
+
 
         val subscriptionName:String = UUID.randomUUID().toString()
 

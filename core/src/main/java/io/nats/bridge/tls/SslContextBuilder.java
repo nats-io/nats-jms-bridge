@@ -7,6 +7,8 @@ import javax.net.ssl.*;
 import java.io.*;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.util.Base64;
 
 public class SslContextBuilder {
@@ -198,18 +200,46 @@ public class SslContextBuilder {
                 } catch (Exception e) {
                     throw new IllegalStateException("Unable to load Trust store from env variable" + getTrustStoreValueEnvVariable(), e);
                 }
-            } else {
-                try {
-                    final FileInputStream fileInputStream = new FileInputStream(truststorePath);
-                    final KeyStore store =  loadKeystore(fileInputStream, getTrustStorePassword());
-                    final TrustManagerFactory factory = TrustManagerFactory.getInstance(getAlgorithm());
-                    factory.init(store);
-                    trustStoreKeyManagers = factory.getTrustManagers();
-                } catch (FileNotFoundException e) {
-                    throw new SslContextBuilderException("Trust store path not found" + truststorePath, e);
-                } catch (Exception e) {
-                    throw new SslContextBuilderException("Unable to load Trust store with path" + truststorePath, e);
+            }
+            else {
+                final String extension = truststorePath.substring(truststorePath.lastIndexOf(".") + 1, truststorePath.length());
+                if (extension.equals("crt")) {
+                    KeyStore truststore = null;
+                    try {
+                        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                        InputStream cert = new FileInputStream(truststorePath);
+                        Certificate ca;
+                        try {
+                            ca = cf.generateCertificate(cert);
+                        } finally {
+                            cert.close();
+                        }
+                        String trustStoreType = KeyStore.getDefaultType();
+                        truststore = KeyStore.getInstance(trustStoreType);
+                        truststore.load(null, getTrustStorePassword());
+                        //truststore.load(null, "cloudurable".toCharArray());
+                        truststore.setCertificateEntry("ca",ca);
+                        final TrustManagerFactory factory = TrustManagerFactory.getInstance(getAlgorithm());
+                        factory.init(truststore);
+                        trustStoreKeyManagers = factory.getTrustManagers();
+                    } catch (Exception e) {
+                        throw new SslContextBuilderException("Unable to convert the CRT file " + truststorePath, e);
+                    }
+
+                } else {
+                    try {
+                        final FileInputStream fileInputStream = new FileInputStream(truststorePath);
+                        final KeyStore store =  loadKeystore(fileInputStream, getTrustStorePassword());
+                        final TrustManagerFactory factory = TrustManagerFactory.getInstance(getAlgorithm());
+                        factory.init(store);
+                        trustStoreKeyManagers = factory.getTrustManagers();
+                    } catch (FileNotFoundException e) {
+                        throw new SslContextBuilderException("Trust store path not found" + truststorePath, e);
+                    } catch (Exception e) {
+                        throw new SslContextBuilderException("Unable to load Trust store with path" + truststorePath, e);
+                    }
                 }
+
             }
         }
         return trustStoreKeyManagers;
@@ -225,25 +255,52 @@ public class SslContextBuilder {
 
                 byte[] decode = Base64.getDecoder().decode(value);
                 try {
-                   final KeyStore store =  loadKeystore(new ByteArrayInputStream(decode),
-                             getKeystorePassword());
+                    final KeyStore store = loadKeystore(new ByteArrayInputStream(decode),
+                            getKeystorePassword());
                     final KeyManagerFactory factory = KeyManagerFactory.getInstance(getAlgorithm());
                     factory.init(store, getKeystorePassword());
                     keyStoreKeyManagers = factory.getKeyManagers();
                 } catch (Exception e) {
                     throw new IllegalStateException("Unable to load key store from env variable" + getKeyStoreValueEnvVariable(), e);
                 }
+
             } else {
-                try {
-                    final FileInputStream fileInputStream = new FileInputStream(keyStorePath);
-                    final KeyStore store  = loadKeystore(fileInputStream, getKeystorePassword());
-                    final KeyManagerFactory factory = KeyManagerFactory.getInstance(getAlgorithm());
-                    factory.init(store, getKeystorePassword());
-                    keyStoreKeyManagers = factory.getKeyManagers();
-                } catch (FileNotFoundException e) {
-                    throw new IllegalStateException("Key store path not found" + keyStorePath, e);
-                } catch (Exception e) {
-                    throw new IllegalStateException("Unable to load Key store with path" + keyStorePath, e);
+                final String extension = keyStorePath.substring(keyStorePath.lastIndexOf(".") + 1, keyStorePath.length());
+                if (extension.equals("crt")) {
+                    KeyStore keystore = null;
+                    try {
+                        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                        InputStream cert = new FileInputStream(keyStorePath);
+                        Certificate ca;
+                        try {
+                            ca = cf.generateCertificate(cert);
+                        } finally {
+                            cert.close();
+                        }
+                        String keyStoreType = KeyStore.getDefaultType();
+                        keystore = KeyStore.getInstance(keyStoreType);
+                        keystore.load(null, getKeystorePassword());
+                        //truststore.load(null, "cloudurable".toCharArray());
+                        keystore.setCertificateEntry("ca", ca);
+                        final KeyManagerFactory factory = KeyManagerFactory.getInstance(getAlgorithm());
+                        factory.init(keystore, getKeystorePassword());
+                        keyStoreKeyManagers = factory.getKeyManagers();
+                    } catch (Exception e) {
+                        throw new SslContextBuilderException("Unable to convert the CRT file " + keyStorePath, e);
+                    }
+
+                } else {
+                    try {
+                        final FileInputStream fileInputStream = new FileInputStream(keyStorePath);
+                        final KeyStore store = loadKeystore(fileInputStream, getKeystorePassword());
+                        final KeyManagerFactory factory = KeyManagerFactory.getInstance(getAlgorithm());
+                        factory.init(store, getKeystorePassword());
+                        keyStoreKeyManagers = factory.getKeyManagers();
+                    } catch (FileNotFoundException e) {
+                        throw new IllegalStateException("Key store path not found" + keyStorePath, e);
+                    } catch (Exception e) {
+                        throw new IllegalStateException("Unable to load Key store with path" + keyStorePath, e);
+                    }
                 }
             }
         }

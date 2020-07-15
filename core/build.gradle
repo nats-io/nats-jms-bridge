@@ -26,7 +26,7 @@ publishing {
         maven(MavenPublication) {
             groupId ='io.nats.bridge'
             artifactId = 'nats-jms-bridge'
-            version = '0.14.0-beta9'
+            version = '0.15.0-beta10'
             from components.java
         }
     }
@@ -56,5 +56,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 
-    implementation("io.nats.bridge:nats-jms-bridge-message:0.14.0-beta9")
+    implementation("io.nats.bridge:nats-jms-bridge-message:0.15.0-beta10")
 }
