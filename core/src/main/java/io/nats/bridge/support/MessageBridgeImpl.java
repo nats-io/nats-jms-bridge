@@ -66,12 +66,17 @@ public class MessageBridgeImpl implements MessageBridge {
         this.replyMessageQueue = (replyMessageQueue != null) ? replyMessageQueue : new LinkedTransferQueue<>();
         this.name = "bridge-" + name.toLowerCase().replace(".", "-").replace(" ", "-");
         this.transforms = transforms;
-
-        this.transformMessage = transforms != null && transforms.size() > 0;
         this.outputTransforms = outputTransforms;
 
+        boolean inputTransformEnabled = transforms != null  && transforms.size() > 0;
+        boolean outputTransformEnabled = outputTransforms != null  && outputTransforms.size() > 0;
 
-        transformers = transformMessage ? Transformers.loadTransforms() : Collections.emptyMap();
+        this.transformMessage = inputTransformEnabled || outputTransformEnabled;
+
+
+
+
+        this.transformers = transformMessage ? Transformers.loadTransforms() : Collections.emptyMap();
 
     }
 
@@ -127,6 +132,7 @@ public class MessageBridgeImpl implements MessageBridge {
 
         if (requestReply) {
             receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
+                        //Request transforms.
                         final Message currentMessageFinal = transformMessageIfNeeded(receiveMessageFromSource,  transforms);
 
                         if (currentMessageFinal == null) {
@@ -137,13 +143,19 @@ public class MessageBridgeImpl implements MessageBridge {
                                 runtimeLogger.info("The bridge {} got reply message {} \n for request message {} ",
                                         name, replyMessage.bodyAsString(), currentMessageFinal);
                             }
-                            final Message replyMessageFinal = transformMessageIfNeeded(replyMessage,  transforms);
-                            replyMessageQueue.add(new MessageBridgeRequestReply(currentMessageFinal, replyMessageFinal));
+
+                            //Reply transforms.
+                            final Message replyMessageFinal = transformMessageIfNeeded(replyMessage,  outputTransforms);
+
+                            replyMessageQueue.add(new MessageBridgeRequestReply(currentMessageFinal,
+                                    replyMessageFinal != null ? replyMessageFinal : replyMessage));
                         });
                     }
             );
         } else {
             receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
+
+                        //Forward transforms.
                         final Message currentMessageFinal = transformMessageIfNeeded(receiveMessageFromSource,  transforms);
                         if (currentMessageFinal == null) {
                             return;
