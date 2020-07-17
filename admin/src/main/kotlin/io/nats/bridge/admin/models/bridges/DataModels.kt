@@ -31,7 +31,9 @@ data class MessageBusInfo(val name: String, val busType: BusType, val subject: S
  */
 data class MessageBridgeInfo(val name: String, val bridgeType: BridgeType,
                              val source: MessageBusInfo, val destination: MessageBusInfo, val copyHeaders: Boolean? = false,
-                             val workers: Int? = 1, val tasks:Int? = 1, val transforms:List<String> = emptyList())
+                             val workers: Int? = 1, val tasks:Int? = 1, val transforms:List<String> = emptyList(),
+                             val replyTransforms:List<String> = emptyList()
+)
 
 /**
  * Two supported message bus types are JMS and NATS.
@@ -94,7 +96,6 @@ data class JmsClusterConfig(override val config: Map<String, String> = emptyMap(
     }
 }
 
-
 /**
  * Specific cluster config object for NATS.
  */
@@ -105,6 +106,7 @@ data class NatsClusterConfig(override val userName: String? = null, override val
         return "NatsClusterConfig(host=$host, port=$port, servers=$servers, config=${config.filter { !it.key.contains("password") }})"
     }
 }
+
 
 /** Used to generate initial config file examples. */
 val defaultDataModel = NatsBridgeConfig(

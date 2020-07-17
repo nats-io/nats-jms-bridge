@@ -1,3 +1,4 @@
 io.nats.bridge.transform.examples.ExampleTransform
 io.nats.bridge.transform.examples.ExampleTransformHello
 io.nats.bridge.transform.examples.AddHeaderTransform
+io.nats.bridge.transform.examples.ModifyBodyTransform

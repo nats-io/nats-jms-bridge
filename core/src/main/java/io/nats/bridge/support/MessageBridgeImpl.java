@@ -53,20 +53,30 @@ public class MessageBridgeImpl implements MessageBridge {
 
     private final Map<String, TransformMessage> transformers;
 
+    private final List<String> outputTransforms;
+
+
+
 
     public MessageBridgeImpl(final String name, final MessageBus sourceBus, final MessageBus destinationBus, boolean requestReply,
-                             final Queue<MessageBridgeRequestReply> replyMessageQueue, final List<String> transforms) {
+                             final Queue<MessageBridgeRequestReply> replyMessageQueue, final List<String> transforms, List<String> outputTransforms) {
         this.sourceBus = sourceBus;
         this.destinationBus = destinationBus;
         this.requestReply = requestReply;
         this.replyMessageQueue = (replyMessageQueue != null) ? replyMessageQueue : new LinkedTransferQueue<>();
         this.name = "bridge-" + name.toLowerCase().replace(".", "-").replace(" ", "-");
         this.transforms = transforms;
+        this.outputTransforms = outputTransforms;
 
-        this.transformMessage = transforms != null && transforms.size() > 0;
+        boolean inputTransformEnabled = transforms != null  && transforms.size() > 0;
+        boolean outputTransformEnabled = outputTransforms != null  && outputTransforms.size() > 0;
+
+        this.transformMessage = inputTransformEnabled || outputTransformEnabled;
 
 
-        transformers = transformMessage ? Transformers.loadTransforms() : Collections.emptyMap();
+
+
+        this.transformers = transformMessage ? Transformers.loadTransforms() : Collections.emptyMap();
 
     }
 
@@ -81,56 +91,81 @@ public class MessageBridgeImpl implements MessageBridge {
         return doProcess(receiveMessageFromSourceOption);
     }
 
+
+    private Message transformMessageIfNeeded(final Message receiveMessageFromSource,
+                                             final List<String> transforms) {
+
+        if (transforms.isEmpty()) return receiveMessageFromSource;
+
+        Message currentMessage = receiveMessageFromSource;
+        if (transformMessage) {
+            TransformResult result = Transformers.runTransforms(transformers, transforms, currentMessage);
+            switch (result.getResult()) {
+                case SKIP:
+                    if (runtimeLogger.isTraceEnabled())
+                        runtimeLogger.trace("Message was skipped");
+                    return null;
+                case SYSTEM_ERROR:
+                case ERROR:
+                    if (result.getStatusMessage().isPresent()) {
+                        logger.error(result.getStatusMessage().get(), result.getError());
+                    } else {
+                        logger.error("Error handling transform ", result.getError());
+                    }
+                    return null;
+                case TRANSFORMED:
+                    if (runtimeLogger.isTraceEnabled()) {
+                        if (!result.getStatusMessage().isPresent()) {
+                            runtimeLogger.trace("Message was transformed");
+                        } else {
+                            runtimeLogger.trace("Message was transformed " + result.getStatusMessage().get());
+                        }
+                    }
+                    currentMessage = result.getTransformedMessage();
+                case NOT_TRANSFORMED:
+                    //no op
+            }
+        }
+        return currentMessage;
+    }
+
     private int doProcess(Optional<Message> receiveMessageFromSourceOption) {
         int count = 0;
-
+        if (receiveMessageFromSourceOption.isPresent()) count++;
 
         if (requestReply) {
-            if (receiveMessageFromSourceOption.isPresent()) count++;
-
             receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
-                        Message currentMessage = receiveMessageFromSource;
-                        if (transformMessage) {
-                            TransformResult result = Transformers.runTransforms(transformers, transforms, currentMessage);
-                            switch (result.getResult()) {
-                                case SKIP:
-                                    if (runtimeLogger.isTraceEnabled())
-                                        runtimeLogger.trace("Message was skipped");
-                                    return;
-                                case SYSTEM_ERROR:
-                                case ERROR:
-                                    if (result.getStatusMessage().isPresent()) {
-                                        logger.error(result.getStatusMessage().get(), result.getError());
-                                    } else {
-                                        logger.error("Error handling transform ", result.getError());
-                                    }
-                                    return;
-                                case TRANSFORMED:
-                                    if (runtimeLogger.isTraceEnabled()) {
-                                        if (!result.getStatusMessage().isPresent()) {
-                                            runtimeLogger.trace("Message was transformed");
-                                        } else {
-                                            runtimeLogger.trace("Message was transformed " + result.getStatusMessage().get());
-                                        }
-                                    }
-                                    currentMessage = result.getTransformedMessage();
-                                case NOT_TRANSFORMED:
-                                    //no op
-                            }
-                        }
+                        //Request transforms.
+                        final Message currentMessageFinal = transformMessageIfNeeded(receiveMessageFromSource,  transforms);
 
-                        final Message currentMessageFinal = currentMessage;
-                        destinationBus.request(currentMessage, replyMessage -> {
+                        if (currentMessageFinal == null) {
+                            return;
+                        }
+                        destinationBus.request(currentMessageFinal, replyMessage -> {
                             if (runtimeLogger.isTraceEnabled()) {
                                 runtimeLogger.info("The bridge {} got reply message {} \n for request message {} ",
                                         name, replyMessage.bodyAsString(), currentMessageFinal);
                             }
-                            replyMessageQueue.add(new MessageBridgeRequestReply(currentMessageFinal, replyMessage));
+
+                            //Reply transforms.
+                            final Message replyMessageFinal = transformMessageIfNeeded(replyMessage,  outputTransforms);
+
+                            replyMessageQueue.add(new MessageBridgeRequestReply(currentMessageFinal,
+                                    replyMessageFinal != null ? replyMessageFinal : replyMessage));
                         });
                     }
             );
         } else {
-            receiveMessageFromSourceOption.ifPresent(destinationBus::publish);
+            receiveMessageFromSourceOption.ifPresent(receiveMessageFromSource -> {
+
+                        //Forward transforms.
+                        final Message currentMessageFinal = transformMessageIfNeeded(receiveMessageFromSource,  transforms);
+                        if (currentMessageFinal == null) {
+                            return;
+                        }
+                        destinationBus.publish(currentMessageFinal);
+                    }
+            );
         }
         count += sourceBus.process();
         count += destinationBus.process();

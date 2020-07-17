@@ -19,7 +19,7 @@ internal class LoginRepoFromFilesTest {
     @BeforeEach
     fun before() {
         file = File("./data/logins-" + UUID.randomUUID().toString() + "+.yaml")
-        repo = LoginRepoFromPath(file, systemSecret = "")
+        repo = LoginRepoFromPath(file.toPath(), systemSecret = "")
 
         repo.addLogin(Login("Rick Hightower", roles = listOf(Role("Admin")),
                 secret = "sk-" + UUID.randomUUID().toString(), publicKey = "pk-" + UUID.randomUUID().toString()))

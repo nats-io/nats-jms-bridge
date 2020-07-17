@@ -56,6 +56,8 @@ clusters:
         nats.ibm.mq.queueManager: "MYQM1"
         nats.ibm.mq.queueModelName: "MY.MODEL"
         nats.ibm.mq.queueModelPrefix: "MY*"
+        io.nats.ibm.mq.jms.prop.XMSC_WMQ_CONNECTION_NAME_LIST: "server1,server2,server3"
+        io.nats.ibm.mq.jms.prop.WMQ_SSL_CIPHER_SUITE: "TLS_RSA_WITH_AES_128_CBC_SHA256"
       userName: "app"
       password: "passw0rd2"
       jmsDestinationType: "QUEUE"

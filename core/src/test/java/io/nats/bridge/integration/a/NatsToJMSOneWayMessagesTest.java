@@ -83,7 +83,7 @@ public class NatsToJMSOneWayMessagesTest {
 
         responseBusServer = TestUtils.getMessageBusJms("SERVER_RESPONSE", responseName);
         responseBusClient = TestUtils.getMessageBusJms("CLIENT_RESPONSE", responseName);
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, false, null, Collections.emptyList());
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, false, null, Collections.emptyList(), Collections.emptyList());
 
     }
 

@@ -42,7 +42,7 @@ public class IBM_MQ_ToNatsBridgeWithHeadersTest {
 
         bridgeMessageBusSource = TestUtils.getMessageBusIbmMQWithHeaders4("BRIDGE_SOURCE",true);
         bridgeMessageBusDestination = TestUtils.getMessageBusNats("BRIDGE_DEST","B");
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null, Collections.emptyList());
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null, Collections.emptyList(), Collections.emptyList());
 
     }
 
