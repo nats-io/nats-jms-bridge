@@ -38,6 +38,7 @@ clusters:
       userName: "cloudurable"
       password: "cloudurable"
       jmsDestinationType: "QUEUE"
+      autoConfig: "ACTIVE_MQ"
   natsCluster:
     name: "natsCluster"
     properties: !<nats>
@@ -67,3 +68,4 @@ clusters:
       userName: "app"
       password: "passw0rd"
       jmsDestinationType: "QUEUE"
+      autoConfig: "IBM_MQ"

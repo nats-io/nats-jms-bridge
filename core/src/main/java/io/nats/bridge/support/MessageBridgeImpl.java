@@ -94,6 +94,9 @@ public class MessageBridgeImpl implements MessageBridge {
 
     private Message transformMessageIfNeeded(final Message receiveMessageFromSource,
                                              final List<String> transforms) {
+
+        if (transforms.isEmpty()) return receiveMessageFromSource;
+
         Message currentMessage = receiveMessageFromSource;
         if (transformMessage) {
             TransformResult result = Transformers.runTransforms(transformers, transforms, currentMessage);
