@@ -44,6 +44,7 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
     public static final String JSSL_KEY_STORE_PATH =   PFX_TLS + "keystore.path";
     public static final String JSSL_ALGORITHM =   PFX_TLS + "algorithm";
     public static final String JSSL_KEY_STORE_PWD =   PFX_TLS + "keystore.password";
+    public static final String JSSL_KEY_STORE_ALIAS =   PFX_TLS + "keystore.alias";
     public static final String JSSL_TRUST_STORE_PWD =   PFX_TLS + "truststore.password";
 
     public static final String JSSL_KEYSTORE_ENV_VAR_VALUE =   PFX_TLS + "keystore.env_var.value";
@@ -104,6 +105,10 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
 
             if(getOptionProperties().getProperty(JSSL_KEY_STORE_PWD) != null) {
                 sslContextBuilder.withKeyPassword(getOptionProperties().getProperty(JSSL_KEY_STORE_PWD));
+            }
+
+            if(getOptionProperties().getProperty(JSSL_KEY_STORE_ALIAS) != null) {
+                sslContextBuilder.withKeyStoreAlias(getOptionProperties().getProperty(JSSL_KEY_STORE_ALIAS));
             }
 
             if(getOptionProperties().getProperty(JSSL_ALGORITHM) != null) {
