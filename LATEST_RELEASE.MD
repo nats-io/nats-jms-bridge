@@ -15,8 +15,11 @@
 ```yaml
 
 ---
-name: "Sample Showing passing system properties"
+name: "Sample Showing passig system properties"
 systemProperties:
+  java.net.ssl.trustStore: path to trust store
+  javax.net.ssl.keyStore: path to key store
+  javax.net.ssl.keyStorePassword: sslpass
 
 bridges:
   - name: "natsToIBMMq"
