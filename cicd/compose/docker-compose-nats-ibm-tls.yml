@@ -19,8 +19,7 @@ services:
       - "1414:1414"
       - "8443:9443"
     volumes:
-      - /Users/gilmarmaciel/job/nats-jms-mq-bridge/certs/ibmmqcert:/etc/mqm/pki/keys/myibmkey
-      #- /Users/gilmarmaciel/job/nats-jms-mq-bridge/certs/ibmmqcert:/var/mqm/qmgrs/QM1/ssl/
+      - ../../certs/ibmmqcert:/etc/mqm/pki/keys/myibmkey
   active-mq:
     build:
       context: ../bridge-activemq

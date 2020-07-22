@@ -33,7 +33,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
         return doLoadMessageBridge(natsBridgeConfig)
     }
 
-    
+
     data class Details(val bridge: MessageBridgeInfo, val sourceCluster: Cluster, val destinationCluster: Cluster)
 
 
