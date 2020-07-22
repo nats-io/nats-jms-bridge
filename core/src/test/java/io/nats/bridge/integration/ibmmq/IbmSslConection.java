@@ -43,7 +43,7 @@ public class IbmSslConection {
             final String destinationName = "DEV.QUEUE.1";
             final JmsFactoryFactory ff = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
             final JmsConnectionFactory cf = ff.createConnectionFactory();
-            final String sslkeyr ="/Users/gilmarmaciel/job/nats-jms-mq-bridge2/bridge2/certs/clientibmkey.kdb" ;
+            final String sslkeyr ="../certs/clientibmkey.kdb" ;
             final String sslpass ="cloudurable";
             // Set the properties
 

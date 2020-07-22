@@ -9,3 +9,31 @@
 * Option to select private key from key store using alias #172
 
 ----
+
+#### Sample nats-bridge.yaml Showing passing system properties
+
+```yaml
+
+---
+name: "Sample Showing passing system properties"
+systemProperties:
+
+bridges:
+  - name: "natsToIBMMq"
+    bridgeType: "REQUEST_REPLY"
+    transforms: ["addHeader"]
+    replyTransforms : ["changeBody"]
+    source:
+      name: "nats"
+      busType: "NATS"
+      subject: "b-subject"
+      clusterName: "natsCluster"
+    destination:
+      name: "ibmMQ"
+      busType: "JMS"
+      subject: "DEV.QUEUE.1"
+      clusterName: "ibmMqCluster"
+    copyHeaders: false
+    workers: 5
+    tasks : 2
+```
