@@ -24,7 +24,7 @@ class SSLUtils {
     //public static String KEY_PASSWORD = "password";
     //public static String ALGORITHM = "SunX509";
 
-    public static KeyStore loadKeystore(final String path, final String storePassword) throws Exception {
+    public static KeyStore loadKeystore(final String path, final String storePassword, final String storeAlias) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         BufferedInputStream in = new BufferedInputStream(new FileInputStream(path));
 
@@ -35,28 +35,28 @@ class SSLUtils {
                 in.close();
             }
         }
-
+        store.aliases().equals(storeAlias);
         return store;
     }
 
-    public static KeyManager[] createTestKeyManagers(final String keystorePath, final String algorithm, final String keyPassword, final String storePassword) throws Exception {
-        KeyStore store = loadKeystore(keystorePath, storePassword);
+    public static KeyManager[] createTestKeyManagers(final String keystorePath, final String algorithm, final String keyPassword, final String storePassword, final String storeAlias) throws Exception {
+        KeyStore store = loadKeystore(keystorePath, storePassword, storeAlias);
         KeyManagerFactory factory = KeyManagerFactory.getInstance(algorithm);
         factory.init(store, keyPassword.toCharArray());
         return factory.getKeyManagers();
     }
 
-    public static TrustManager[] createTestTrustManagers(final String truststorePath, final String algorithm, final String storePassword) throws Exception {
-        KeyStore store = loadKeystore(truststorePath,  storePassword);
+    public static TrustManager[] createTestTrustManagers(final String truststorePath, final String algorithm, final String storePassword, final String storeAlias) throws Exception {
+        KeyStore store = loadKeystore(truststorePath,  storePassword, storeAlias);
         TrustManagerFactory factory = TrustManagerFactory.getInstance(algorithm);
         factory.init(store);
         return factory.getTrustManagers();
     }
 
-    public static SSLContext createSSLContext(final String truststorePath, final String keystorePath, final String algorithm, final String keyPassword, final  String storePassword) throws Exception {
+    public static SSLContext createSSLContext(final String truststorePath, final String keystorePath, final String algorithm, final String keyPassword, final  String storePassword, String storeAlias) throws Exception {
         SSLContext ctx = SSLContext.getInstance(Options.DEFAULT_SSL_PROTOCOL);
-        ctx.init(createTestKeyManagers(keystorePath, algorithm, keyPassword, storePassword),
-                createTestTrustManagers( truststorePath, algorithm, storePassword), new SecureRandom());
+        ctx.init(createTestKeyManagers(keystorePath, algorithm, keyPassword, storePassword, storeAlias),
+                createTestTrustManagers( truststorePath, algorithm, storePassword, storeAlias), new SecureRandom());
         return ctx;
     }
 }

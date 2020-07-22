@@ -1,8 +1,54 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-0.15.0-beta10}
+VERSION=${VERSION:-0.16.0-beta11}
 DOCKER_NAMESPACE=${DOCKER_NAMESPACE:-synadia}
+
+wrapper() {
+  cd message
+  gradle wrapper
+  pwd
+  cd ..
+  cd core
+  gradle wrapper
+  pwd
+  cd ..
+  cd admin
+  gradle wrapper
+  pwd
+  cd ..
+}
+
+
+build_all() {
+  cd message
+  ./gradlew clean build publishToMavenLocal -x test
+  pwd
+  cd ..
+  cd core
+  ./gradlew clean build publishToMavenLocal -x test
+  pwd
+  cd ..
+  cd admin
+  ./gradlew clean distZip
+  pwd
+  cd ..
+}
+
+test_all() {
+  cd message
+  ./gradlew clean build
+  pwd
+  cd ..
+  cd core
+  ./gradlew clean build
+  pwd
+  cd ..
+  cd admin
+  ./gradlew clean build
+  pwd
+  cd ..
+}
 
 build_prometheus_image() {
   bin/build_deploy_docker.sh "$VERSION" "$DOCKER_NAMESPACE" cicd/prometheus prometheus
@@ -173,6 +219,18 @@ help () {
 export COMMAND="$1"
 
 case $COMMAND in
+
+test_all)
+  test_all
+  ;;
+  
+wrapper)
+    wrapper
+    ;;
+
+build_all)
+  build_all
+  ;;
 
 docker_build_nats_tls_test)
   docker_build_nats_tls_test
