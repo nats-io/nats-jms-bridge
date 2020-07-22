@@ -17,11 +17,21 @@ import java.util.*
 
 class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsRegistry: MeterRegistry? = null) : MessageBridgeLoader {
 
-    override fun loadBridgeConfigs() = doLoadMessageBridge(repo.readConfig())
-
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val startupLogs = getLogger("startup")
 
+    override fun loadBridgeConfigs() : List<BridgeConfig> {
+        val natsBridgeConfig = repo.readConfig()
+        if (natsBridgeConfig.systemProperties != null) {
+            natsBridgeConfig.systemProperties.forEach{
+                if (startupLogs.isInfoEnabled) {
+                    startupLogs.info("Set System Property key {} == value {} ", it.key, it.value)
+                }
+                System.setProperty(it.key, it.value)
+            }
+        }
+        return doLoadMessageBridge(natsBridgeConfig)
+    }
 
 
     data class Details(val bridge: MessageBridgeInfo, val sourceCluster: Cluster, val destinationCluster: Cluster)
@@ -36,6 +46,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
 
     }
     private fun doLoadMessageBridge(config: NatsBridgeConfig) = config.bridges.map { bridge ->
+
 
         logger.info("Loading configuration")
 

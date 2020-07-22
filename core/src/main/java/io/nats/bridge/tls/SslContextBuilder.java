@@ -5,11 +5,14 @@ import io.nats.client.Options;
 
 import javax.net.ssl.*;
 import java.io.*;
+import java.security.Key;
 import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.util.Base64;
+import java.util.Enumeration;
 
 public class SslContextBuilder {
 
@@ -24,6 +27,7 @@ public class SslContextBuilder {
     private String keyStoreValueEnvVariable = "KEYSTORE";
     private String trustStorePathEnvVariable = "TRUSTSTORE_PATH";
     private String keyStorePathEnvVariable = "KEYSTORE_PATH";
+    private String keyStoreAlias;
 
 
     public String getTrustStoreValueEnvVariable() {
@@ -62,7 +66,12 @@ public class SslContextBuilder {
         return this;
     }
 
+    public String getKeyStoreAlias() { return keyStoreAlias; }
 
+    public SslContextBuilder withKeyStoreAlias(String keyStoreAlias) {
+        this.keyStoreAlias = keyStoreAlias;
+        return this;
+    }
 
     private static KeyStore loadKeystore(final InputStream in, final char[] password) throws Exception {
         final KeyStore store = KeyStore.getInstance("JKS");
@@ -77,6 +86,12 @@ public class SslContextBuilder {
 
         return store;
 
+    }
+
+    private static KeyStore loadKeystoreAlias(final String alias, final char[] password) throws Exception {
+        final KeyStore store = KeyStore.getInstance("JKS");
+        store.getKey(alias, password);
+        return store;
     }
 
     public SslContextBuilder withTrustStoreKeyManagers(TrustManager[] trustStoreKeyManagers) {
@@ -166,7 +181,7 @@ public class SslContextBuilder {
     public SSLContext buildOld() {
         try {
             return SSLUtils.createSSLContext(getTruststorePath(), getKeystorePath(), getAlgorithm(), new String(getKeystorePassword()),
-                    new String(getTrustStorePassword()));
+                    new String(getTrustStorePassword()), getKeyStoreAlias());
         } catch (Exception e) {
             throw new SslContextBuilderException("Unable to create SSL context", e);
         }
@@ -250,6 +265,7 @@ public class SslContextBuilder {
 
         if (keyStoreKeyManagers == null) {
             final String keyStorePath = getKeystorePath();
+            final String keyStoreAlias = getKeyStoreAlias();
             if (keyStorePath == null) {
                 final String value = System.getenv(getKeyStoreValueEnvVariable());
 
@@ -260,6 +276,7 @@ public class SslContextBuilder {
                     final KeyManagerFactory factory = KeyManagerFactory.getInstance(getAlgorithm());
                     factory.init(store, getKeystorePassword());
                     keyStoreKeyManagers = factory.getKeyManagers();
+
                 } catch (Exception e) {
                     throw new IllegalStateException("Unable to load key store from env variable" + getKeyStoreValueEnvVariable(), e);
                 }
@@ -293,9 +310,29 @@ public class SslContextBuilder {
                     try {
                         final FileInputStream fileInputStream = new FileInputStream(keyStorePath);
                         final KeyStore store = loadKeystore(fileInputStream, getKeystorePassword());
-                        final KeyManagerFactory factory = KeyManagerFactory.getInstance(getAlgorithm());
-                        factory.init(store, getKeystorePassword());
-                        keyStoreKeyManagers = factory.getKeyManagers();
+                        //store.getCertificateAlias(store.getCertificate(getKeyStoreAlias()));
+                        if (keyStoreAlias != null) {
+                            try {
+                                KeyStore keystore = null;
+                                Certificate cert = store.getCertificate(keyStoreAlias);
+                                String keyStoreType = KeyStore.getDefaultType();
+                                if (cert != null) {
+                                    keystore = KeyStore.getInstance(keyStoreType);
+                                    keystore.load(null, null);
+                                    keystore.setCertificateEntry(keyStoreAlias, cert);
+
+                                } else { keystore.load(null, null); }
+                                final KeyManagerFactory factory = KeyManagerFactory.getInstance(getAlgorithm());
+                                factory.init(keystore, getKeystorePassword());
+                                keyStoreKeyManagers = factory.getKeyManagers();
+                            } catch (Exception e) {
+                            throw new SslContextBuilderException("Unable to find the alias " + keyStoreAlias, e);
+                            }
+                        } else {
+                            final KeyManagerFactory factory = KeyManagerFactory.getInstance(getAlgorithm());
+                            factory.init(store, getKeystorePassword());
+                            keyStoreKeyManagers = factory.getKeyManagers();
+                        }
                     } catch (FileNotFoundException e) {
                         throw new IllegalStateException("Key store path not found" + keyStorePath, e);
                     } catch (Exception e) {

@@ -14,7 +14,8 @@ data class NatsBridgeConfig(val name: String,
                             val dateTime: LocalDateTime = LocalDateTime.now(),
                             val secretKey: String? = null,
                             val bridges: List<MessageBridgeInfo>,
-                            val clusters: Map<String, Cluster>)
+                            val clusters: Map<String, Cluster>,
+                            val systemProperties: Map<String, String>? = null)
 
 
 /**

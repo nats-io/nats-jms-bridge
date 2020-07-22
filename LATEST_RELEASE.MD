@@ -1,65 +1,34 @@
-# 0.15.0-beta10 NATS JMS/MQ Bridge
+# 0.16.0-beta11 NATS JMS/MQ Bridge
 
-#### TAG: 0.15.0-beta10
+#### TAG: 0.16.0-beta11
 
 ## Issues
 
-* #190 Support truststore in .crt format.
-* #191 Adding support for transform on forward.  
-* #192 Adding support for transform on reply.
+* #196 MTLS support via System properties
+* #189 and #198 Subscription support to support multiple bridge admins   
+* Option to select private key from key store using alias #172
 
 ----
 
-## #191 and #192 Example Forward Transform
-
-#### nats-jms-mq-bridge/example-transform/config/nats-bridge-forward-q-2-q.yaml
+#### Sample nats-bridge.yaml Showing passing system properties, keystore alias, and MTLS
 
 ```yaml
 
 ---
-name: "Starter Config"
-...
-bridges:
-  - name: "natsForwardToJMS"
-    bridgeType: "FORWARD"
-    transforms: ["addHeader"] # <----------------- Look here <<<<<<<<<<<<<<
-    source:
-      name: "natsSrc"
-      busType: "NATS"
-      subject: "forward-subject"
-      clusterName: "natsCluster"
-    destination:
-      name: "ibmMQDst"
-      busType: "JMS"
-      subject: "DEV.QUEUE.2"
-      clusterName: "ibmMqCluster"
-    copyHeaders: false
-    workers: 3
-    tasks : 1
-...
-```
+name: "Sample Showing passig system properties"
+systemProperties:
+  javax.net.ssl.trustStore: "../certs/ibmkey.jks" # <-- MTLS #196
+  javax.net.ssl.trustStoreType: JKS
+  com.ibm.mq.cfg.useIBMCipherMappings: false # <-- MTLS #196
+  javax.net.ssl.trustStorePassword: cloudurable@10
+  # javax.net.ssl.keyStore: path to key store
+  # javax.net.ssl.keyStorePassword: sslpass  
 
-
-## Example Request/Reply Transform
-
-#### nats-jms-mq-bridge/example-transform/config/nats-bridge-reply-transform.yaml
-
-```yaml
----
-name: "Config for reply example"
-dateTime:
-  - 2020
-  - 4
-  - 30
-  - 0
-  - 53
-  - 50
-  - 423615000
 bridges:
   - name: "natsToIBMMq"
     bridgeType: "REQUEST_REPLY"
-    transforms: ["addHeader"] # <----------------- Look here <<<<<<<<<<<<<<
-    replyTransforms : ["changeBody"] # <----------------- And Look here <<<<<<<<<<<<<<
+    transforms: ["addHeader"]
+    replyTransforms : ["changeBody"]
     source:
       name: "nats"
       busType: "NATS"
@@ -73,66 +42,40 @@ bridges:
     copyHeaders: false
     workers: 5
     tasks : 2
-    ...
 
-```
+...
 
-## Added new change body transform example
+ibmMqCluster:
+  name: "ibmMqCluster"
+  properties: !<jms>
+    config:
+      java.naming.factory.initial: "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"
+      nats.ibm.mq.host: "tcp://localhost:1414"
+      nats.ibm.mq.channel: "DEV.APP.SVRCONN"
+      nats.ibm.mq.queueManager: "QM1"
+      nats.ibm.mq.queueModelName: "DEV.MODEL"
+      nats.ibm.mq.queueModelPrefix: "DEV*"
+      io.nats.ibm.mq.jms.prop.XMSC_WMQ_SSL_CIPHER_SUITE: “TLS_RSA_WITH_AES_128_CBC_SHA256” # <-- MTLS #196
+    userName: "app"
+    password: "passw0rd"
+    jmsDestinationType: "QUEUE"    
 
-#### nats-jms-mq-bridge/example-transform/src/main/java/io/nats/bridge/transform/examples/ModifyBodyTransform.java
+    natsCluster:
+      name: "natsCluster"
+      properties: !<nats>
+        host: "localhost"
+        port: 4222
+        servers: []
+        config:
+          io.nats.client.reconnect.wait: "3000"
+          io.nats.client.reconnect.max: "10"
+          io.nats.client.timeout: "4000"
+          io.nats.client.tls.jssl.enable: "true"
+          io.nats.client.tls.truststore.path: "../certs/truststore.crt"
+          io.nats.client.tls.keystore.path: "../certs/keystore.jks"
+          io.nats.client.tls.algorithm: "SunX509"
+          io.nats.client.tls.keystore.password: "cloudurable1"
+          io.nats.client.tls.truststore.password: "cloudurable2"
+          keystore.alias.keystore.alias: "myalias"   ## <------------- #172 keys tore alias
 
-```java
-package io.nats.bridge.transform.examples;
-
-import io.nats.bridge.messages.Message;
-import io.nats.bridge.messages.MessageBuilder;
-import io.nats.bridge.messages.transform.TransformMessage;
-import io.nats.bridge.messages.transform.TransformResult;
-
-public class ModifyBodyTransform implements TransformMessage {
-
-
-    @Override
-    public TransformResult transform(final Message inputMessage) {
-        final MessageBuilder builder = MessageBuilder.builder().initFromMessage(inputMessage);
-        System.out.println("Class ModifyBodyTransform: "+ inputMessage.bodyAsString());
-
-        builder.withBody(inputMessage.bodyAsString() + " FROM BRAZIL!");
-
-        return TransformResult.success("Message came from Brazil", builder.build());
-    }
-
-    @Override
-    public String name() {
-        return "changeBody";
-    }
-}
-
-
-```
-
-## #190 Ability to read crt files as well as jks
-
-```java
-SslContextBuilder sslContext = new SslContextBuilder();
-sslContext.withAlgorithm("SunX509");
-sslContext.withKeystorePath("../certs/keystore.crt");
-sslContext.withTruststorePath("../certs/truststore.jks");
-sslContext.withKeyPassword("cloudurable1");
-sslContext.withStorePassword("cloudurable2");
-
-
-NatsMessageBusBuilder natsMessageBusBuilder = new NatsMessageBusBuilder();
-natsMessageBusBuilder.withName("natsCluster");
-natsMessageBusBuilder.withUseTls(true);
-natsMessageBusBuilder.withSubject("a1-subject");
-natsMessageBusBuilder.withQueueGroup("exampleGroup");
-natsMessageBusBuilder.withSslContext(sslContext.build());
-natsMessageBusBuilder.getOptionsBuilder().server("nats://localhost:4222");
-natsMessageBusBuilder.getOptionsBuilder().noReconnect();
-
-MessageBus messageBus = natsMessageBusBuilder.build();
-
-System.out.println("Connect using CRT Cert - Good bye");
-messageBus.close();
 ```
