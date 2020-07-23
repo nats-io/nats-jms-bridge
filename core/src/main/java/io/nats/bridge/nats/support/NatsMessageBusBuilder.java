@@ -38,7 +38,7 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
     private Metrics metrics;
     private MetricsProcessor metricsProcessor;
 
-    public static final String PFX_TLS = "io.nats.client.io.nats.bridge.tls.";
+    public static final String PFX_TLS = "io.nats.client.tls.";
     public static final String JSSL_ENABLE =   PFX_TLS + "jssl.enable";
     public static final String JSSL_TRUST_STORE_PATH =   PFX_TLS + "truststore.path";
     public static final String JSSL_KEY_STORE_PATH =   PFX_TLS + "keystore.path";
