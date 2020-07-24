@@ -55,7 +55,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
         displayIfNeeded(details)
 
 
-        val subscriptionName:String = "admin-subscription-group" + UUID.randomUUID().toString() + System.currentTimeMillis() 
+        val subscriptionName:String = "admin-subscription-group" + UUID.randomUUID().toString() + System.currentTimeMillis()
 
         val list = if ((bridge.workers == 1 || bridge.workers == 0) && (bridge.tasks==1 || bridge.tasks==0)) {
             val bridgeBuilder = MessageBridgeBuilder()
