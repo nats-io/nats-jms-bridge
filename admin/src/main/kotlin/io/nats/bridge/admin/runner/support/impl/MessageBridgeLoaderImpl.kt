@@ -55,7 +55,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
         displayIfNeeded(details)
 
 
-        val subscriptionName:String = UUID.randomUUID().toString()
+        val subscriptionName:String = "admin-subscription-group" + UUID.randomUUID().toString() + System.currentTimeMillis() 
 
         val list = if ((bridge.workers == 1 || bridge.workers == 0) && (bridge.tasks==1 || bridge.tasks==0)) {
             val bridgeBuilder = MessageBridgeBuilder()
@@ -159,7 +159,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
                     Duration.ofSeconds(30), builder.timeSource, { builder.name }))
 
         if (busInfo.subscriptionGroup != null && busInfo.subscriptionGroup.isNotEmpty()) {
-            builder.withQueueGroup(subscriptionName)
+            builder.withQueueGroup(busInfo.subscriptionGroup)
         }else {
             builder.withQueueGroup(subscriptionName)
         }
