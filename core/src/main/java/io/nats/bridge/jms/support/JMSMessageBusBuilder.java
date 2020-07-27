@@ -16,6 +16,7 @@ import io.nats.bridge.MessageBus;
 import io.nats.bridge.TimeSource;
 import io.nats.bridge.jms.JMSMessageBus;
 import io.nats.bridge.jms.JMSMessageBusException;
+import io.nats.bridge.jms.JmsContext;
 import io.nats.bridge.metrics.Metrics;
 import io.nats.bridge.metrics.MetricsDisplay;
 import io.nats.bridge.metrics.MetricsProcessor;
@@ -551,6 +552,43 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         return this;
     }
 
+    public Supplier<JmsContext> buildJmsSupplier() {
+
+        return new Supplier<JmsContext>() {
+            @Override
+            public JmsContext get() {
+
+
+                JMSMessageBusBuilder.this.connection = null;
+                JMSMessageBusBuilder.this.session = null;
+                JMSMessageBusBuilder.this.destination = null;
+                JMSMessageBusBuilder.this.responseDestination = null;
+                JMSMessageBusBuilder.this.producerSupplier = null;
+                JMSMessageBusBuilder.this.consumerSupplier = null;
+
+                final Connection connection = getConnection();
+                final Session session = getSession();
+                final Destination destination = getDestination();
+                if (isRequestReply()) {
+
+
+                    return new JmsContext(getDestination(), getSession(), getConnection(),
+                            getResponseDestination(),
+                            JMSMessageBusBuilder.this.source ? null : getResponseConsumer(),
+                             getProducerSupplier(), getConsumerSupplier(),
+                             getTryHandler());
+                } else {
+                    return new JmsContext(getDestination(), getSession(), getConnection(),
+                            null,
+                            null,
+                            getProducerSupplier(), getConsumerSupplier(),
+                            getTryHandler());
+                }
+
+            }
+        };
+
+    }
 
     public MessageBus build() {
 
@@ -558,26 +596,13 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
             ibmMQ = true;
         }
 
-        final Connection connection = getConnection();
-        final Session session = getSession();
-        final Destination destination = getDestination();
-        if (isRequestReply()) {
+        final Supplier<JmsContext> jmsContextSupplier = buildJmsSupplier();
 
+        return new JMSMessageBus(getName(),
+                    getTimeSource(), getMetrics(),
+                    getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(),
+                    getBridgeMessageConverter(), getDestinationName(), jmsContextSupplier);
 
-            return new JMSMessageBus(getName(), destination, session, connection,
-                    getResponseDestination(),
-                    source ? null : getResponseConsumer(),
-                    getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(),
-                    getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(),
-                    getBridgeMessageConverter(), getDestinationName());
-        } else {
-            return new JMSMessageBus(getName(), destination, session, connection,
-                    null,
-                    null,
-                    getTimeSource(), getMetrics(), getProducerSupplier(), getConsumerSupplier(),
-                    getMetricsProcessor(), getTryHandler(), getJmsBusLogger(), getJmsReplyQueue(), getJmsMessageConverter(),
-                    getBridgeMessageConverter(), getDestinationName());
-        }
     }
 
 
