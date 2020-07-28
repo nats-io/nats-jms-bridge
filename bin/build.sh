@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-0.17.0-beta12}
+VERSION=${VERSION:-0.18.0-beta14}
 DOCKER_NAMESPACE=${DOCKER_NAMESPACE:-synadia}
 
 wrapper() {
@@ -158,6 +158,21 @@ copy_ibm_test_config() {
   cp admin/sampleConf/nats-bridge-ibm-mq-demo-conf.yaml admin/config/nats-bridge.yaml
 }
 
+docker_deploy_ibm_only() {
+
+  cd cicd
+  docker-compose  -f compose/docker-compose-ibm-only.yml up
+  cd ..
+}
+
+docker_deploy_nats_only() {
+
+  cd cicd
+  docker-compose  -f compose/docker-compose-nats-only.yml up
+  cd ..
+}
+
+
 docker_deploy_ibm_mq_test() {
   copy_ibm_test_config
   cd cicd
@@ -223,7 +238,7 @@ case $COMMAND in
 test_all)
   test_all
   ;;
-  
+
 wrapper)
     wrapper
     ;;
@@ -231,6 +246,15 @@ wrapper)
 build_all)
   build_all
   ;;
+
+
+docker_deploy_nats_only)
+  docker_deploy_nats_only
+  ;;
+
+docker_deploy_ibm_only)
+    docker_deploy_ibm_only
+    ;;
 
 docker_build_nats_tls_test)
   docker_build_nats_tls_test

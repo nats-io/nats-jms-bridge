@@ -6,7 +6,8 @@ public interface ProcessNotifier {
         return !stopRunning();
     }
     void notifyStopped();
-    void notifyStoppedByError(Exception ex);
+    void notifyStoppedByException(Exception ex);
+    void notifyStoppedByError(Throwable ex);
     void notifyStarted();
 
     boolean wasStarted();

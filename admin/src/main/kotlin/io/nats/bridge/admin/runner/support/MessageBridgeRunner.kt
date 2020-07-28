@@ -18,15 +18,16 @@ class BuilderTracker(val workers: Int, val tasks: Int, val builderList: List<Mes
         if (builderList.size == 1 || (workers == 1 && tasks == 1)) {
             return builderList[0].build()
         } else {
-
             try {
                 val build = builderList[index].build()
                 index++
+                if (index == builderList.size) {
+                    index =0
+                }
                 return build
             } catch (ex: IndexOutOfBoundsException) {
                 throw IllegalStateException("workers=$workers tasks=$tasks; total = ${workers * tasks}, but $index")
             }
-
         }
     }
 }

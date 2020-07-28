@@ -23,13 +23,18 @@ public class BridgeTaskRunner {
         this.name = name;
     }
 
+
+    public boolean isHealthy() {
+        return !processNotifier.wasError();
+    }
+
     public void process() {
         processNotifier.notifyStarted();
         int count = 0;
         boolean pause = false;
+        logger.info("BridgeTaskRunner starting processing loop {}", name);
         try {
             //Process
-
             while (processNotifier.keepRunning()) {
                 for (int index = 0; index < 100; index++) { //reduce calling atomic by 100x
                     for (MessageBridge messageBridge : messageBridges) {
@@ -39,26 +44,31 @@ public class BridgeTaskRunner {
                             count += messageBridge.process();
                         }
                     }
-                    if (count == 0) pause = true;
+                    pause = count == 0;
                     count = 0;
                 }
             }
+            logger.info("BridgeTaskRunner exited loop {}", name);
             //Clean up
-            messageBridges.forEach(messageBridge -> {
-                try {
-                    messageBridge.close();
-                } catch (Exception ex) {
-                    logger.error("Issue closing bridge", ex);
-                }
-            });
+            cleanUp();
             processNotifier.notifyStopped();
         } catch (final Exception ex){
             logger.error(String.format("Bridge Task Runner %s Stopped by Exception %s", name, ex.getClass().getSimpleName()), ex);
-            processNotifier.notifyStoppedByError(ex);
+            processNotifier.notifyStoppedByException(ex);
         }
         catch (final Throwable ex){
-            logger.error(String.format("Bridge Task Runner %s Stopped by Exception %s", name, ex.getClass().getSimpleName()), ex);
-            //processNotifier.notifyStoppedByError(ex);
+            logger.error(String.format("Bridge Task Runner %s Stopped by Error %s", name, ex.getClass().getSimpleName()), ex);
+            processNotifier.notifyStoppedByError(ex);
         }
+    }
+
+    private void cleanUp() {
+        messageBridges.forEach(messageBridge -> {
+            try {
+                messageBridge.close();
+            } catch (Exception ex) {
+                logger.error("Issue closing bridge", ex);
+            }
+        });
     }
 }

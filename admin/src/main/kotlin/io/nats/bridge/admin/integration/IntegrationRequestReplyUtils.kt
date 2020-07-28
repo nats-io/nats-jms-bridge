@@ -138,8 +138,8 @@ class IntegrationRequestReplyUtils {
         var totalSent = 0
         for (a in 0..9) {
             println("Run $a")
-            val latch = CountDownLatch(10)
-            for (x in 0..9) {
+            val latch = CountDownLatch(100)
+            for (x in 0..99) {
                 totalSent++
                 println("Call $x of run $a")
 

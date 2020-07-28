@@ -1,0 +1,14 @@
+# Test that uses docker image of IBM MQ that sets every setting different than the default.
+# This is to test passing IBM MQ params in the Bridge admin.
+version: '3'
+services:
+  ibm-mq:
+    build:
+      context: ../bridge-ibmmq
+    environment:
+      - LICENSE=accept
+      - MQ_QMGR_NAME=QM1
+      - MQ_APP_PASSWORD=passw0rd
+    ports:
+      - "1414:1414"
+      - "8443:9443"
