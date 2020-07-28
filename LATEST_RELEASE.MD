@@ -1,8 +1,8 @@
-# 0.17.0-beta12 NATS JMS/MQ Bridge
+# 0.18.0-beta14 NATS JMS/MQ Bridge
 
-#### TAG: 0.17.0-beta12
+#### TAG: 0.18.0-beta14
 
 ## Issues
 
 
-* #203 #189 and #198 Subscription support to support multiple bridge admins (not fully validated but please retry)
+* #197 #205 Enable IBM MQ retry list by trying to reconnect on failure with reasonable backoff.

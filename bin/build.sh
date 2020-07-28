@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-0.17.0-beta12}
+VERSION=${VERSION:-0.18.0-beta14}
 DOCKER_NAMESPACE=${DOCKER_NAMESPACE:-synadia}
 
 wrapper() {
@@ -251,7 +251,7 @@ build_all)
 docker_deploy_nats_only)
   docker_deploy_nats_only
   ;;
-  
+
 docker_deploy_ibm_only)
     docker_deploy_ibm_only
     ;;
