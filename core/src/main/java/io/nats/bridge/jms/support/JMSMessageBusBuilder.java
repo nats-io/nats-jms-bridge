@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import java.lang.IllegalStateException;
 import java.time.Duration;
 import java.util.Hashtable;
 import java.util.Map;
@@ -576,13 +575,13 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
                             getResponseDestination(),
                             JMSMessageBusBuilder.this.source ? null : getResponseConsumer(),
                              getProducerSupplier(), getConsumerSupplier(),
-                             getTryHandler());
+                              getJmsBusLogger());
                 } else {
                     return new JmsContext(getDestination(), getSession(), getConnection(),
                             null,
                             null,
                             getProducerSupplier(), getConsumerSupplier(),
-                            getTryHandler());
+                             getJmsBusLogger());
                 }
 
             }

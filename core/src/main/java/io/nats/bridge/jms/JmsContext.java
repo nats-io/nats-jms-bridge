@@ -1,6 +1,7 @@
 package io.nats.bridge.jms;
 
 import io.nats.bridge.util.ExceptionHandler;
+import org.slf4j.Logger;
 
 import javax.jms.*;
 import java.util.function.Supplier;
@@ -18,7 +19,7 @@ public class JmsContext {
     private final Supplier<MessageConsumer>  consumerSupplier;
     private MessageProducer producer;
     private MessageConsumer consumer;
-    private final ExceptionHandler tryHandler;
+    private final Logger logger;
 
 
     public JmsContext(final Destination destination,
@@ -27,7 +28,8 @@ public class JmsContext {
                       final Destination responseDestination,
                       final MessageConsumer responseConsumer,
                       final Supplier<MessageProducer> producer,
-                      final Supplier<MessageConsumer> consumer, ExceptionHandler tryHandler) {
+                      final Supplier<MessageConsumer> consumer,
+                      final Logger logger) {
         this.destination = destination;
         this.session = session;
         this.connection = connection;
@@ -35,7 +37,7 @@ public class JmsContext {
         this.responseConsumer = responseConsumer;
         this.producerSupplier = producer;
         this.consumerSupplier = consumer;
-        this.tryHandler = tryHandler;
+        this.logger = logger;
     }
 
     public Destination getDestination() {
@@ -74,6 +76,21 @@ public class JmsContext {
     }
 
     public void close() {
-        tryHandler.tryWithRethrow(connection::close, e -> new JMSMessageBusException("Error closing connection", e));
+
+        try {
+            if (session!=null) {
+                session.close();
+            }
+        } catch (Exception ex) {
+            logger.warn("Unable to close session", ex);
+        }
+
+        try {
+            if (connection!=null) {
+                connection.close();
+            }
+        }catch (Exception ex) {
+            logger.warn("Unable to close connection", ex);
+        }
     }
 }

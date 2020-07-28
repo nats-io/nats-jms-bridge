@@ -31,6 +31,7 @@ import java.time.Duration;
 import java.util.Queue;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 
@@ -213,11 +214,21 @@ public class JMSMessageBus implements MessageBus {
 
     }
 
+    public void init() {
+        jms();
+    }
+
     @Override
     public void close() {
-
-        jms().close();
+        try {
+            if (jms != null) {
+                jms.close();
+            }
+        } catch (Exception ex) {
+            logger.warn("Unable to close JMS Context", ex);
+        }
         jms=null;
+        jmsReplyQueue.clear();
     }
 
 
@@ -227,16 +238,22 @@ public class JMSMessageBus implements MessageBus {
      */
     private int processResponses() {
 
-        final MessageConsumer responseConsumer = jms().getResponseConsumer();
+
+        final JmsContext jms = jms();
+        if (jms == null) return 0;
+
+
+        final MessageConsumer responseConsumer = jms.getResponseConsumer();
 
         if (responseConsumer == null) return 0;
 
         int[] countHolder = new int[1];
 
-        tryHandler.tryWithErrorCount(() -> {
+        tryHandler.tryWithRethrow(() -> {
             int count = 0;
             javax.jms.Message message;
             do {
+
                 message = responseConsumer.receiveNoWait();
                 if (message != null) {
                     count++;
@@ -261,7 +278,7 @@ public class JMSMessageBus implements MessageBus {
             while (message != null);
             countHolder[0] = count;
 
-        }, countRequestResponseErrors, "Error Processing Responses");
+        }, countRequestResponseErrors, e -> new JMSMessageBusException("unable to call JMS receiveNoWait", e));
 
         return countHolder[0];
     }
@@ -279,7 +296,7 @@ public class JMSMessageBus implements MessageBus {
      */
     private int processReplies() {
         int[] countHolder = new int[1];
-        tryHandler.tryWithErrorCount(() -> {
+        tryHandler.tryWithRethrow(() -> {
             JMSReply reply;
             final Session session = jms().getSession();
             int count = 0;
@@ -308,7 +325,7 @@ public class JMSMessageBus implements MessageBus {
             }
             while (reply != null);
             countHolder[0] = count;
-        }, countReceivedReplyErrors, "error processing JMS receive queue for replies");
+        }, countReceivedReplyErrors, e -> new JMSMessageBusException("unable to process JMS Replies", e));
         return countHolder[0];
     }
 }

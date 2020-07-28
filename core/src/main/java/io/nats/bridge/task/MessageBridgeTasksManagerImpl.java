@@ -29,10 +29,10 @@ public class MessageBridgeTasksManagerImpl implements MessageBridgeTasksManager 
 
     private AtomicBoolean stop = new AtomicBoolean();
     private AtomicInteger startedCount = new AtomicInteger();
-    private AtomicInteger restartCount = new AtomicInteger();
-    private AtomicLong lastRestartTime = new AtomicLong(0L);
+    //private AtomicInteger restartCount = new AtomicInteger();
+    //private AtomicLong lastRestartTime = new AtomicLong(0L);
     private AtomicReference<Exception> lastError = new AtomicReference<>();
-    private CopyOnWriteArrayList<BridgeTaskRunner> runners = new CopyOnWriteArrayList<>();
+    //private CopyOnWriteArrayList<BridgeTaskRunner> runners = new CopyOnWriteArrayList<>();
 
     public MessageBridgeTasksManagerImpl(final String name, final Logger logger, final Function<String, MessageBridge> bridgeFactory,
                                          final int workers, final int tasks, final Duration pollDuration, boolean namePerTask) {
@@ -68,7 +68,7 @@ public class MessageBridgeTasksManagerImpl implements MessageBridgeTasksManager 
                     bridges.add(bridgeBuilder.apply(createName(task, worker)));
                 }
                 final BridgeTaskRunner runner = createBridgeTaskRunner(worker, bridges);
-                runners.add(runner);
+                //runners.add(runner);
                 pool.submit(runner::process);
             }
         }catch (Exception ex) {
@@ -76,81 +76,81 @@ public class MessageBridgeTasksManagerImpl implements MessageBridgeTasksManager 
             logger.error("Error starting message bridge task manager", ex);
         }
 
-        try {
-            Thread.sleep(5_000);
-        } catch (InterruptedException e) {
-        }
-        installMonitor();
+//        try {
+//            Thread.sleep(5_000);
+//        } catch (InterruptedException e) {
+//        }
+        //installMonitor();
     }
 
 
-    private void installMonitor() {
-        pool.submit(() -> {
-            while (!stop.get()) {
-
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-
-                }
-
-                boolean allHealthy=true;
-                for (BridgeTaskRunner runner : runners) {
-                    allHealthy = runner.isHealthy();
-                    if (!allHealthy) {
-                        break;
-                    }
-                }
-
-                if (!allHealthy) {
-
-                    final long now = System.currentTimeMillis();
-
-                    final long lastRestart = lastRestartTime.get();
-
-                    final boolean restart = (lastRestart + 60_000) < now;
-
-                    if (restart) {
-                        stop.set(true);
-                        restartCount.incrementAndGet();
-                        logger.error("Restarting bridge task manager {} starts {} restarts {}", name, startedCount.get(), restartCount.get());
-                        try {
-                            Thread.sleep(20_000);
-                        } catch (InterruptedException e) {
-
-                        }
-
-                        final Exception exception = lastError.get();
-                        if (exception != null) {
-                            logger.error("Restarting bridge task manager with last error", exception);
-                            lastError.set(null);
-                        }
-                        stop.set(false);
-                        runners.clear();
-                        startedCount.set(0);
-                        MessageBridgeTasksManagerImpl.this.start();
-                        lastRestartTime.set(System.currentTimeMillis());
-
-                        try {
-                            Thread.sleep(5_000);
-                        } catch (InterruptedException e) {
-
-                        }
-                        logger.error("Restarting bridge task manager {} starts {} restarts {}", name, startedCount.get(), restartCount.get());
-                    } else {
-                        logger.error("Restarting bridge {} in the next 60 seconds starts {} restarts {}", name, startedCount.get(), restartCount.get());
-
-                        final Exception exception = lastError.get();
-                        if (exception != null) {
-                            logger.error("Restarting bridge in the next 60 seconds", exception);
-                        }
-                    }
-
-                }
-
-            }
-        });
-    }
+//    private void installMonitor() {
+//        pool.submit(() -> {
+//            while (!stop.get()) {
+//
+//                try {
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException e) {
+//
+//                }
+//
+//                boolean allHealthy=true;
+//                for (BridgeTaskRunner runner : runners) {
+//                    allHealthy = runner.isHealthy();
+//                    if (!allHealthy) {
+//                        break;
+//                    }
+//                }
+//
+//                if (!allHealthy) {
+//
+//                    final long now = System.currentTimeMillis();
+//
+//                    final long lastRestart = lastRestartTime.get();
+//
+//                    final boolean restart = (lastRestart + 60_000) < now;
+//
+//                    if (restart) {
+//                        stop.set(true);
+//                        restartCount.incrementAndGet();
+//                        logger.error("Restarting bridge task manager {} starts {} restarts {}", name, startedCount.get(), restartCount.get());
+//                        try {
+//                            Thread.sleep(20_000);
+//                        } catch (InterruptedException e) {
+//
+//                        }
+//
+//                        final Exception exception = lastError.get();
+//                        if (exception != null) {
+//                            logger.error("Restarting bridge task manager with last error", exception);
+//                            lastError.set(null);
+//                        }
+//                        stop.set(false);
+//                        runners.clear();
+//                        startedCount.set(0);
+//                        MessageBridgeTasksManagerImpl.this.start();
+//                        lastRestartTime.set(System.currentTimeMillis());
+//
+//                        try {
+//                            Thread.sleep(5_000);
+//                        } catch (InterruptedException e) {
+//
+//                        }
+//                        logger.error("Restarting bridge task manager {} starts {} restarts {}", name, startedCount.get(), restartCount.get());
+//                    } else {
+//                        logger.error("Restarting bridge {} in the next 60 seconds starts {} restarts {}", name, startedCount.get(), restartCount.get());
+//
+//                        final Exception exception = lastError.get();
+//                        if (exception != null) {
+//                            logger.error("Restarting bridge in the next 60 seconds", exception);
+//                        }
+//                    }
+//
+//                }
+//
+//            }
+//        });
+//    }
 
     private BridgeTaskRunner createBridgeTaskRunner(final int worker, List<MessageBridge> bridges) {
 

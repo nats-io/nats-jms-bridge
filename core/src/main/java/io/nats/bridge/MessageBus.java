@@ -88,5 +88,7 @@ public interface MessageBus extends Closeable {
 
     int process();
 
+    default void init() {};
+
 
 }

@@ -229,6 +229,7 @@ public class MockMessageBus implements MessageBus {
 
     int process = 0;
 
+
     @Override
     public int process() {
         process++;

@@ -239,7 +239,7 @@ public class MessageBridgeImpl implements MessageBridge {
 
 
         if (messageBus instanceof JMSMessageBus) {
-            logger.info("Restarting Message Bus {}", name);
+            logger.info("Restarting Message Bus {} {}", name, backoffSeconds);
 
             final long now = System.currentTimeMillis();
 
@@ -253,18 +253,23 @@ public class MessageBridgeImpl implements MessageBridge {
                 messageBus.close();
             } catch (Exception exClose) {
                 logger.error("Unable to close", exClose);
-                rethrow(ex);
             }
 
+            try {
+                messageBus.init();
+            } catch (Exception exClose) {
+                logger.error("Unable to recreate", exClose);
+
+                try {
+                    Thread.sleep(backoffSeconds * 1000);
+                } catch (InterruptedException e) {
+                }
+                return;
+            }
+            backoffSeconds = 1;
             lastRestart = System.currentTimeMillis();
 
             logger.info("Restarting Message Bus for {}, sleeping {}", name, backoffSeconds);
-
-            try {
-                Thread.sleep(backoffSeconds * 1000);
-            } catch (InterruptedException e) {
-            }
-
             logger.info("Restarted Message Bus for {}", name);
 
         } else {
