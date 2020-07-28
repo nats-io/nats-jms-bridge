@@ -251,12 +251,14 @@ public class MessageBridgeImpl implements MessageBridge {
 
             try {
                 messageBus.close();
+                logger.info("Restart reason {} === CLOSED", name);
             } catch (Exception exClose) {
-                logger.error("Unable to close", exClose);
+                logger.debug("Unable to close", exClose);
             }
 
             try {
                 messageBus.init();
+                logger.info("Restart reason {} === RESTARTED", name);
             } catch (Exception exClose) {
                 logger.error("Unable to recreate", exClose);
 

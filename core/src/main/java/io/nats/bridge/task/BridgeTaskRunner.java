@@ -23,6 +23,7 @@ public class BridgeTaskRunner {
         this.name = name;
     }
 
+
     public boolean isHealthy() {
         return !processNotifier.wasError();
     }
@@ -31,9 +32,9 @@ public class BridgeTaskRunner {
         processNotifier.notifyStarted();
         int count = 0;
         boolean pause = false;
+        logger.info("BridgeTaskRunner starting processing loop {}", name);
         try {
             //Process
-
             while (processNotifier.keepRunning()) {
                 for (int index = 0; index < 100; index++) { //reduce calling atomic by 100x
                     for (MessageBridge messageBridge : messageBridges) {
@@ -47,18 +48,17 @@ public class BridgeTaskRunner {
                     count = 0;
                 }
             }
+            logger.info("BridgeTaskRunner exited loop {}", name);
             //Clean up
             cleanUp();
             processNotifier.notifyStopped();
         } catch (final Exception ex){
             logger.error(String.format("Bridge Task Runner %s Stopped by Exception %s", name, ex.getClass().getSimpleName()), ex);
             processNotifier.notifyStoppedByException(ex);
-            cleanUp();
         }
         catch (final Throwable ex){
             logger.error(String.format("Bridge Task Runner %s Stopped by Error %s", name, ex.getClass().getSimpleName()), ex);
             processNotifier.notifyStoppedByError(ex);
-            cleanUp();
         }
     }
 

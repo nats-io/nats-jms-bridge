@@ -69,7 +69,16 @@ public class MessageBridgeTasksManagerImpl implements MessageBridgeTasksManager 
                 }
                 final BridgeTaskRunner runner = createBridgeTaskRunner(worker, bridges);
                 //runners.add(runner);
-                pool.submit(runner::process);
+                pool.submit(() -> {
+                        while (!stop.get()) {
+                            runner.process();
+                            try {
+                                Thread.sleep(3_000);
+                            } catch (InterruptedException e) {
+                                //e.printStackTrace();
+                            }
+                        }
+                });
             }
         }catch (Exception ex) {
             lastError.set(ex);

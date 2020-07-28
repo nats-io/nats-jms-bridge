@@ -77,20 +77,22 @@ public class JmsContext {
 
     public void close() {
 
+        logger.info("Closing session");
         try {
             if (session!=null) {
                 session.close();
             }
         } catch (Exception ex) {
-            logger.warn("Unable to close session", ex);
+            logger.debug("Unable to close session", ex);
         }
 
+        logger.info("Closing connection");
         try {
             if (connection!=null) {
                 connection.close();
             }
         }catch (Exception ex) {
-            logger.warn("Unable to close connection", ex);
+            logger.debug("Unable to close connection", ex);
         }
     }
 }

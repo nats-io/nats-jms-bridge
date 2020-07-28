@@ -564,10 +564,8 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
                 JMSMessageBusBuilder.this.responseDestination = null;
                 JMSMessageBusBuilder.this.producerSupplier = null;
                 JMSMessageBusBuilder.this.consumerSupplier = null;
+                JMSMessageBusBuilder.this.responseConsumer = null;
 
-                final Connection connection = getConnection();
-                final Session session = getSession();
-                final Destination destination = getDestination();
                 if (isRequestReply()) {
 
 

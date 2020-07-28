@@ -310,7 +310,13 @@ public class JMSMessageBus implements MessageBus {
                     final byte[] messageBody = reply.getReply().getBodyBytes();
                     final String correlationId = reply.getCorrelationID();
                     final Destination jmsReplyTo = reply.getJmsReplyTo();
-                    final MessageProducer replyProducer = session.createProducer(jmsReplyTo);
+                    MessageProducer replyProducer;
+                    try {
+                        replyProducer = session.createProducer(jmsReplyTo);
+                    }catch (Exception ex) {
+                        logger.debug("Unable to handle creating a producer", ex);
+                        return;
+                    }
                     final BytesMessage jmsReplyMessage = session.createBytesMessage();
                     jmsReplyMessage.writeBytes(messageBody);
                     timerReceiveReply.recordTiming(timeSource.getTime() - reply.getSentTime());
