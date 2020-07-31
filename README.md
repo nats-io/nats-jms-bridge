@@ -17,6 +17,8 @@ The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nat
 2. Bridge gets the response and sends it back to the original client.
 3. The focus is on Queues and Request/Reply.
 
+Reconnect and tlsverify for TLS alias for Nats.
+
 
 #### Basic flow
 

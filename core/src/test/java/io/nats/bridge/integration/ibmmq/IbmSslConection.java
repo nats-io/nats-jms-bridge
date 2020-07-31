@@ -27,16 +27,6 @@ public class IbmSslConection {
 
     }
 
-<<<<<<< HEAD
-
-    //@Test Need to run a certain contanier to get this to test to work see CI/CD.
-=======
-<<<<<<< HEAD
-    //@Test Need to run a certain contanier to get this to test to work see CI/CD.
-=======
-    @Test
->>>>>>> efa2fbb3c0f680dd66693e8a7efc950de32a6aa9
->>>>>>> master
     public void testSendMessageWithDynamicQueueTls() throws Exception {
 
         try {
@@ -52,15 +42,7 @@ public class IbmSslConection {
             final String destinationName = "DEV.QUEUE.1";
             final JmsFactoryFactory ff = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
             final JmsConnectionFactory cf = ff.createConnectionFactory();
-<<<<<<< HEAD
             final String sslkeyr ="../certs/clientibmkey.kdb" ;
-=======
-<<<<<<< HEAD
-            final String sslkeyr ="../certs/clientibmkey.kdb" ;
-=======
-            final String sslkeyr ="/Users/gilmarmaciel/job/nats-jms-mq-bridge2/bridge2/certs/clientibmkey.kdb" ;
->>>>>>> efa2fbb3c0f680dd66693e8a7efc950de32a6aa9
->>>>>>> master
             final String sslpass ="cloudurable";
             // Set the properties
 

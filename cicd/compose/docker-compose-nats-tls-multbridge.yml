@@ -29,7 +29,7 @@ services:
       - "61616:61616"
   bridge-admin_1:
     container_name: bridge-admin_1
-    image: 'gilmarmacieljr/bridge-admin'
+    image: 'admin_bridge/bridge-admin'
     environment:
       - TARGET=host.docker.internal
     working_dir: /usr/app/bridge
@@ -38,7 +38,7 @@ services:
       - "8070:8080"
   bridge-admin_2:
     container_name: bridge-admin_2
-    image: 'gilmarmacieljr/bridge-admin'
+    image: 'admin_bridge/bridge-admin'
     environment:
       - TARGET=host.docker.internal
     working_dir: /usr/app/bridge
@@ -47,7 +47,7 @@ services:
       - "8090:8080"
   bridge-admin_3:
     container_name: bridge-admin_3
-    image: 'gilmarmacieljr/bridge-admin'
+    image: 'admin_bridge/bridge-admin'
     environment:
       - TARGET=host.docker.internal
     working_dir: /usr/app/bridge
