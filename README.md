@@ -151,8 +151,8 @@ Use this install guide to download and test the NATS JMS/MQ Bridge with IBM MQ.
 mkdir bridge
 cd bridge
 
-wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.18.0-beta14/nats-bridge-admin-0.18.0-beta14.zip
-unzip nats-bridge-admin-0.18.0-beta14.zip
+wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.18.1-beta14/nats-bridge-admin-0.18.1-beta14.zip
+unzip nats-bridge-admin-0.18.1-beta14.zip
 rm *.zip
 ```
 
@@ -211,7 +211,7 @@ bin/nats-bridge-admin
 =========|_|==============|___/=/_/_/_/
 :: Spring Boot ::        (v2.2.6.RELEASE)
 
-2020-05-01 03:22:06.114  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Starting ApplicationMain on Richards-MacBook-Pro.local with PID 92828 (/Users/richardhightower/bridge/nats-bridge-admin-0.18.0-beta14/lib/nats-bridge-admin-0.18.0-beta14.jar started by richardhightower in /Users/richardhightower/bridge/nats-bridge-admin-0.18.0-beta14)
+2020-05-01 03:22:06.114  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Starting ApplicationMain on Richards-MacBook-Pro.local with PID 92828 (/Users/richardhightower/bridge/nats-bridge-admin-0.18.1-beta14/lib/nats-bridge-admin-0.18.1-beta14.jar started by richardhightower in /Users/richardhightower/bridge/nats-bridge-admin-0.18.1-beta14)
 2
 ...
 2020-05-01 03:22:09.211  INFO 92828 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
