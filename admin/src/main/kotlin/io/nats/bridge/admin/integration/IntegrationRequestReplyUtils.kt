@@ -118,7 +118,7 @@ class IntegrationRequestReplyUtils {
         }
 
         if (builder2.destinationBusBuilder!! is JMSMessageBusBuilder) {
-            (builder2.destinationBusBuilder as JMSMessageBusBuilder).useIBMMQ() //todo fix so this works with activemq
+            (builder2.destinationBusBuilder as JMSMessageBusBuilder).useIBMMQ() //todo fix so this works with activemq also
         }
 
         val clientBus = clientBuilder.build()
