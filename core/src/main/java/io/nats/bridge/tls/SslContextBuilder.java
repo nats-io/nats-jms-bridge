@@ -310,29 +310,17 @@ public class SslContextBuilder {
                     try {
                         final FileInputStream fileInputStream = new FileInputStream(keyStorePath);
                         final KeyStore store = loadKeystore(fileInputStream, getKeystorePassword());
-                        //store.getCertificateAlias(store.getCertificate(getKeyStoreAlias()));
-                        if (keyStoreAlias != null) {
+                        if (keyStoreAlias != null) { //I changed here
                             try {
-                                KeyStore keystore = null;
-                                Certificate cert = store.getCertificate(keyStoreAlias);
-                                String keyStoreType = KeyStore.getDefaultType();
-                                if (cert != null) {
-                                    keystore = KeyStore.getInstance(keyStoreType);
-                                    keystore.load(null, null);
-                                    keystore.setCertificateEntry(keyStoreAlias, cert);
-
-                                } else { keystore.load(null, null); }
-                                final KeyManagerFactory factory = KeyManagerFactory.getInstance(getAlgorithm());
-                                factory.init(keystore, getKeystorePassword());
-                                keyStoreKeyManagers = factory.getKeyManagers();
+                                store.setKeyEntry(keyStoreAlias,store.getKey(keyStoreAlias,getKeystorePassword()),
+                                        getKeystorePassword(),store.getCertificateChain(keyStoreAlias));
                             } catch (Exception e) {
                             throw new SslContextBuilderException("Unable to find the alias " + keyStoreAlias, e);
                             }
-                        } else {
-                            final KeyManagerFactory factory = KeyManagerFactory.getInstance(getAlgorithm());
-                            factory.init(store, getKeystorePassword());
-                            keyStoreKeyManagers = factory.getKeyManagers();
                         }
+                        final KeyManagerFactory factory = KeyManagerFactory.getInstance(getAlgorithm());
+                        factory.init(store, getKeystorePassword());
+                        keyStoreKeyManagers = factory.getKeyManagers();
                     } catch (FileNotFoundException e) {
                         throw new IllegalStateException("Key store path not found" + keyStorePath, e);
                     } catch (Exception e) {

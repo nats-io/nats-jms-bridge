@@ -14,6 +14,7 @@ package io.nats.bridge.jms.support;
 
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.TimeSource;
+import io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory;
 import io.nats.bridge.jms.JMSMessageBus;
 import io.nats.bridge.jms.JMSMessageBusException;
 import io.nats.bridge.jms.JmsContext;
@@ -620,8 +621,21 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         final String channel = getIbmMQChannel();
 
         jndiProperties.clear();
+
+
         jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"));
-        jndiProperties.put("nats.ibm.mq.host", System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414"));
+
+        //io.nats.ibm.mq.jms.prop.string.XMSC_WMQ_CONNECTION_NAME_LIST
+        final String connectionListKey = IbmMqInitialContextFactory.PREFIX + "jms.prop.string.XMSC_WMQ_CONNECTION_NAME_LIST";
+        if (!jndiProperties.containsKey(connectionListKey)) {
+            getJmsBusLogger().info("Connection List was not set so we are using nats.ibm.mq.host");
+            final String hostName = System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414");
+            jndiProperties.put("nats.ibm.mq.host", hostName );
+            getJmsBusLogger().info("JUST SET nats.ibm.mq.host to {}", hostName);
+        } else {
+            getJmsBusLogger().info("Using IBM Connection List key={} value={}" ,
+                    connectionListKey, jndiProperties.get(connectionListKey));
+        }
         jndiProperties.put("nats.ibm.mq.channel", channel);
         jndiProperties.put("nats.ibm.mq.queueManager", queueManager);
 

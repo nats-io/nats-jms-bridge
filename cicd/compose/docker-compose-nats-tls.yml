@@ -10,7 +10,7 @@ services:
       - "8222:8222"
   ibm-mq:
     build:
-      context: ../bridge-ibmmq
+      context: ../bridge-ibmmq-tls
     environment:
       - LICENSE=accept
       - MQ_QMGR_NAME=QM1

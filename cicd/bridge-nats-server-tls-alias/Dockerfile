@@ -10,4 +10,4 @@ COPY cert/*.* ./usr/
 #EXPOSE 4222
 #EXPOSE 8222
 
-CMD sh -c "nats-server --tls --tlscert=./usr/cloudurable.crt --tlskey=./usr/cloudurable.key --tlsverify=false"
+CMD sh -c "nats-server --tls --tlscert=./usr/server-cert.pem --tlskey=./usr/server-key.pem --tlscacert=./usr/rootCA.pem --tlsverify=true"

@@ -20,7 +20,7 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
 
     private final Map<String, Object> contextMap = new HashMap<String, Object>();
     private final static String CONNECTION_FACTORY = "ConnectionFactory";
-    private final static String PREFIX = "nats.ibm.mq.";
+    public final static String PREFIX = "nats.ibm.mq.";
     private final static String HOST = PREFIX + "host";
     private final static String CHANNEL = PREFIX + "channel";
     private final static String QUEUE_MANAGER = PREFIX + "queueManager";

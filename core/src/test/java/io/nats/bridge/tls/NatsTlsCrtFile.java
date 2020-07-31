@@ -40,7 +40,7 @@ public class NatsTlsCrtFile {
         sslContext.withKeystorePath("../certs/keyalias/keystore.jks");
         sslContext.withKeyStoreAlias("mamatus-cert");
         sslContext.withTruststorePath("../certs/keyalias/truststore.jks");
-        sslContext.withKeyPassword("passw0rd");
+        sslContext.withKeyPassword("password");
         sslContext.withStorePassword("cloudurable2");
         NatsMessageBusBuilder natsMessageBusBuilder = new NatsMessageBusBuilder();
         natsMessageBusBuilder.withName("natsCluster");

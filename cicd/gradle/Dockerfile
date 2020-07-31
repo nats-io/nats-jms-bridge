@@ -14,7 +14,7 @@ RUN chmod +x cicd/sdkman.sh
 RUN exec cicd/sdkman.sh
 
 # Install Java
-RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install java 11.0.7-amzn"
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install java 8.0.262-amzn"
 RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install gradle"
 
 

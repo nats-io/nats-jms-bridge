@@ -4,8 +4,9 @@ FROM ibmcom/mq:9.1.5.0-r1
 #Copy file and change the owner
 #IBM MQ can read 11-dev that creates a queue model.
 COPY --chown=1001:root 11-dev.mqsc /etc/mqm/11-dev.mqsc
-#COPY --chown=1001:root ibmmqcert/clientibmkey.kdb /var/mqm/qmgrs/QM1/ssl/clientibmkey.kdb
-#COPY --chown=1001:root ibmmqcert/clientibmkey.sth /var/mqm/qmgrs/QM1/ssl/clientibmkey.sth
+
+COPY --chown=1001:root ibmmqcert/key.crt /etc/mqm/pki/keys/key/key.crt
+COPY --chown=1001:root ibmmqcert/key.key /etc/mqm/pki/keys/key/key.key
 
 # environment
 ENV LICENSE=accept
