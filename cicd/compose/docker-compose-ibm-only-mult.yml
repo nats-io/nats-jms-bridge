@@ -8,22 +8,30 @@ services:
     ports:
       - "4222:4222"
       - "8222:8222"
-  ibm-mq:
+  ibm-mq_1:
     build:
-      context: ../bridge-ibmmq-tls
+      context: ../bridge-ibmmq
     environment:
       - LICENSE=accept
       - MQ_QMGR_NAME=QM1
       - MQ_APP_PASSWORD=passw0rd
     ports:
       - "1414:1414"
-      - "8443:9443"
-  active-mq:
+  ibm-mq_2:
     build:
-      context: ../bridge-activemq
+      context: ../bridge-ibmmq
     environment:
-        - ARTEMIS_USERNAME=cloudurable
-        - ARTEMIS_PASSWORD=cloudurable
+      - LICENSE=accept
+      - MQ_QMGR_NAME=QM1
+      - MQ_APP_PASSWORD=passw0rd
     ports:
-      - "8161:8161"
-      - "61616:61616"
+      - "1415:1414"
+  ibm-mq_3:
+    build:
+      context: ../bridge-ibmmq
+    environment:
+      - LICENSE=accept
+      - MQ_QMGR_NAME=QM1
+      - MQ_APP_PASSWORD=passw0rd
+    ports:
+      - "1416:1414"

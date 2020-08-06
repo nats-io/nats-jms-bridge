@@ -217,6 +217,7 @@ help () {
   echo "Use 'build_travis_build_image' to build travis image for testing"
   echo "Docker Compose:"
   echo "Use 'localdev' to run all images for local development"
+  echo "Use 'run_many_ibm_mq' to run three IBM MQ images for local failover testing"
   echo "Use 'docker_deploy_ibm_mq_test' to run a version of IBM MQ that has non default values use config sample nats-bridge-ibm-mq-demo-conf.yaml"
   echo "Gradle Builds Compose:"
   echo "Use build_install_dir to create install dir"
@@ -331,9 +332,19 @@ build_travis_build_image)
   echo "Done!"
   ;;
 
+
+run_many_ibm_mq)
+  cd cicd/compose
+  docker-compose  -f docker-compose-ibm-only-mult.yml  stop
+  docker-compose   -f docker-compose-ibm-only-mult.yml rm
+  docker-compose   -f docker-compose-ibm-only-mult.yml build
+  docker-compose    -f docker-compose-ibm-only-mult.yml up
+  ;;
+
 localdev)
         bin/docker-deploy-local-dev.sh
         ;;
+
 
 stop-localdev)
   cd cicd

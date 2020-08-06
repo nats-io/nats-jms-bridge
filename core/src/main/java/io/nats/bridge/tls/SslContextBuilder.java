@@ -310,7 +310,9 @@ public class SslContextBuilder {
                     try {
                         final FileInputStream fileInputStream = new FileInputStream(keyStorePath);
                         final KeyStore store = loadKeystore(fileInputStream, getKeystorePassword());
-                        if (keyStoreAlias != null) { //I changed here
+
+                        if (keyStoreAlias != null) {
+
                             try {
                                 store.setKeyEntry(keyStoreAlias,store.getKey(keyStoreAlias,getKeystorePassword()),
                                         getKeystorePassword(),store.getCertificateChain(keyStoreAlias));

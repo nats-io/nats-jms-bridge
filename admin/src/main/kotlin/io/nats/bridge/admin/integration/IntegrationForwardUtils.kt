@@ -128,13 +128,27 @@ class IntegrationForwardUtils {
 
         val thread = Thread(Runnable {
             while (count.get() < 2500) {
-                val receive = receiverBus.receive(Duration.ofMillis(100))
-                if (receive.isPresent) {
-                    count.incrementAndGet()
-                }
-                val timeNow = System.currentTimeMillis()
-                if (timeNow - startTime > 60_000) {
-                    break
+
+                try {
+                    val receive = receiverBus.receive(Duration.ofMillis(100))
+
+
+                    if (receive.isPresent) {
+                        count.incrementAndGet()
+                    }
+                    val timeNow = System.currentTimeMillis()
+                    if (timeNow - startTime > 60_000) {
+                        break
+                    }
+                }catch (ex:Exception) {
+                    println("ERROR RECEIVE")
+                    ex.printStackTrace();
+                    try {
+                        receiverBus.close()
+                    } catch (ex2:Exception) {
+                        println("UNABLE TO CLOSE RECIVER BUS")
+                    }
+
                 }
             }
         })
