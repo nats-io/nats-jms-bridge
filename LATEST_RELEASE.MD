@@ -5,4 +5,4 @@
 ## Issues
 
 
-* #197 #205 Enable IBM MQ retry list by trying to reconnect on failure with reasonable backoff.
+* Make channel optional #216
