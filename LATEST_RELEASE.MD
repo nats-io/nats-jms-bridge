@@ -1,8 +1,8 @@
-# 0.19.1-beta15 NATS JMS/MQ Bridge
+# 0.20.1-beta16 NATS JMS/MQ Bridge
 
-#### TAG: 0.19.1-beta15
+#### TAG: 0.20.1-beta16
 
 ## Issues
 
 
-* #197 #205 Enable IBM MQ retry list by trying to reconnect on failure with reasonable backoff.
+* Make channel optional #216
