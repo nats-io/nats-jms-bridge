@@ -47,7 +47,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "io.nats.bridge"
             artifactId = "nats-jms-bridge-message"
-            version = "0.20.0-beta16"
+            version = "0.20.1-beta16"
             from(components["java"])
         }
     }
