@@ -45,12 +45,15 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
                 connectionFactory.setIntProperty(WMQConstants.WMQ_PORT, port);
             }
 
-            final String channel = getStringProp(jndiProperties, CHANNEL);
+            final String channel = getOptionalStringProp(jndiProperties, CHANNEL);
             final String queueManagerName = getStringProp(jndiProperties, QUEUE_MANAGER);
             final String queueModelName = getOptionalStringProp(jndiProperties, QUEUE_MODEL_NAME);
             final String queueModelPrefix = getOptionalStringProp(jndiProperties, QUEUE_MODEL_PREFIX);
 
-            connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
+            if (channel!=null) {
+                connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
+            }
+            
             connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
             connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
             connectionFactory.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
