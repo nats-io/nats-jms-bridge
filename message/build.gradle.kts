@@ -23,11 +23,31 @@ repositories {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "OSSRH"
+            //url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+            url = uri("https://oss.sonatype.org/service/local/repositories/releases/content/")
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+//        maven {
+//            name = "GitHubPackages"
+//            url = uri("https://maven.pkg.github.com/nats-io")
+//            credentials {
+//                username = System.getenv("GITHUB_ACTOR")
+//                password = System.getenv("GITHUB_TOKEN")
+//            }
+//        }
+    }
+
     publications {
         create<MavenPublication>("maven") {
             groupId = "io.nats.bridge"
             artifactId = "nats-jms-bridge-message"
-            version = "0.19.0-beta15"
+            version = "0.19.1-beta15"
             from(components["java"])
         }
     }
@@ -57,5 +77,3 @@ dependencies {
 
 
 }
-
-

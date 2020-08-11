@@ -22,11 +22,32 @@ sourceCompatibility = 1.8
 //targetCompatibility = 1.8
 
 publishing {
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            //url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            url = "https://oss.sonatype.org/service/local/repositories/releases/content/"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+//        maven {
+//            name = "GitHubPackages"
+//            url = "https://maven.pkg.github.com/nats-io/maven2"
+//            credentials {
+//                username = System.getenv("GITHUB_ACTOR")
+//                password = System.getenv("GITHUB_TOKEN")
+//            }
+//        }
+    }
+
     publications {
         maven(MavenPublication) {
             groupId ='io.nats.bridge'
             artifactId = 'nats-jms-bridge'
-            version = '0.19.0-beta15'
+            version = '0.19.1-beta15'
             from components.java
         }
     }
@@ -56,5 +77,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 
-    implementation("io.nats.bridge:nats-jms-bridge-message:0.19.0-beta15")
+    implementation("io.nats.bridge:nats-jms-bridge-message:0.19.1-beta15")
 }
