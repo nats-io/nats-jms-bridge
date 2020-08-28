@@ -1,0 +1,24 @@
+{
+  "channel":
+  [
+    {
+      "general":
+      {
+        "description": "dev channel"
+      },
+      "name": "DEV.APP.SVRCONN",
+      "clientConnection":
+      {
+        "connection":
+        [
+          {
+            "host": "localhost",
+            "port": 1414
+          }
+        ],
+        "queueManager": "QM1"
+      },
+      "type": "clientConnection"
+    }
+  ]
+}

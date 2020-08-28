@@ -207,7 +207,7 @@ public class TestUtils {
 
         final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder().withSslContext(sslContextBuilder.build())
                 .withName("NATS_" + name).withSubject(subject);
-        natsMessageBusBuilder.withUseTls(true);
+        natsMessageBusBuilder.withUseTls(false);
 
         natsMessageBusBuilder.getOptionsBuilder().noReconnect();
         return natsMessageBusBuilder.build();

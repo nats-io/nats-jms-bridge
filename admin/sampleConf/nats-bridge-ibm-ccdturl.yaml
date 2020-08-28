@@ -1,0 +1,59 @@
+---
+name: "Starter Config"
+dateTime:
+  - 2020
+  - 4
+  - 30
+  - 0
+  - 53
+  - 50
+  - 423615000
+bridges:
+  - name: "natsToIBMMq"
+    bridgeType: "REQUEST_REPLY"
+    source:
+      name: "nats"
+      busType: "NATS"
+      subject: "b-subject"
+      clusterName: "natsCluster"
+    destination:
+      name: "ibmMQ"
+      busType: "JMS"
+      subject: "DEV.QUEUE.1"
+      clusterName: "ibmMqCluster"
+    copyHeaders: false
+    workers: 5
+    tasks : 2
+clusters:
+  jmsCluster:
+    name: "jmsCluster"
+    properties: !<jms>
+      config:
+        java.naming.factory.initial: "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory"
+        connectionFactory.ConnectionFactory: "tcp://localhost:61616"
+        queue.queue/testQueue: "queue.queue/testQueue=testQueue"
+      userName: "cloudurable"
+      password: "cloudurable"
+      jmsDestinationType: "QUEUE"
+  natsCluster:
+    name: "natsCluster"
+    properties: !<nats>
+      host: "localhost"
+      port: 4222
+      servers: []
+      config:
+        io.nats.client.reconnect.wait: "3000"
+        io.nats.client.reconnect.max: "10"
+        io.nats.client.timeout: "4000"
+  ibmMqCluster:
+    name: "ibmMqCluster"
+    properties: !<jms>
+      config:
+        java.naming.factory.initial: "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"
+        nats.ibm.mq.ccdtUrl: "file:../cicd/bridge-ibmmq/CCDT.json"
+        nats.ibm.mq.queueManager: "QM1"
+        nats.ibm.mq.queueModelName: "DEV.MODEL"
+        nats.ibm.mq.queueModelPrefix: "DEV*"
+      userName: "app"
+      password: "passw0rd"
+      jmsDestinationType: "QUEUE"

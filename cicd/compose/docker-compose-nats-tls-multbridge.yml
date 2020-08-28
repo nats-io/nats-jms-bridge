@@ -1,5 +1,7 @@
-# Test that uses docker image of IBM MQ that sets every setting different than the default.
-# This is to test passing IBM MQ params in the Bridge admin.
+# Test that uses docker image of IBM MQ, Nats, active mq and Multbridge instances.
+# Use this docker compose file to test bridge share work.
+# We change the bridge port forward because we will run admin in the localhost too.
+# You can create as many bridge admin as you want/need
 version: '3'
 services:
   nats-server:
@@ -29,7 +31,7 @@ services:
       - "61616:61616"
   bridge-admin_1:
     container_name: bridge-admin_1
-    image: 'admin_bridge/bridge-admin'
+    image: 'cloudurable/multi-bridge'
     environment:
       - TARGET=host.docker.internal
     working_dir: /usr/app/bridge
@@ -38,7 +40,7 @@ services:
       - "8070:8080"
   bridge-admin_2:
     container_name: bridge-admin_2
-    image: 'admin_bridge/bridge-admin'
+    image: 'cloudurable/multi-bridge'
     environment:
       - TARGET=host.docker.internal
     working_dir: /usr/app/bridge
@@ -47,7 +49,7 @@ services:
       - "8090:8080"
   bridge-admin_3:
     container_name: bridge-admin_3
-    image: 'admin_bridge/bridge-admin'
+    image: 'cloudurable/multi-bridge'
     environment:
       - TARGET=host.docker.internal
     working_dir: /usr/app/bridge

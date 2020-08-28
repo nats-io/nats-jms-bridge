@@ -1,23 +1,22 @@
 package io.nats.bridge.integration.ibmmq;
 
+import com.ibm.mq.jms.MQConnectionFactory;
 import com.ibm.msg.client.jms.JmsConnectionFactory;
 import com.ibm.msg.client.jms.JmsFactoryFactory;
 import com.ibm.msg.client.wmq.WMQConstants;
 import io.nats.bridge.MessageBus;
-import io.nats.bridge.TestUtils;
-import io.nats.bridge.messages.Message;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.jms.*;
 import java.net.URI;
-import java.time.Duration;
-import java.util.Optional;
+import java.net.URL;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-public class IbmSslConection {
+public class IbmCcdturl {
     private MessageBus serverMessageBus;
     private MessageBus clientMessageBus;
 
@@ -27,42 +26,35 @@ public class IbmSslConection {
 
     }
 
-    public void testSendMessageWithDynamicQueueTls() throws Exception {
+
+    @Test
+    public void testSendMessageWithDynamicQueueCcdturl() throws Exception {
 
         try {
-            final String hostURI = System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414");
-            final URI uri = new URI(hostURI);
-            final String host = uri.getHost();
-            final int port = uri.getPort();
+
+            final String hostURL = "file:../cicd/bridge-ibmmq/CCDT.json";
             final String user = "app";
             final int timeout = 15000; // in ms or 15 seconds
-            final String channel = "DEV.APP.SVRCONN";
             final String password = "passw0rd";
             final String queueManagerName = "QM1";
             final String destinationName = "DEV.QUEUE.1";
             final JmsFactoryFactory ff = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
             final JmsConnectionFactory cf = ff.createConnectionFactory();
-            final String sslkeyr ="../certs/clientibmkey.kdb" ;
-            final String sslpass ="cloudurable";
-            // Set the properties
 
-            System.setProperty("java.net.ssl.trustStore", sslkeyr);
-            System.setProperty("javax.net.ssl.keyStore", sslkeyr );
-            System.setProperty("javax.net.ssl.keyStorePassword", sslpass );
+            if (cf instanceof MQConnectionFactory) {
+                final MQConnectionFactory factory = (MQConnectionFactory) cf;
+                factory.setCCDTURL(new URL(hostURL));
 
-            cf.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
-            cf.setIntProperty(WMQConstants.WMQ_PORT, port);
-            cf.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
+            } else {
+                System.out.println("Unable to set CCDT file using " + hostURL);
+            }
+
             cf.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
             cf.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
-            cf.setStringProperty(WMQConstants.WMQ_SSL_CIPHER_SUITE, "TLS_RSA_WITH_AES_128_CBC_SHA256");
-            //cf.setStringProperty(WMQConstants.WMQ_SSL_FIPS_REQUIRED, "false");
             cf.setStringProperty(WMQConstants.USERID, user);
             cf.setStringProperty(WMQConstants.PASSWORD, password);
-            cf.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
             cf.setStringProperty(WMQConstants.WMQ_TEMPORARY_MODEL, "DEV.MODEL");
             cf.setStringProperty(WMQConstants.WMQ_TEMP_Q_PREFIX, "DEV*");
-            cf.setStringProperty(WMQConstants.WMQ_CCDTURL,"");
 
             // Create JMS objects
             final Connection connection = cf.createConnection();

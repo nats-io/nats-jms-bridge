@@ -14,7 +14,7 @@ RUN chmod +x cicd/sdkman.sh
 RUN exec cicd/sdkman.sh
 
 # Install Java
-RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install java 8.0.262-amzn"
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install java 8.0.265-amzn"
 RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install gradle"
 
 
@@ -22,8 +22,8 @@ ENV JAVA_HOME /root/.sdkman/candidates/java/current
 
 #Downloading version
 WORKDIR /usr/app/bridge
-RUN bash -c "wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.17.0-beta12/nats-bridge-admin-0.17.0-beta12.zip"
-RUN bash -c "unzip nats-bridge-admin-0.17.0-beta12.zip"
+RUN bash -c "wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.21.0-beta17/nats-bridge-admin-0.21.0-beta17.zip"
+RUN bash -c "unzip nats-bridge-admin-0.21.0-beta17.zip"
 RUN bash -c "rm *.zip"
 
 RUN bash -c "mkdir certs"
