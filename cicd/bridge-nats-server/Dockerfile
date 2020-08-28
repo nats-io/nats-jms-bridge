@@ -5,3 +5,5 @@ FROM nats:alpine3.11
 
 # Tell the image what to do when it starts as a container
 EXPOSE 4222
+
+CMD sh -c "nats-server"

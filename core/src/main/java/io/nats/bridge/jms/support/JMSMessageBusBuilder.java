@@ -663,6 +663,55 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
         return this;
     }
 
+    public JMSMessageBusBuilder useActiveMQ() {
+        getJmsBusLogger().info("Setting JNDI PROPERTIES for ActiveMq");
+
+        final String queueManager = getIbmMQQueueManager();
+        final String channel = getIbmMQChannel();
+
+        getJmsBusLogger().info("Setting JNDI PROPERTIES for IBM {} {}", queueManager, channel);
+
+        //Mandatory
+        jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "io.nats.bridge.integration.ibmmq.IbmMqInitialContextFactory"));
+
+        // Only set host if connection name list not found.
+        //io.nats.ibm.mq.jms.prop.string.XMSC_WMQ_CONNECTION_NAME_LIST
+        final String connectionListKey = IbmMqInitialContextFactory.PREFIX + "jms.prop.string.XMSC_WMQ_CONNECTION_NAME_LIST";
+        if (!jndiProperties.containsKey(connectionListKey)) {
+            getJmsBusLogger().info("Connection List was not set so we are using nats.ibm.mq.host");
+            final String hostName = System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414");
+            jndiProperties.put("nats.ibm.mq.host", hostName );
+            getJmsBusLogger().info("JUST SET nats.ibm.mq.host to {}", hostName);
+        } else {
+            getJmsBusLogger().info("Using IBM Connection List key={} value={}" ,
+                    connectionListKey, jndiProperties.get(connectionListKey));
+        }
+
+        // Only use default channel if channel not in properties.
+        if (!jndiProperties.containsKey("nats.ibm.mq.channel")) {
+            jndiProperties.put("nats.ibm.mq.channel", channel);
+        } else {
+            logger.info("IBM MQ CHANNEL IS {}", jndiProperties.get("nats.ibm.mq.channel"));
+        }
+
+        // Only use default queue manager if queue manager not in properties.
+        if (!jndiProperties.containsKey("nats.ibm.mq.queueManager")) {
+            jndiProperties.put("nats.ibm.mq.queueManager", queueManager);
+        }else {
+            logger.info("IBM MQ QUEUE MANAGER IS {}", jndiProperties.get("nats.ibm.mq.queueManager"));
+        }
+
+
+        if (isRequestReply()) {
+            final String queueModelName = getIbmMQQueueModelName();
+            final String queueModelPrefix = getIbmMQQueueModelPrefix();
+            jndiProperties.put("nats.ibm.mq.queueModelName", queueModelName);
+            jndiProperties.put("nats.ibm.mq.queueModelPrefix", queueModelPrefix);
+        }
+
+        return this;
+    }
+
     public Hashtable<String, Object> getJndiProperties() {
         if (jndiProperties.size() == 0) {
             jndiProperties.put("java.naming.factory.initial", System.getenv().getOrDefault("NATS_BRIDGE_JMS_NAMING_FACTORY", "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory"));

@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-0.20.1-beta16}
+VERSION=${VERSION:-0.21.2-beta17}
 DOCKER_NAMESPACE=${DOCKER_NAMESPACE:-synadia}
 
 wrapper() {
@@ -217,8 +217,9 @@ help () {
   echo "Use 'build_travis_build_image' to build travis image for testing"
   echo "Docker Compose:"
   echo "Use 'localdev' to run all images for local development"
-  echo "Use 'run_many_ibm_mq' to run three IBM MQ images for local failover testing"
   echo "Use 'docker_deploy_ibm_mq_test' to run a version of IBM MQ that has non default values use config sample nats-bridge-ibm-mq-demo-conf.yaml"
+  echo "Use 'multbridge' to run all images and 3 bridges for testing work share"
+  echo "Use 'multibm' to run a version with 3 IBM MQ to test failover "
   echo "Gradle Builds Compose:"
   echo "Use build_install_dir to create install dir"
   echo "Use build_admin_image_local or bai_local to build a admin image that does not depend on a release"
@@ -332,19 +333,9 @@ build_travis_build_image)
   echo "Done!"
   ;;
 
-
-run_many_ibm_mq)
-  cd cicd/compose
-  docker-compose  -f docker-compose-ibm-only-mult.yml  stop
-  docker-compose   -f docker-compose-ibm-only-mult.yml rm
-  docker-compose   -f docker-compose-ibm-only-mult.yml build
-  docker-compose    -f docker-compose-ibm-only-mult.yml up
-  ;;
-
 localdev)
         bin/docker-deploy-local-dev.sh
         ;;
-
 
 stop-localdev)
   cd cicd
@@ -352,6 +343,28 @@ stop-localdev)
   docker-compose  rm
   cd ..
   ;;
+
+  multbridge)
+          bin/docker-deploy-multbridge.sh
+          ;;
+
+  stop-multbridge)
+    cd cicd
+    docker-compose  -f compose/docker-compose-nats-tls-multbridge stop
+    docker-compose  -f compose/docker-compose-nats-tls-multbridge rm
+    cd ..
+    ;;
+
+    multibm)
+            bin/docker-deploy-multibm.sh
+            ;;
+
+    stop-multibm)
+      cd cicd
+      docker-compose  -f compose/docker-compose-multibm.yaml stop
+      docker-compose  -f compose/docker-compose-multibm.yaml rm
+      cd ..
+      ;;
 
 stop-localdev-nats-tls)
     cd cicd

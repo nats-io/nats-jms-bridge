@@ -13,6 +13,6 @@ ENV MQ_QMGR_NAME=QM1
 
 # Tell the image what to do when it starts as a container
 EXPOSE 1414
-
+EXPOSE 9443
 
 #ENV MQ_APP_PASSWORD=/your password here/

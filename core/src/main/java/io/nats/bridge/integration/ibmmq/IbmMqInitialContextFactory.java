@@ -1,5 +1,6 @@
 package io.nats.bridge.integration.ibmmq;
 
+import com.ibm.mq.jms.MQConnectionFactory;
 import com.ibm.msg.client.jms.JmsConnectionFactory;
 import com.ibm.msg.client.jms.JmsFactoryFactory;
 import com.ibm.msg.client.wmq.WMQConstants;
@@ -11,6 +12,7 @@ import javax.jms.JMSException;
 import javax.naming.*;
 import javax.naming.spi.InitialContextFactory;
 import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -23,6 +25,7 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
     public final static String PREFIX = "nats.ibm.mq.";
     private final static String HOST = PREFIX + "host";
     private final static String CHANNEL = PREFIX + "channel";
+    private final static String CCDT_URL = PREFIX + "ccdtUrl";
     private final static String QUEUE_MANAGER = PREFIX + "queueManager";
     private final static String QUEUE_MODEL_NAME = PREFIX + "queueModelName";
     private final static String QUEUE_MODEL_PREFIX = PREFIX + "queueModelPrefix";
@@ -35,25 +38,42 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
             final JmsFactoryFactory factoryFactory = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
             final JmsConnectionFactory connectionFactory = factoryFactory.createConnectionFactory();
 
-            final String hostURL = getOptionalStringProp(jndiProperties, HOST);
-
-            if (hostURL != null) {
-                final URI uri = new URI(hostURL);
-                final String host = uri.getHost();
-                final int port = uri.getPort();
-                connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
-                connectionFactory.setIntProperty(WMQConstants.WMQ_PORT, port);
+            final String ccdtURL = getOptionalStringProp(jndiProperties, CCDT_URL);
+            if (ccdtURL!=null) {
+                if (connectionFactory instanceof MQConnectionFactory) {
+                    final MQConnectionFactory factory = (MQConnectionFactory) connectionFactory;
+                    factory.setCCDTURL(new URL(ccdtURL));
+                } else {
+                    System.out.println("Unable to set CCDT file using " + CCDT_URL);
+                }
+            } else {
+                final String hostURL = getOptionalStringProp(jndiProperties, HOST);
+                final String channel = getStringProp(jndiProperties, CHANNEL);
+                if (hostURL != null) {
+                    final URI uri = new URI(hostURL);
+                    final String host = uri.getHost();
+                    final int port = uri.getPort();
+                    connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
+                    connectionFactory.setIntProperty(WMQConstants.WMQ_PORT, port);
+                }
+                if (channel!=null) {
+                    connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
+                }
+                connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
             }
 
-            final String channel = getOptionalStringProp(jndiProperties, CHANNEL);
+
+
+
+
             final String queueManagerName = getStringProp(jndiProperties, QUEUE_MANAGER);
             final String queueModelName = getOptionalStringProp(jndiProperties, QUEUE_MODEL_NAME);
             final String queueModelPrefix = getOptionalStringProp(jndiProperties, QUEUE_MODEL_PREFIX);
 
-            if (channel!=null) {
-                connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
-            }
-            
+
+
+
+
             connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
             connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
             connectionFactory.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
@@ -68,7 +88,7 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
             if (queueModelPrefix != null)
                 connectionFactory.setStringProperty(WMQConstants.WMQ_TEMP_Q_PREFIX, queueModelPrefix);
 
-            contextMap.put(CONNECTION_FACTORY, new MQConnectionFactory(connectionFactory));
+            contextMap.put(CONNECTION_FACTORY, new NatsMQConnectionFactory(connectionFactory));
 
             return new MQContext(contextMap);
         } catch (Exception ex) {
@@ -85,12 +105,12 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
         return (String) jndiProperties.get(key);
     }
 
-    public static class MQConnectionFactory implements ConnectionFactory {
+    public static class NatsMQConnectionFactory implements ConnectionFactory {
 
         private final JmsConnectionFactory connectionFactory;
 
 
-        private MQConnectionFactory(final JmsConnectionFactory connectionFactory) {
+        private NatsMQConnectionFactory(final JmsConnectionFactory connectionFactory) {
             this.connectionFactory = connectionFactory;
 
         }
