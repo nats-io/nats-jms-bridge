@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
+import java.util.function.Supplier
 
 class IntegrationRequestReplyUtils {
 
@@ -125,8 +126,16 @@ class IntegrationRequestReplyUtils {
         val clientBus2 = clientBuilder2.build()
         val serverBus = serverBuilder.build()
         val serverBus2 = builder2.destinationBusBuilder!!.build()
-        val natsService = FakeServer(serverBus, stop)
-        val nats2Service = FakeServer(serverBus2, stop)
+        //val natsService = FakeServer(serverBus, stop)
+        //val nats2Service = FakeServer(serverBus2, stop)
+
+
+
+        val natsService = FakeServer( Supplier {
+            serverBuilder.build()
+        }, stop)
+        val nats2Service = FakeServer( Supplier { builder2.destinationBusBuilder!!.build()
+        }, stop)
 
         natsService.run()
         nats2Service.run()

@@ -12,7 +12,7 @@ import java.lang.IllegalStateException
 import java.util.concurrent.atomic.AtomicReference
 
 @SpringBootApplication
-class Application
+open class Application
 
 object AppConfig {
     private val applicationConfigRef = AtomicReference<ApplicationConfig?>()
@@ -30,7 +30,7 @@ object AppConfig {
 
 data class ApplicationConfig(val bridgeConfigFile:String, val loginConfigFile:String, val configDirectory:String?)
 
-class Run(val args : Array<String>) : CliktCommand(help = "Run NATS JMS/IBM MQ Bridge", epilog="""
+open class Run(val args : Array<String>) : CliktCommand(help = "Run NATS JMS/IBM MQ Bridge", epilog="""
     You can also set environments variables by replacing dashes '-' with underscores '_' and prefix with "NATS_BRIDGE" 
     
     ```

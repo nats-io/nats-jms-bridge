@@ -9,15 +9,14 @@ NATS MQ JMS Bridge.
 
 
 
-## Beta 17
+## Beta 18
 
-The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nats.io`, but queue to queue forwarding should also work. More focus has been put on to IBM MQ's JMS support.
+The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nats.io`, but queue to queue forwarding should also work as well as support for JMS (ActiveMQ). More focus has been put on to IBM MQ's JMS support. See examples for transforms and header support.
 
 1. A request gets sent to `nats.io` which then sends that request to IBM/MQ/JMS.
 2. Bridge gets the response and sends it back to the original client.
-3. The focus is on Queues and Request/Reply.
-
-Reconnect and tlsverify for TLS alias for Nats.
+3. The focus is on Queues and `Request/Reply` as well as `Forwarding`.
+4. Transforms and header support is working.
 
 
 #### Basic flow
@@ -153,8 +152,8 @@ Use this install guide to download and test the NATS JMS/MQ Bridge with IBM MQ.
 mkdir bridge
 cd bridge
 
-wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.21.2-beta17/nats-bridge-admin-0.21.2-beta17.zip
-unzip nats-bridge-admin-0.21.2-beta17.zip
+wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.21.3-beta18/nats-bridge-admin-0.21.3-beta18.zip
+unzip nats-bridge-admin-0.21.3-beta18.zip
 rm *.zip
 ```
 
@@ -213,7 +212,7 @@ bin/nats-bridge-admin
 =========|_|==============|___/=/_/_/_/
 :: Spring Boot ::        (v2.2.6.RELEASE)
 
-2020-05-01 03:22:06.114  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Starting ApplicationMain on Richards-MacBook-Pro.local with PID 92828 (/Users/richardhightower/bridge/nats-bridge-admin-0.21.2-beta17/lib/nats-bridge-admin-0.21.2-beta17.jar started by richardhightower in /Users/richardhightower/bridge/nats-bridge-admin-0.21.2-beta17)
+2020-05-01 03:22:06.114  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Starting ApplicationMain on Richards-MacBook-Pro.local with PID 92828 (/Users/richardhightower/bridge/nats-bridge-admin-0.21.3-beta18/lib/nats-bridge-admin-0.21.3-beta18.jar started by richardhightower in /Users/richardhightower/bridge/nats-bridge-admin-0.21.3-beta18)
 2
 ...
 2020-05-01 03:22:09.211  INFO 92828 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''

@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-0.21.2-beta17}
+VERSION=${VERSION:-0.21.3-beta18}
 DOCKER_NAMESPACE=${DOCKER_NAMESPACE:-synadia}
 
 wrapper() {
