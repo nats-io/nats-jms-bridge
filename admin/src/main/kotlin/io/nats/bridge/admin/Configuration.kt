@@ -21,7 +21,7 @@ import java.io.File
 
 
 @Configuration
-class Configuration {
+open class Configuration {
 
     fun env(env: Environment): Environment {
         return env
@@ -79,7 +79,7 @@ class Configuration {
 
 @Configuration
 @EnableSwagger2
-class SwaggerConfig {
+open class SwaggerConfig {
     @Bean
     fun natsBridgeAPI(@Value(value = "\${version:dev}") version: String): Docket {
         return Docket(DocumentationType.SWAGGER_2)
