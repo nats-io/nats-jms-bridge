@@ -27,12 +27,12 @@ open class Configuration {
         return env
     }
 
-    @Bean fun appConfig() : ApplicationConfig {
+    @Bean open fun appConfig() : ApplicationConfig {
         return AppConfig.getConfig()
     }
 
     @Bean
-    fun bridgeConfigRepo(env: Environment, app:ApplicationConfig): ConfigRepo {
+    open fun bridgeConfigRepo(env: Environment, app:ApplicationConfig): ConfigRepo {
         return if (app.bridgeConfigFile.startsWith("classpath://") ) {
             val configFile = app.bridgeConfigFile.substring("classpath://".length)
             val paths = ClasspathUtils.paths(this.javaClass, configFile)
@@ -47,15 +47,15 @@ open class Configuration {
     }
 
     @Bean
-    fun messageBridgeLoader(repo: ConfigRepo, metricsRegistry: MeterRegistry): MessageBridgeLoader =
+    open fun messageBridgeLoader(repo: ConfigRepo, metricsRegistry: MeterRegistry): MessageBridgeLoader =
          MessageBridgeLoaderImpl(repo, metricsRegistry = metricsRegistry)
 
     @Bean
-    fun messageBridgeRunner( messageBridgeLoader : MessageBridgeLoader) : MessageBridgeRunner =
+    open fun messageBridgeRunner( messageBridgeLoader : MessageBridgeLoader) : MessageBridgeRunner =
             MessageBridgeRunner(messageBridgeLoader)
 
     @Bean
-    fun loginRepo(env: Environment,
+    open fun loginRepo(env: Environment,
                   @Value(value = "\${security.secretKey}") secretKey: String,
                   @Value(value = "\${repo.logins.configFile}") confFile: String,
                   app:ApplicationConfig
@@ -81,7 +81,7 @@ open class Configuration {
 @EnableSwagger2
 open class SwaggerConfig {
     @Bean
-    fun natsBridgeAPI(@Value(value = "\${version:dev}") version: String): Docket {
+    open  fun natsBridgeAPI(@Value(value = "\${version:dev}") version: String): Docket {
         return Docket(DocumentationType.SWAGGER_2)
                 .groupName("NatsBridgeAdmin")
                 .apiInfo(
