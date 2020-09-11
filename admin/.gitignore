@@ -16,3 +16,4 @@ build/
 /config.old2/
 /config.old/
 /logs/
+/target/

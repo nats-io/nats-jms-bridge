@@ -1,18 +1,18 @@
 package io.nats.bridge.admin
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.context
-import com.github.ajalt.clikt.parameters.options.default
-import com.github.ajalt.clikt.parameters.options.option
 import io.nats.bridge.admin.util.ClasspathUtils
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import java.io.File
 import java.lang.IllegalStateException
 import java.util.concurrent.atomic.AtomicReference
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.context
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.option
 
 @SpringBootApplication
-class Application
+open class Application
 
 object AppConfig {
     private val applicationConfigRef = AtomicReference<ApplicationConfig?>()
@@ -35,7 +35,7 @@ class Run(val args : Array<String>) : CliktCommand(help = "Run NATS JMS/IBM MQ B
     
     ```
     NATS_BRIDGE_LOGIN_CONFIG_FILE=./config/nats-bridge-logins.yaml
-    NATS_BRIDGE_BRIDGE_CONFIG_FILE=./config/nats-bridge.yaml
+    NATS_BRIDGE_BRIDGE_CONFIG_FILE=./BOOT-INF/classes/config/nats-bridge.yaml
     ```
     
     Files can also be on the classpath inside of a jar file or on the file system in the classpath. 
@@ -46,25 +46,27 @@ class Run(val args : Array<String>) : CliktCommand(help = "Run NATS JMS/IBM MQ B
     ```
     
 """.trimIndent()) {
-
+	
     init {
         context { autoEnvvarPrefix = "NATS_BRIDGE" }
     }
 
-    private val configFolder: String? by option("-d", "--config-directory", help = "Location of Configuration Directory").default("./config/")
+    private val configFolder: String? by option("-d", "--config-directory", help = "Location of Configuration Directory").default("./BOOT-INF/classes/config/")
     private val bridgeConfigFile: String? by option("-f", "--bridge-config-file", help = "Location of Bridge Config File")
     private val loginConfigFile: String? by option("-l", "--login-config-file", help = "Location of Bridge Login Config File")
 
 
     override fun run() {
-
         val configFileLocation : String = readFileConf(bridgeConfigFile, configFolder!!)
         val loginConfigLocation : String = readFileConf(loginConfigFile, configFolder!!, "nats-bridge-logins.yaml")
         AppConfig.setConfig(ApplicationConfig(configFileLocation, loginConfigLocation, configFolder))
-        SpringApplication.run(Application::class.java, *args)
+        echo("Bridge Config file: " + configFileLocation)
+        //SpringApplication.run(Application::class.java, *args)
+     
     }
 
     private fun Run.readFileConf(configLocation:String?, configFolder:String, defaultName : String = "nats-bridge.yaml"): String {
+    	    echo("Starting...Run.readFileConf")
         return if (configLocation.isNullOrBlank()) {
             val configDir = File(configFolder)
 

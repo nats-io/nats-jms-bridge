@@ -21,25 +21,28 @@ import java.io.File
 
 
 @Configuration
-class Configuration {
+open class Configuration {
 
     fun env(env: Environment): Environment {
         return env
     }
 
-    @Bean fun appConfig() : ApplicationConfig {
+    @Bean open fun appConfig() : ApplicationConfig {
         return AppConfig.getConfig()
     }
 
     @Bean
-    fun bridgeConfigRepo(env: Environment, app:ApplicationConfig): ConfigRepo {
+    open fun bridgeConfigRepo(env: Environment, app:ApplicationConfig): ConfigRepo {
+    	println("Starting...bridgeConfigRepo")
         return if (app.bridgeConfigFile.startsWith("classpath://") ) {
             val configFile = app.bridgeConfigFile.substring("classpath://".length)
+            println("MQ-Bridge Configuration file: " + configFile);
             val paths = ClasspathUtils.paths(this.javaClass, configFile)
             val repo = ConfigRepoFromPath(configFile = paths[0])
             repo.init()
             repo
         } else {
+        	println("MQ-Bridge Configuration file: class path is not set going with default file...");
             val repo = ConfigRepoFromPath(File(app.bridgeConfigFile).toPath())
             repo.init()
             repo
@@ -47,15 +50,15 @@ class Configuration {
     }
 
     @Bean
-    fun messageBridgeLoader(repo: ConfigRepo, metricsRegistry: MeterRegistry): MessageBridgeLoader =
+    open fun messageBridgeLoader(repo: ConfigRepo, metricsRegistry: MeterRegistry): MessageBridgeLoader =
          MessageBridgeLoaderImpl(repo, metricsRegistry = metricsRegistry)
 
     @Bean
-    fun messageBridgeRunner( messageBridgeLoader : MessageBridgeLoader) : MessageBridgeRunner =
+    open fun messageBridgeRunner( messageBridgeLoader : MessageBridgeLoader) : MessageBridgeRunner =
             MessageBridgeRunner(messageBridgeLoader)
 
     @Bean
-    fun loginRepo(env: Environment,
+    open fun loginRepo(env: Environment,
                   @Value(value = "\${security.secretKey}") secretKey: String,
                   @Value(value = "\${repo.logins.configFile}") confFile: String,
                   app:ApplicationConfig
@@ -79,9 +82,9 @@ class Configuration {
 
 @Configuration
 @EnableSwagger2
-class SwaggerConfig {
+open class SwaggerConfig {
     @Bean
-    fun natsBridgeAPI(@Value(value = "\${version:dev}") version: String): Docket {
+    open fun natsBridgeAPI(@Value(value = "\${version:dev}") version: String): Docket {
         return Docket(DocumentationType.SWAGGER_2)
                 .groupName("NatsBridgeAdmin")
                 .apiInfo(
