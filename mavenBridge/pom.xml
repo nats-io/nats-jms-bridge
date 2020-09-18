@@ -23,19 +23,19 @@
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-message</artifactId>
-			<version>0.21.3-beta18</version>
+			<version>0.22.4-beta19</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge</artifactId>
-			<version>0.21.3-beta18</version>
+			<version>0.22.4-beta19</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-springboot-app</artifactId>
-			<version>0.21.3-beta18</version>
+			<version>0.22.4-beta19</version>
 		</dependency>
 
 		<dependency>
