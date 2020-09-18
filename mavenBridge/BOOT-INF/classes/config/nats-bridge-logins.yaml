@@ -1,0 +1,10 @@
+---
+logins:
+- subject: "admin"
+  secret: "ZcYlgxzjFnFE1hlXP6mnTglNQhxOaJITvBoASorvhBTrG8NvTB8kbE0yM6IWh+EE"
+  publicKey: "pk-508b2f2a-872d-4efa-9a75-b099927754c0"
+  roles:
+  - name: "Admin"
+roles:
+- name: "Admin"
+- name: "User"

@@ -1,0 +1,43 @@
+{
+  "channel":
+  [
+    {
+      "general":
+      {
+        "description": "First channel"
+      },
+      "name": "DEV.APP.SVRCONN",
+      "clientConnection":
+      {
+        "connection":
+        [
+          {
+            "host": "localhost",
+            "port": 1414
+          }
+        ],
+        "queueManager": "QM1"
+      },
+      "type": "clientConnection"
+    },
+    {
+      "general":
+      {
+        "description": "Second channel"
+      },
+      "name": "DEV.APP.SVRCONN",
+      "clientConnection":
+      {
+        "connection":
+        [
+          {
+            "host": "localhost",
+            "port": 1415
+          }
+        ],
+        "queueManager": "QM1"
+      },
+      "type": "clientConnection"
+    }
+  ]
+}

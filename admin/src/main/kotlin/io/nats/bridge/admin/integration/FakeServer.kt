@@ -1,5 +1,4 @@
 package io.nats.bridge.admin.integration
-
 import io.nats.bridge.MessageBus
 import io.nats.bridge.messages.MessageBuilder
 import java.time.Duration
@@ -14,7 +13,6 @@ class FakeServer(val messageBusSupplier: Supplier<MessageBus>,
 
 
                 var messageBus  = messageBusSupplier.get();
-
                 Runtime.getRuntime().addShutdownHook(Thread(Runnable { stop.set(true) }))
                 while (true) {
                     if (stop.get()) {
@@ -51,6 +49,5 @@ class FakeServer(val messageBusSupplier: Supplier<MessageBus>,
                 ex.printStackTrace()
             }
         }.start()
-
     }
 }
