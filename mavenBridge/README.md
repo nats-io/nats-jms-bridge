@@ -1,20 +1,8 @@
-# 0.22.2-beta19 NATS JMS/MQ Bridge
-
-#### TAG: 0.22.2-beta19
-
-## Issues
-
-
-* #248 fixed copying correlation id broken
-* #250 Example showing how to build a custom Spring Boot App that extends Bridge admin Spring boot using maven
-* Added readme and write up for #250
-----
-
 # Repackage NATS JMS Bridge Spring Boot Admin Application to create a custom Spring Executable Jar to run the NATS JMS Bridge
 
-To extend the spring boot application, you need the following dependencies.
-
-#### pom.xml
+To extend the spring boot application, you need the following dependencies. 
+	
+#### pom.xml 
 
 ```xml
                 <dependency>
@@ -37,10 +25,10 @@ To extend the spring boot application, you need the following dependencies.
 ```
 
 * ***nats-jms-bridge-message*** - holds transform and message builders, can be used in your client code as well and is needed for custom transformations
-* ***nats-jms-bridge*** - the core library which implements the bridge code to bridge between NATS to/fro JMS (ActiveMQ and IBM MQ).
-* ***nats-jms-bridge-springboot-app*** - the spring boot admin application which implements health checkpoints, integrates with Prometheus, allows administration of bridges, allows config via YAML, implements JWT, allows imports of csv files for IBM MQ, and provides a REST interface for controlling the NATS Bridge so it can be administered
+* ***nats-jms-bridge*** - the core library which implements the bridge code to bridge between NATS to/fro JMS (ActiveMQ and IBM MQ). 
+* ***nats-jms-bridge-springboot-app*** - the spring boot admin application which implements health checkpoints, integrates with Prometheus, allows administration of bridges, allows config via YAML, implements JWT, allows imports of csv files for IBM MQ, and provides a REST interface for controlling the NATS Bridge so it can be administered 
 
-You can find the bridge dependencies in the [Maven Central Repository](https://search.maven.org/classic/#search%7Cga%7C1%7Cg%3A%22io.nats.bridge%22) which is available and searchable with sample gradle, maven, and sbt dependency declaration from [this maven repo search web tool](https://mvnrepository.com/artifact/io.nats.bridge).
+You can find the bridge dependencies in the [Maven Central Repository](https://search.maven.org/classic/#search%7Cga%7C1%7Cg%3A%22io.nats.bridge%22) which is available and searchable with sample gradle, maven, and sbt dependency declaration from [this maven repo search web tool](https://mvnrepository.com/artifact/io.nats.bridge). 
 
 You can find the source code for this example in [the main github repo for this project, look for mavenBridge](https://github.com/nats-io/nats-jms-mq-bridge/tree/master/mavenBridge).
 
@@ -64,19 +52,19 @@ public class MavenBridgeApplication {
 
 }
 
-```
+``` 
 
-Notice that we can pass any of the command line arguments to the ApplicationMain of the NATS bridge admin.
-You can also set environments variables by replacing dashes '-' with underscores '_' and prefix with "NATS_BRIDGE"
-
+Notice that we can pass any of the command line arguments to the ApplicationMain of the NATS bridge admin. 
+You can also set environments variables by replacing dashes '-' with underscores '_' and prefix with "NATS_BRIDGE" 
+    
 ```bash
     NATS_BRIDGE_LOGIN_CONFIG_FILE=./config/nats-bridge-logins.yaml
     NATS_BRIDGE_BRIDGE_CONFIG_FILE=./config/nats-bridge.yaml
 ```
-
-    Files can also be on the classpath inside of a jar file or on the file system in the classpath.
+    
+    Files can also be on the classpath inside of a jar file or on the file system in the classpath. 
     Just prepend the file name with "classpath://" to denote looking for this file on the classpath instead of the file system.
-
+    
 ```bash
     -f classpath://nats-bridge.yaml
 ```
@@ -89,12 +77,12 @@ You can specify these command-line arguments.
     loginConfigFile use "-l" or "--login-config-file", This is the Location of Bridge Login Config File.
 ```
 
-In the above example, we pass the location of the `"--config-directory"`.
-This allows you to bundle special config.
+In the above example, we pass the location of the `"--config-directory"`. 
+This allows you to bundle special config. 
 
-To create an executable spring boot jar file, we use the following maven pom file.
+To create an executable spring boot jar file, we use the following maven pom file. 
 
-#### pom.xml - Maven build file.
+#### pom.xml - Maven build file. 
 
 ```xml
 
@@ -203,7 +191,7 @@ To create an executable spring boot jar file, we use the following maven pom fil
 
 To build this project use the command `mvn package` as follows:
 
-```bash
+```bash 
 ./mvnw package
 
 ...
@@ -218,11 +206,11 @@ To build this project use the command `mvn package` as follows:
 
 ```
 
-## Run the application
+## Run the application 
 
 To run the application do this after running the above build:
 
-Find the jar.
+Find the jar. 
 
 ```bash
 $ find . -name "*Bridge*.jar"
@@ -231,9 +219,9 @@ $ find . -name "*Bridge*.jar"
 ./target/mavenBridge-0.0.1-SNAPSHOT.jar
 ```  
 
-Run the jar with `java -jar`.
+Run the jar with `java -jar`. 
 
-```bash
+```bash 
 java -jar ./target/mavenBridge-0.0.1-SNAPSHOT.jar
 
 
@@ -258,8 +246,8 @@ java -jar ./target/mavenBridge-0.0.1-SNAPSHOT.jar
 2020-09-17 18:59:33.036  INFO 7312 --- [           main] c.github.ajalt.clikt.core.CliktCommand   : Started CliktCommand in 7.455 seconds (JVM running for 8.198)
 
 ```
-
-The above ran because the config in the directory `./BOOT-INF/classes/config/` which was specified with `MavenBridgeApplication` contains yaml config compatible with our CI/CD docker-compose file used to integration test the NATS JMS Bridge.
+ 
+The above ran because the config in the directory `./BOOT-INF/classes/config/` which was specified with `MavenBridgeApplication` contains yaml config compatible with our CI/CD docker-compose file used to integration test the NATS JMS Bridge. 
 
 
 If you want to test this out fully, do the following.
@@ -294,16 +282,16 @@ active-mq_1    |  Apache ActiveMQ Artemis 2.12.0
 ...
 ```
 
-Once the JMS and NATS servers are running, you can restart the NATS Bridge admin and then run the integration test.
+Once the JMS and NATS servers are running, you can restart the NATS Bridge admin and then run the integration test. 
 
-Now run runIntegrationNatsToMQ tasks from the admin folder to run the integration tests.
+Now run runIntegrationNatsToMQ tasks from the admin folder to run the integration tests. 
 
 ```bash
 
 $ ./gradlew runIntegrationNatsToMQ
 
 
-## Output
+## Output 
 ...
 Call 98 of run 19
 Call 99 of run 19
@@ -314,10 +302,10 @@ Errors? false
 TOTAL SENT ############### 2000 in time 1441
 ```
 
-The task runIntegrationNatsToMQ just runs this gradle task which runs the class `IntegrationRequestReplyMain`.
-
+The task runIntegrationNatsToMQ just runs this gradle task which runs the class `IntegrationRequestReplyMain`. 
+ 
 #### build.gradle.kts - runIntegrationNatsToMQ
-```kotlin
+```kotlin 
     create<JavaExec>("runIntegrationNatsToMQ") {
         main = "io.nats.bridge.admin.integration.IntegrationRequestReplyMain"
         classpath = sourceSets["main"].runtimeClasspath
@@ -325,4 +313,9 @@ The task runIntegrationNatsToMQ just runs this gradle task which runs the class 
 
 ```
 
-If `runIntegrationNatsToMQ` is missing just add it. It will be in the next release.
+If `runIntegrationNatsToMQ` is missing just add it. It will be in the next release. 
+
+
+ 
+
+
