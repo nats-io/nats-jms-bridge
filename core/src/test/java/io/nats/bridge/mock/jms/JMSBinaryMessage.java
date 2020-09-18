@@ -143,10 +143,17 @@ public class JMSBinaryMessage extends JMSMessage implements javax.jms.BytesMessa
         throw new UnsupportedOperationException();
     }
 
+    byte[] value;
+
     @Override
     public void writeBytes(byte[] value) throws JMSException {
-        throw new UnsupportedOperationException();
+        this.value = value;
     }
+
+    public byte[] getBytes() {
+        return value;
+    }
+
 
     @Override
     public void writeBytes(byte[] value, int offset, int length) throws JMSException {

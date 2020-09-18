@@ -3,13 +3,13 @@ package io.nats.bridge.admin.integration
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.nats.bridge.jms.support.JMSMessageBusBuilder
 import io.nats.bridge.admin.models.logins.LoginConfig
 import io.nats.bridge.admin.models.logins.LoginRequest
 import io.nats.bridge.admin.models.logins.TokenResponse
 import io.nats.bridge.admin.repos.ConfigRepoFromPath
 import io.nats.bridge.admin.runner.support.impl.MessageBridgeLoaderImpl
 import io.nats.bridge.admin.util.ObjectMapperUtils
+import io.nats.bridge.jms.support.JMSMessageBusBuilder
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -25,8 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import java.util.function.Supplier
 
-class IntegrationRequestReplyUtils {
-
+class IntegrationRequestReplyUtilsNatstoNats {
     val JSON: MediaType = "application/json; charset=utf-8".toMediaType()
     fun client() = OkHttpClient()
     val client = client()
@@ -100,13 +99,11 @@ class IntegrationRequestReplyUtils {
         displayFlag(readFlag("${Constants.bridgeControlURL}/running"))
         displayFlag(readFlag("${Constants.bridgeControlURL}/started"))
         displayFlag(readFlag("${Constants.bridgeControlURL}/error/was-error"))
-        //postAdmin("$bridgeControlAdminURL/clear/last/error")
-        //postAdmin("$bridgeControlAdminURL/stop")
-        //postAdmin("$bridgeControlAdminURL/restart")
+
         val stop = AtomicBoolean()
         val builder = loader.loadBridgeConfigs()[0].builders[0]
         val builder2 = loader.loadBridgeConfigs()[0].builders[1]
-        val destinationName = loader.loadBridgeConfigs()[0].config.destination.name.toString()
+
         val clientBuilder  = builder.sourceBusBuilder!!
         val clientBuilder2  = builder2.sourceBusBuilder!!
 
@@ -114,16 +111,12 @@ class IntegrationRequestReplyUtils {
         val serverBuilder = builder.destinationBusBuilder!!
 
         if (serverBuilder is JMSMessageBusBuilder) {
-            if (destinationName != "jms") {
-                serverBuilder.useIBMMQ() //TODO fix so this works with activemq too
-            }
+            serverBuilder.useIBMMQ() //TODO fix so this works with activemq too
             serverBuilder.asSource()
         }
 
         if (builder2.destinationBusBuilder!! is JMSMessageBusBuilder) {
-            if (destinationName != "jms") {
-                (builder2.destinationBusBuilder as JMSMessageBusBuilder).useIBMMQ() //todo fix so this works with activemq also
-            }
+            (builder2.destinationBusBuilder as JMSMessageBusBuilder).useIBMMQ() //todo fix so this works with activemq also
         }
 
         val clientBus = clientBuilder.build()
@@ -132,7 +125,6 @@ class IntegrationRequestReplyUtils {
         val serverBus2 = builder2.destinationBusBuilder!!.build()
         //val natsService = FakeServer(serverBus, stop)
         //val nats2Service = FakeServer(serverBus2, stop)
-
 
         val natsService = FakeServer( Supplier {
             serverBuilder.build()
@@ -148,7 +140,7 @@ class IntegrationRequestReplyUtils {
         val startTime = System.currentTimeMillis()
 
         var totalSent = 0
-        for (a in 0..19) {
+        for (a in 0..999) {
             println("Run $a")
             val latch = CountDownLatch(100)
             for (x in 0..99) {
@@ -162,19 +154,19 @@ class IntegrationRequestReplyUtils {
                         latch.countDown()
                     }
                 } else {
-                    clientBus2.request("Rick $a $x") { response ->
+                    clientBus2.request("Robert $a $x") { response ->
                         ref.set(response)
                         count.incrementAndGet()
                         latch.countDown()
                     }
                 }
 
-                latch.await(1, TimeUnit.MILLISECONDS)
-                clientBus.process()
-                clientBus2.process()
+                //latch.await(100, TimeUnit.MILLISECONDS)
+                //clientBus.process()
+                //clientBus2.process()
             }
-
-            for (x in 0..1000) {
+            //latch.await(100, TimeUnit.MILLISECONDS)
+            for (x in 0..25) {
                 if (latch.await(5, TimeUnit.MILLISECONDS)) {
                     break
                 }

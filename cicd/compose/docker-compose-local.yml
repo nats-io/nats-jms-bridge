@@ -17,7 +17,9 @@ services:
       - MQ_APP_PASSWORD=passw0rd
     ports:
       - "1414:1414"
+
       - "9443:9443"
+
   active-mq:
     build:
       context: ../bridge-activemq

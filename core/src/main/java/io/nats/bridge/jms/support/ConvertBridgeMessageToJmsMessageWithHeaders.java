@@ -3,6 +3,7 @@ package io.nats.bridge.jms.support;
 import io.nats.bridge.messages.BaseMessageWithHeaders;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.util.FunctionWithException;
+import io.nats.bridge.util.SupplierWithException;
 
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
@@ -12,15 +13,20 @@ import java.util.Set;
 
 public class ConvertBridgeMessageToJmsMessageWithHeaders implements FunctionWithException<Message, javax.jms.Message> {
 
-    private final Session session;
+    private final SupplierWithException<BytesMessage> messageCreator;
+
+    public ConvertBridgeMessageToJmsMessageWithHeaders(SupplierWithException<BytesMessage> messageCreator) {
+        this.messageCreator = messageCreator;
+    }
+
 
     public ConvertBridgeMessageToJmsMessageWithHeaders(final Session session) {
-        this.session = session;
+        this(new ByteMessageSupplierFromSession(session));
     }
 
     @Override
     public javax.jms.Message apply(final Message message) throws Exception {
-        final BytesMessage bytesMessage = session.createBytesMessage();
+        final BytesMessage bytesMessage = messageCreator.get();
 
         if (message instanceof BaseMessageWithHeaders) {
             copyHeaders(message, bytesMessage);
@@ -59,6 +65,7 @@ public class ConvertBridgeMessageToJmsMessageWithHeaders implements FunctionWith
             bytesMessage.setJMSPriority(message.priority());
 
         if (message.correlationID() != null && message.correlationID().trim().length() > 0)
-            bytesMessage.setJMSCorrelationID(bytesMessage.getJMSCorrelationID());
+            bytesMessage.setJMSCorrelationID(message.correlationID());
+
     }
 }

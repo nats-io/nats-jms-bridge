@@ -1,0 +1,38 @@
+# Test that uses docker image of mult IBM MQ, Nats and active mq.
+# Use this docker compose file to test IBM MQ failover.
+# We change the IBM MQ port forward to run many docker instances at the same time
+version: '3'
+services:
+  nats-server:
+    build:
+      context: ../bridge-nats-server
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+  active-mq:
+    build:
+      context: ../bridge-activemq
+    environment:
+        - ARTEMIS_USERNAME=cloudurable
+        - ARTEMIS_PASSWORD=cloudurable
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+  ibm-mq_1:
+    build:
+      context: ../bridge-ibmmq
+    environment:
+      - LICENSE=accept
+      - MQ_QMGR_NAME=QM1
+      - MQ_APP_PASSWORD=passw0rd
+    ports:
+      - "1414:1414"
+  ibm-mq_2:
+    build:
+      context: ../bridge-ibmmq2
+    environment:
+      - LICENSE=accept
+      - MQ_QMGR_NAME=QM1
+      - MQ_APP_PASSWORD=passw0rd
+    ports:
+      - "1415:1414"
