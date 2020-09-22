@@ -137,7 +137,7 @@ public class BasicIbmMqIntegrationTest {
             while (consumer.receive(100) != null) {
                 System.out.println("drain");
             }
-            final String correlationID = UUID.randomUUID().toString();
+            final String correlationID = UUID.randomUUID().toString().substring(0, 22);
 
             final TextMessage requestMessage = session.createTextMessage("REQUEST");
             requestMessage.setJMSReplyTo(responseDestination);

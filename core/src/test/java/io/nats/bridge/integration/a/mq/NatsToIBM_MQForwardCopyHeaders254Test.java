@@ -75,8 +75,8 @@ public class NatsToIBM_MQForwardCopyHeaders254Test {
     @Before
     public void setUp() throws Exception {
 
-        final String busName = "MessagesOnlyA";
-        final String responseName = "RESPONSEA";
+        final String busName = "MessagesOnlyA254";
+        final String responseName = "RESPONSEA254";
         clientMessageBus = TestUtils.getMessageBusNats("CLIENT", busName);
         serverMessageBus = TestUtils.getMessageBusIbmMQCopyHeader("SERVER", true);
         resultSignal = new CountDownLatch(1);
@@ -98,12 +98,19 @@ public class NatsToIBM_MQForwardCopyHeaders254Test {
 
     @Test
     public void test() throws Exception {
+        TestUtils.drainBus(serverMessageBus);
+        drainClientLoop();
         runServerLoop();
         runBridgeLoop();
         runClientLoop();
 
         final Message  message = MessageBuilder.builder().withHeader("foo", "bar").withBody("Rick").build();
         clientMessageBus.publish(message);
+
+        for (int index = 0 ; index < 20; index++) {
+            resultSignal.await(1, TimeUnit.SECONDS);
+            if (responseFromServer.get()!=null) break;
+        }
 
         resultSignal.await(10, TimeUnit.SECONDS);
 
@@ -140,6 +147,11 @@ public class NatsToIBM_MQForwardCopyHeaders254Test {
 
         th.start();
     }
+
+    private void drainClientLoop() throws Exception {
+        TestUtils.drainBus(responseBusClient);
+    }
+
 
     private void runBridgeLoop() {
         TestUtils.runBridgeLoop(messageBridge, stop, bridgeStopped);

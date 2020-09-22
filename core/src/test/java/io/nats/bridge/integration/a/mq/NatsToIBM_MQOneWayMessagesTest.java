@@ -88,17 +88,26 @@ public class NatsToIBM_MQOneWayMessagesTest {
 
     @Test
     public void test() throws Exception {
+        TestUtils.drainBus(serverMessageBus);
+        drainClientLoop();
         runServerLoop();
         runBridgeLoop();
         runClientLoop();
         clientMessageBus.publish("Rick");
         resultSignal.await(10, TimeUnit.SECONDS);
 
+        for (int index = 0; index < 20; index++) {
+            resultSignal.await(1, TimeUnit.SECONDS);
+            if (responseFromServer.get() != null) break;
+        }
+
+        resultSignal.await(10, TimeUnit.SECONDS);
+
         assertEquals("Hello Rick", responseFromServer.get());
         stopServerAndBridgeLoops();
     }
 
-    private void runClientLoop() {
+    private void runClientLoop() throws Exception {
 
         Thread th = new Thread(() -> {
 
@@ -123,7 +132,14 @@ public class NatsToIBM_MQOneWayMessagesTest {
         });
 
         th.start();
+        Thread.sleep(1000);
     }
+
+
+    private void drainClientLoop() throws Exception {
+        TestUtils.drainBus(clientMessageBus);
+    }
+
 
     private void runBridgeLoop() {
         TestUtils.runBridgeLoop(messageBridge, stop, bridgeStopped);

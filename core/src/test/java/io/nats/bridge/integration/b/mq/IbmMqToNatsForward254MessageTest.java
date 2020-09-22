@@ -68,7 +68,7 @@ public class IbmMqToNatsForward254MessageTest {
     @Before
     public void setUp() throws Exception {
 
-        final String busName = "MessagesOnlyB";
+        final String busName = "MessagesOnlyB254B";
         final String responseName = "RESPONSEB";
         clientMessageBusForIbmMQ = TestUtils.getMessageBusIbmMQ("", true);
         serverMessageBusForNats = TestUtils.getMessageBusNats("",busName);
@@ -87,6 +87,8 @@ public class IbmMqToNatsForward254MessageTest {
 
     @Test
     public void test() throws Exception {
+        TestUtils.drainBus(serverMessageBusForNats);
+        drainClientLoop();
         runServerLoop();
         runBridgeLoop();
         runClientLoop();
@@ -94,6 +96,10 @@ public class IbmMqToNatsForward254MessageTest {
         final Message  message = MessageBuilder.builder().withHeader("foo", "bar").withBody("Rick").build();
         clientMessageBusForIbmMQ.publish(message);
 
+        for (int index = 0 ; index < 20; index++) {
+            resultSignal.await(1, TimeUnit.SECONDS);
+            if (responseFromServer.get()!=null) break;
+        }
         resultSignal.await(10, TimeUnit.SECONDS);
 
         assertEquals("Hello Rick", responseFromServer.get());
@@ -118,6 +124,7 @@ public class IbmMqToNatsForward254MessageTest {
                     break;
                 }
                 try {
+
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -126,6 +133,10 @@ public class IbmMqToNatsForward254MessageTest {
         });
 
         th.start();
+    }
+
+    private void drainClientLoop() throws Exception {
+        TestUtils.drainBus(responseBusClient);
     }
 
     private void runBridgeLoop() {

@@ -22,8 +22,8 @@ ENV JAVA_HOME /root/.sdkman/candidates/java/current
 
 #Downloading version
 WORKDIR /usr/app/bridge
-RUN bash -c "wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.23.0-beta20-1/nats-bridge-admin-0.23.0-beta20-1.zip"
-RUN bash -c "unzip nats-bridge-admin-0.23.0-beta20-1.zip"
+RUN bash -c "wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.24.0-beta21/nats-bridge-admin-0.24.0-beta21.zip"
+RUN bash -c "unzip nats-bridge-admin-0.24.0-beta21.zip"
 RUN bash -c "rm *.zip"
 
 RUN bash -c "mkdir certs"

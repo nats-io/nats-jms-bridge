@@ -85,11 +85,19 @@ public class IbmMqToNatsOneWayMessageTest  {
 
     @Test
     public void test() throws Exception {
+        TestUtils.drainBus(serverMessageBusForNats);
+        drainClientLoop();
         runServerLoop();
         runBridgeLoop();
         runClientLoop();
         clientMessageBusForIbmMQ.publish("Rick");
-        resultSignal.await(2, TimeUnit.SECONDS);
+
+        for (int index = 0 ; index < 20; index++) {
+            resultSignal.await(1, TimeUnit.SECONDS);
+            if (responseFromServer.get()!=null) break;
+        }
+
+        resultSignal.await(10, TimeUnit.SECONDS);
 
         assertEquals("Hello Rick", responseFromServer.get());
         stopServerAndBridgeLoops();
@@ -119,6 +127,11 @@ public class IbmMqToNatsOneWayMessageTest  {
         });
 
         th.start();
+    }
+
+    private void drainClientLoop() throws Exception {
+
+        TestUtils.drainBus(responseBusClient);
     }
 
     private void runBridgeLoop() {

@@ -113,6 +113,18 @@ public class TestUtils {
         }
     }
 
+    public static void drainBus(final MessageBus mb) throws Exception {
+        Optional<Message> receive;
+        for (int idx = 0; idx < 1000; idx++) {
+            receive = mb.receive();
+            if (receive.isPresent()) {
+                Message message = receive.get();
+                System.out.println("##### MESSAGE FOUND IN QUEUE" + message.bodyAsString() + " CLEARED  ");
+                break;
+            }
+        }
+    }
+
     public static MessageBus getMessageBusIbmMQWithHeaders4(final String name, boolean src) {
         try {
 //            final String host ="localhost";

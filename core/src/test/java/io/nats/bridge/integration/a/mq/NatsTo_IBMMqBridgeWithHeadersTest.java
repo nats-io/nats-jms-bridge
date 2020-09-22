@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -49,14 +50,20 @@ public class NatsTo_IBMMqBridgeWithHeadersTest {
 
     }
 
+
     @After
     public void tearDown() throws Exception {
+    }
+
+    private void drainClientLoop() throws Exception {
+        TestUtils.drainBus(clientMessageNatsBus);
     }
 
     @Test
     public void test() throws Exception {
 
-
+        TestUtils.drainBus(serverJMSMessageBus);
+        drainClientLoop();
         runServerLoop();
         runBridgeLoop();
 
