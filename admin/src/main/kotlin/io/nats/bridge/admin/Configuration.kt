@@ -53,8 +53,6 @@ open class Configuration {
             repo.init()
             repo
         } else if (app.bridgeConfigFile.startsWith("classpath:")) {
-
-
             println("URI ********************************* " + app.bridgeConfigFile)
             val resource: Resource = resourceLoader!!.getResource(app.bridgeConfigFile)
             println("URI ********************************* " + resource.uri)
@@ -83,6 +81,7 @@ open class Configuration {
                 val actualResource: Path = zipFS.getPath(res)
 
                 val repo = ConfigRepoFromPath(configFile = actualResource)
+                repo.init()
                 repo
 
             } else if (resURI.startsWith("file:")) {
@@ -90,6 +89,7 @@ open class Configuration {
 
                 val file = File(path)
                 val repo = ConfigRepoFromPath(configFile = file.toPath())
+                repo.init()
                 repo
             } else {
                 throw IllegalStateException("Unable to read resource " + resURI)
@@ -117,7 +117,7 @@ open class Configuration {
     ): LoginRepo {
 
         return if (app.loginConfigFile.startsWith("classpath://")) {
-            val configFile = app.bridgeConfigFile.substring("classpath://".length)
+            val configFile = app.loginConfigFile.substring("classpath://".length)
             val paths = ClasspathUtils.paths(this.javaClass, configFile)
             val repo = LoginRepoFromPath(configFile = paths[0], systemSecret = secretKey)
             repo.init()
@@ -151,6 +151,7 @@ open class Configuration {
                 val actualResource: Path = zipFS.getPath(res)
 
                 val repo = LoginRepoFromPath(configFile = actualResource, systemSecret = secretKey)
+                repo.init()
                 repo
 
             } else if (resURI.startsWith("file:")) {
@@ -158,9 +159,10 @@ open class Configuration {
 
                 val file = File(path)
                 val repo = LoginRepoFromPath(configFile = file.toPath(), systemSecret = secretKey)
+                repo.init()
                 repo
             } else {
-                throw IllegalStateException("Unable to read resource " + resURI)
+                throw IllegalStateException("Unable to read resource for login" + resURI)
             }
 
 
