@@ -66,12 +66,12 @@ open class Run(runBoot:Boolean) : CliktCommand(help = "Run NATS JMS/IBM MQ Bridg
     }
 
 
-
-
-
-    private val configFolder: String? by option("-d", "--config-directory", help = "Location of Configuration Directory").default("./config/")
+    private val configFolder: String? by option("-d", "--config-directory", help = "Location of Configuration Directory")
+            .default(AppConfig.configFolderDefault)
     private val bridgeConfigFile: String? by option("-f", "--bridge-config-file", help = "Location of Bridge Config File")
+            .default(AppConfig.bridgeConfigFileDefault)
     private val loginConfigFile: String? by option("-l", "--login-config-file", help = "Location of Bridge Login Config File")
+            .default(AppConfig.loginConfigFileDefault)
 
     private val bootApp by option("--on", "-o").flag("--off", "-ff", default = runBoot)
 
@@ -79,8 +79,10 @@ open class Run(runBoot:Boolean) : CliktCommand(help = "Run NATS JMS/IBM MQ Bridg
 
 
     open fun config() {
-        val configFileLocation : String = readFileConf(bridgeConfigFile, configFolder!!, AppConfig.bridgeConfigFileDefault)
-        val loginConfigLocation : String = readFileConf(loginConfigFile, configFolder!!, AppConfig.loginConfigFileDefault)
+
+
+        val configFileLocation : String = readFileConf(bridgeConfigFile, configFolder!! )
+        val loginConfigLocation : String = readFileConf(loginConfigFile, configFolder!!)
         AppConfig.setConfig(ApplicationConfig(configFileLocation, loginConfigLocation, configFolder))
     }
 
@@ -89,11 +91,17 @@ open class Run(runBoot:Boolean) : CliktCommand(help = "Run NATS JMS/IBM MQ Bridg
         if (bootApp)  SpringApplication.run(NATSJmsBridgeApplication::class.java, *args!!)
     }
 
-    private fun readFileConf(configLocation:String?, configFolder:String, defaultName:String): String {
-        return if (configLocation.isNullOrBlank()) {
+    private fun readFileConf(configFileLocation:String?, configFolder:String): String {
+
+        println("CONFIG FILE LOCATION $configFileLocation")
+        println("CONFIG FOLDER $configFolder")
+
+
+
+        return if (configFileLocation.isNullOrBlank() || !configFileLocation.startsWith("classpath:")) {
             val configDir = File(configFolder)
 
-            if (!configDir.exists()) {
+            if (!configDir.exists() ) {
                 try {
                     configDir.mkdirs()
                 } catch (ex: Exception) {
@@ -102,7 +110,7 @@ open class Run(runBoot:Boolean) : CliktCommand(help = "Run NATS JMS/IBM MQ Bridg
             }
 
             if (configDir.exists()) {
-                val configFile = File(configDir, defaultName)
+                val configFile = File(configDir, configFileLocation)
                 if (configFile.exists()) {
                     echo("Using configuration file $configFile")
                     configFile.toString()
@@ -111,22 +119,23 @@ open class Run(runBoot:Boolean) : CliktCommand(help = "Run NATS JMS/IBM MQ Bridg
                         echo("Using configuration file $configFile which does not exist but can be written to")
                         configFile.toString()
                     } else {
-                        echo("Trying to use configuration file $configFile but it is not writeable so using classpath://./config/$defaultName instead")
-                        val paths = ClasspathUtils.paths(this.javaClass, "./config/$defaultName")
+                        echo("Trying to use configuration file $configFile but it is not writeable so using instead classpath://./config/$configFileLocation")
+                        val paths = ClasspathUtils.paths(this.javaClass, "./config/$configFileLocation")
                         if (paths.isEmpty()) {
                             echo("No configuration is found, exiting")
                             throw IllegalStateException("No configuration is found, exiting; \n " +
-                                    "Tried to use configuration file $configFile but it is not writeable so using classpath://./config/$defaultName instead")
+                                    "Tried to use configuration file $configFile but it is not writeable so using classpath://./config/$configFileLocation instead")
                         } else {
-                            "classpath://./config/$defaultName"
+                            "$configFileLocation"
                         }
                     }
                 }
             } else {
-                throw IllegalStateException("No configuration is found, exiting")
+                throw IllegalStateException("No configuration is found, exiting $configFileLocation $configDir")
             }
         } else {
-            configLocation
+            println("CLASSPATH RESOURCE $configFileLocation")
+            configFileLocation
         }
     }
 
