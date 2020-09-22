@@ -5,10 +5,12 @@ import io.nats.bridge.MessageBus;
 import io.nats.bridge.TestUtils;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
+import io.nats.bridge.support.MessageBridgeBuilder;
 import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -18,10 +20,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 
-public class NatsToIBM_MQOneWayMessagesTest {
+public class NatsToIBM_MQForwardCopyHeaders254Test {
 
     private final AtomicBoolean stop = new AtomicBoolean(false);
     private final AtomicReference<String> responseFromServer = new AtomicReference<>();
+    private final AtomicReference<String> fooHeaderRef = new AtomicReference<>();
     private CountDownLatch resultSignal;
     private CountDownLatch serverStopped;
     private CountDownLatch bridgeStopped;
@@ -35,7 +38,7 @@ public class NatsToIBM_MQOneWayMessagesTest {
     private MessageBus responseBusClient;
     private MessageBridge messageBridge;
 
-    public static void runServerLoop(final AtomicBoolean stop, final MessageBus serverMessageBus, final MessageBus responseBusServer,
+    public  void runServerLoop(final AtomicBoolean stop, final MessageBus serverMessageBus, final MessageBus responseBusServer,
                                      final CountDownLatch serverStopped) {
         final Thread thread = new Thread(() -> {
             while (true) {
@@ -46,11 +49,14 @@ public class NatsToIBM_MQOneWayMessagesTest {
                 final Optional<Message> receive = serverMessageBus.receive();
 
                 if (!receive.isPresent()) {
+
                 }
                 receive.ifPresent(message -> {
 
                     System.out.println("Handle message " + message.bodyAsString() + "....................");
-                    responseBusServer.publish(MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build());
+
+                    fooHeaderRef.set((String) message.headers().get("foo"));
+                    responseBusServer.publish(MessageBuilder.builder().withBody("Hello " + new String(message.getBodyBytes(), StandardCharsets.UTF_8)).build());
 
                 });
                 try {
@@ -72,17 +78,21 @@ public class NatsToIBM_MQOneWayMessagesTest {
         final String busName = "MessagesOnlyA";
         final String responseName = "RESPONSEA";
         clientMessageBus = TestUtils.getMessageBusNats("CLIENT", busName);
-        serverMessageBus = TestUtils.getMessageBusIbmMQ("SERVER", true);
+        serverMessageBus = TestUtils.getMessageBusIbmMQCopyHeader("SERVER", true);
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
         bridgeMessageBusSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE", busName);
-        bridgeMessageBusDestination = TestUtils.getMessageBusIbmMQ("BRIDGE_DEST", false);
+        bridgeMessageBusDestination = TestUtils.getMessageBusIbmMQCopyHeader("BRIDGE_DEST", false);
 
         responseBusServer = TestUtils.getMessageBusJms("SERVER_RESPONSE", responseName);
         responseBusClient = TestUtils.getMessageBusJms("CLIENT_RESPONSE", responseName);
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, false, null, Collections.emptyList(), Collections.emptyList());
+
+
+        messageBridge = MessageBridgeBuilder.builder().withDestinationBus(bridgeMessageBusDestination)
+                .withSourceBus(bridgeMessageBusSource).withRequestReply(false).withName("NatsToIBM_MQForwardCopyHeaders254Test").build();
+
 
     }
 
@@ -91,10 +101,16 @@ public class NatsToIBM_MQOneWayMessagesTest {
         runServerLoop();
         runBridgeLoop();
         runClientLoop();
-        clientMessageBus.publish("Rick");
+
+        final Message  message = MessageBuilder.builder().withHeader("foo", "bar").withBody("Rick").build();
+        clientMessageBus.publish(message);
+
         resultSignal.await(10, TimeUnit.SECONDS);
 
         assertEquals("Hello Rick", responseFromServer.get());
+
+        assertEquals("bar", fooHeaderRef.get());
+
         stopServerAndBridgeLoops();
     }
 

@@ -89,7 +89,7 @@ public class IbmMqToNatsOneWayMessageTest  {
         runBridgeLoop();
         runClientLoop();
         clientMessageBusForIbmMQ.publish("Rick");
-        resultSignal.await(10, TimeUnit.SECONDS);
+        resultSignal.await(2, TimeUnit.SECONDS);
 
         assertEquals("Hello Rick", responseFromServer.get());
         stopServerAndBridgeLoops();
