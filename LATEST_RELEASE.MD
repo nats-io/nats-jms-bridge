@@ -1,6 +1,6 @@
-# 0.23.0-beta20 NATS JMS/MQ Bridge
+# 0.23.0-beta20-1 NATS JMS/MQ Bridge
 
-#### TAG: 0.23.0-beta20
+#### TAG: 0.23.0-beta20-1
 
 ## Issues
 
@@ -22,19 +22,19 @@ To extend the spring boot application, you need the following dependencies.
                 <dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-message</artifactId>
-			<version>0.23.0-beta20</version>
+			<version>0.23.0-beta20-1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge</artifactId>
-			<version>0.23.0-beta20</version>
+			<version>0.23.0-beta20-1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-springboot-app</artifactId>
-			<version>0.23.0-beta20</version>
+			<version>0.23.0-beta20-1</version>
 		</dependency>
 ```
 
@@ -154,19 +154,19 @@ To create an executable spring boot jar file, we use the following maven pom fil
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-message</artifactId>
-			<version>0.23.0-beta20</version>
+			<version>0.23.0-beta20-1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge</artifactId>
-			<version>0.23.0-beta20</version>
+			<version>0.23.0-beta20-1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-springboot-app</artifactId>
-			<version>0.23.0-beta20</version>
+			<version>0.23.0-beta20-1</version>
 		</dependency>
 
 		<dependency>

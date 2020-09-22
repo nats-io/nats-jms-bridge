@@ -27,7 +27,11 @@ class ConfigRepoFromPath(private val configFile: Path = File("./config/nats-brid
 
     override fun readConfig(): NatsBridgeConfig {
 
-        if (!Files.exists(configFile) && Files.isWritable(configFile.parent)) saveConfig(defaultDataModel)
+        if (!configFile.toString().contains("classpath:")
+                && !Files.exists(configFile) && Files.isWritable(configFile.parent))
+            saveConfig(defaultDataModel)
+
+        println("READ CONFIG REPO $configFile")
         return mapper.readValue(PathUtils.read(configFile))
     }
 
