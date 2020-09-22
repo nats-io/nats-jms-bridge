@@ -85,6 +85,12 @@ open class Configuration {
                 val repo = ConfigRepoFromPath(configFile = actualResource)
                 repo
 
+            } else if (resURI.startsWith("file:")) {
+                val path:String = resource.uri.path;
+
+                val file = File(path)
+                val repo = ConfigRepoFromPath(configFile = file.toPath())
+                repo
             } else {
                 throw IllegalStateException("Unable to read resource " + resURI)
             }
@@ -147,6 +153,12 @@ open class Configuration {
                 val repo = LoginRepoFromPath(configFile = actualResource, systemSecret = secretKey)
                 repo
 
+            } else if (resURI.startsWith("file:")) {
+                val path:String = resource.uri.path;
+
+                val file = File(path)
+                val repo = LoginRepoFromPath(configFile = file.toPath(), systemSecret = secretKey)
+                repo
             } else {
                 throw IllegalStateException("Unable to read resource " + resURI)
             }

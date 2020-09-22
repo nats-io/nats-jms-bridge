@@ -3,6 +3,7 @@ package io.nats.bridge.admin
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import io.nats.bridge.admin.util.ClasspathUtils
 import org.springframework.boot.SpringApplication
@@ -12,25 +13,38 @@ import java.lang.IllegalStateException
 import java.util.concurrent.atomic.AtomicReference
 
 @SpringBootApplication
-open class Application
+open class NATSJmsBridgeApplication
 
 object AppConfig {
     private val applicationConfigRef = AtomicReference<ApplicationConfig?>()
 
     fun setConfig(appConfig:ApplicationConfig) {
-        if (!applicationConfigRef.compareAndSet(null, appConfig)) {
-            throw IllegalStateException("Application config can only be set once")
+        if (!runSpringBootDirect) {
+            applicationConfigRef.set(appConfig)
+        } else {
+            if (!applicationConfigRef.compareAndSet(null, appConfig)) {
+                throw IllegalStateException("Application config can only be set once")
+            }
         }
     }
 
     fun getConfig() : ApplicationConfig =applicationConfigRef.get()
                 ?: throw IllegalStateException("Application config must bet set before running application")
 
+    @JvmStatic
+    fun runner() = Run(runSpringBootDirect)
+
+
+    var configFolderDefault: String = "./config/"
+    var bridgeConfigFileDefault: String = "nats-bridge.yaml"
+    var loginConfigFileDefault: String = "nats-bridge-logins.yaml"
+    var runSpringBootDirect: Boolean = true
+
 }
 
 data class ApplicationConfig(val bridgeConfigFile:String, val loginConfigFile:String, val configDirectory:String?)
 
-open class Run(val args : Array<String>) : CliktCommand(help = "Run NATS JMS/IBM MQ Bridge", epilog="""
+open class Run(runBoot:Boolean) : CliktCommand(help = "Run NATS JMS/IBM MQ Bridge", epilog="""
     You can also set environments variables by replacing dashes '-' with underscores '_' and prefix with "NATS_BRIDGE" 
     
     ```
@@ -51,20 +65,31 @@ open class Run(val args : Array<String>) : CliktCommand(help = "Run NATS JMS/IBM
         context { autoEnvvarPrefix = "NATS_BRIDGE" }
     }
 
+
+
+
+
     private val configFolder: String? by option("-d", "--config-directory", help = "Location of Configuration Directory").default("./config/")
     private val bridgeConfigFile: String? by option("-f", "--bridge-config-file", help = "Location of Bridge Config File")
     private val loginConfigFile: String? by option("-l", "--login-config-file", help = "Location of Bridge Login Config File")
 
+    private val bootApp by option("--on", "-o").flag("--off", "-ff", default = runBoot)
 
-    override fun run() {
 
-        val configFileLocation : String = readFileConf(bridgeConfigFile, configFolder!!)
-        val loginConfigLocation : String = readFileConf(loginConfigFile, configFolder!!, "nats-bridge-logins.yaml")
+
+
+    open fun config() {
+        val configFileLocation : String = readFileConf(bridgeConfigFile, configFolder!!, AppConfig.bridgeConfigFileDefault)
+        val loginConfigLocation : String = readFileConf(loginConfigFile, configFolder!!, AppConfig.loginConfigFileDefault)
         AppConfig.setConfig(ApplicationConfig(configFileLocation, loginConfigLocation, configFolder))
-        SpringApplication.run(Application::class.java, *args)
     }
 
-    private fun Run.readFileConf(configLocation:String?, configFolder:String, defaultName : String = "nats-bridge.yaml"): String {
+    override fun run() {
+        config()
+        if (bootApp)  SpringApplication.run(NATSJmsBridgeApplication::class.java, *args!!)
+    }
+
+    private fun readFileConf(configLocation:String?, configFolder:String, defaultName:String): String {
         return if (configLocation.isNullOrBlank()) {
             val configDir = File(configFolder)
 
@@ -104,12 +129,23 @@ open class Run(val args : Array<String>) : CliktCommand(help = "Run NATS JMS/IBM
             configLocation
         }
     }
+
+    private var args:Array<String>? = null
+
+    open fun runMain(args:Array<String>) {
+        this.args = args
+        super.main(args)
+    }
+
+
+
 }
 
 object ApplicationMain {
     @JvmStatic
     fun main(args: Array<String>) {
-        Run(args).main(args)
+        val runner = AppConfig.runner()
+        runner.runMain(args)
     }
 }
 

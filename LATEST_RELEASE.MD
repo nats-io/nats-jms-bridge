@@ -1,14 +1,15 @@
-# 0.22.4-beta19 NATS JMS/MQ Bridge
+# 0.23.0-beta20-INTERIM NATS JMS/MQ Bridge
 
-#### TAG: 0.22.4-beta19
+#### TAG: 0.23.0-beta20-INTERIM
 
 ## Issues
 
 
-* #248 fixed copying correlation id broken
+* #258 ObjectMapper().registerModule(KotlinModule(nullisSameAsDefault = true)
 * #250 Example showing how to build a custom Spring Boot App that extends Bridge admin Spring boot using maven
-* Added readme and write up for #250
-* #252 Issue loading yaml when running in Spring Boot executable jar
+* Make Spring Boot App an API #259
+* TODO modify readme below 
+
 ----
 
 # Repackage NATS JMS Bridge Spring Boot Admin Application to create a custom Spring Executable Jar to run the NATS JMS Bridge
