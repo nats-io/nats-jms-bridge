@@ -10,7 +10,7 @@ object ObjectMapperUtils {
 
     fun getYamlObjectMapper(): ObjectMapper {
         val mapper = ObjectMapper(YAMLFactory())
-        mapper.registerModule(KotlinModule())
+        mapper.registerModule(KotlinModule(nullIsSameAsDefault = true))
         mapper.findAndRegisterModules()
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
         return mapper

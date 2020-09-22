@@ -64,7 +64,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "io.nats.bridge"
             artifactId = "nats-jms-bridge-springboot-app"
-            version = "0.22.4-beta19"
+            version = "0.23.0-beta20"
             from(components["java"])
         }
     }
@@ -140,7 +140,7 @@ tasks.getByName<CreateStartScripts>("startScripts") {
 }
 
 
-version = "0.22.4-beta19"
+version = "0.23.0-beta20"
 
 tasks {
 
@@ -182,7 +182,7 @@ tasks {
 
     dependencyManagement {
         imports {
-            mavenBom("com.fasterxml.jackson:jackson-bom:2.9.5")
+            mavenBom("com.fasterxml.jackson:jackson-bom:2.11.2")
         }
     }
 
@@ -210,7 +210,7 @@ tasks {
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-        implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.8")
+        implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
 
         // Security
         implementation("org.springframework.boot:spring-boot-starter-security")
@@ -219,7 +219,7 @@ tasks {
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.22.4-beta19")
+        implementation("io.nats.bridge:nats-jms-bridge:0.23.0-beta20")
 
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
@@ -245,11 +245,11 @@ tasks {
 
         implementation("com.github.ajalt:clikt:2.7.1")
 
-        implementation("io.nats.bridge:nats-jms-bridge-message:0.22.4-beta19")
+        implementation("io.nats.bridge:nats-jms-bridge-message:0.23.0-beta20")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.22.4-beta19")
+        implementation("io.nats.bridge:nats-jms-bridge:0.23.0-beta20")
 
-        //implementation("io.nats.bridge:nats-jms-bridge-example-transforms:0.22.4-beta19")
+        //implementation("io.nats.bridge:nats-jms-bridge-example-transforms:0.23.0-beta20")
 
 
 

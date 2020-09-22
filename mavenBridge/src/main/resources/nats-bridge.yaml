@@ -47,10 +47,10 @@ clusters:
         io.nats.client.reconnect.max: "10"
         io.nats.client.timeout: "4000"
         io.nats.client.tls.jssl.enable: "true"
-        io.nats.client.tls.truststore.path: "../certs/alias/truststore.jks"
-        io.nats.client.tls.keystore.path: "../certs/alias/keystore.jks"
+        io.nats.client.tls.truststore.path: "../certs/truststore.jks"
+        io.nats.client.tls.keystore.path: "../certs/keystore.jks"
         io.nats.client.tls.algorithm: "SunX509"
-        io.nats.client.tls.keystore.password: "password"
+        io.nats.client.tls.keystore.password: "cloudurable1"
         io.nats.client.tls.truststore.password: "cloudurable2"
   ibmMqCluster:
     name: "ibmMqCluster"

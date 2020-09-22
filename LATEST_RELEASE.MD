@@ -1,14 +1,15 @@
-# 0.22.4-beta19 NATS JMS/MQ Bridge
+# 0.23.0-beta20 NATS JMS/MQ Bridge
 
-#### TAG: 0.22.4-beta19
+#### TAG: 0.23.0-beta20
 
 ## Issues
 
 
-* #248 fixed copying correlation id broken
+* #258 ObjectMapper().registerModule(KotlinModule(nullisSameAsDefault = true)
 * #250 Example showing how to build a custom Spring Boot App that extends Bridge admin Spring boot using maven
-* Added readme and write up for #250
-* #252 Issue loading yaml when running in Spring Boot executable jar
+* Make Spring Boot App an API #259
+* TODO modify readme below
+
 ----
 
 # Repackage NATS JMS Bridge Spring Boot Admin Application to create a custom Spring Executable Jar to run the NATS JMS Bridge
@@ -21,19 +22,19 @@ To extend the spring boot application, you need the following dependencies.
                 <dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-message</artifactId>
-			<version>0.21.3-beta18</version>
+			<version>0.23.0-beta20</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge</artifactId>
-			<version>0.21.3-beta18</version>
+			<version>0.23.0-beta20</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-springboot-app</artifactId>
-			<version>0.21.3-beta18</version>
+			<version>0.23.0-beta20</version>
 		</dependency>
 ```
 
@@ -52,6 +53,10 @@ To extend the NATS JMS Bridge Admin just create a SpringApplication class as fol
 
 package com.example.mavenBridge;
 
+
+import io.nats.bridge.admin.AppConfig;
+import io.nats.bridge.admin.NATSJmsBridgeApplication;
+import io.nats.bridge.admin.Run;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -59,8 +64,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MavenBridgeApplication {
 
 	public static void main(String[] args) {
-		String [] actualArgs = args.length == 0 ? new String[]{"--config-directory", "./BOOT-INF/classes/config/"} : args;
-		io.nats.bridge.admin.ApplicationMain.main(actualArgs);
+
+		final AppConfig appConfig = AppConfig.INSTANCE;
+		appConfig.setBridgeConfigFileDefault("classpath:nats-bridge.yaml");
+		appConfig.setLoginConfigFileDefault("classpath:nats-bridge-logins.yaml");
+		appConfig.setRunSpringBootDirect(false);
+
+
+		Run runner = AppConfig.runner();
+		runner.runMain(args);
+		SpringApplication.run(new Class[]{NATSJmsBridgeApplication.class, MavenBridgeApplication.class}, args);
 	}
 
 }
@@ -119,24 +132,41 @@ To create an executable spring boot jar file, we use the following maven pom fil
 		<java.version>1.8</java.version>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>jcenter</id>
+			<name>jcenter</name>
+			<url>https://jcenter.bintray.com/</url>
+		</repository>
+		<repository>
+			<id>central</id>
+			<name>Central Repository</name>
+			<url>https://repo.maven.apache.org/maven2</url>
+			<layout>default</layout>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<dependencies>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-message</artifactId>
-			<version>0.21.3-beta18</version>
+			<version>0.23.0-beta20</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge</artifactId>
-			<version>0.21.3-beta18</version>
+			<version>0.23.0-beta20</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-springboot-app</artifactId>
-			<version>0.21.3-beta18</version>
+			<version>0.23.0-beta20</version>
 		</dependency>
 
 		<dependency>
@@ -148,7 +178,7 @@ To create an executable spring boot jar file, we use the following maven pom fil
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jdk8</artifactId>
-			<version>2.9.5</version>
+			<version>2.11.2</version>
 		</dependency>
 
 		<dependency>
@@ -160,19 +190,27 @@ To create an executable spring boot jar file, we use the following maven pom fil
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-kotlin</artifactId>
-			<version>2.9.5</version>
+			<version>2.11.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-yaml</artifactId>
-			<version>2.9.8</version>
+			<version>2.11.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.github.ajalt/clikt -->
+		<dependency>
+			<groupId>com.github.ajalt</groupId>
+			<artifactId>clikt</artifactId>
+			<version>2.7.1</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -205,7 +243,7 @@ To create an executable spring boot jar file, we use the following maven pom fil
 To build this project use the command `mvn package` as follows:
 
 ```bash
-./mvnw package
+./mvnw clean package
 
 ...
 [INFO] --- spring-boot-maven-plugin:2.3.3.RELEASE:repackage (repackage) @ mavenBridge ---
@@ -259,8 +297,6 @@ java -jar ./target/mavenBridge-0.0.1-SNAPSHOT.jar
 2020-09-17 18:59:33.036  INFO 7312 --- [           main] c.github.ajalt.clikt.core.CliktCommand   : Started CliktCommand in 7.455 seconds (JVM running for 8.198)
 
 ```
-
-The above ran because the config in the directory `./BOOT-INF/classes/config/` which was specified with `MavenBridgeApplication` contains yaml config compatible with our CI/CD docker-compose file used to integration test the NATS JMS Bridge.
 
 
 If you want to test this out fully, do the following.
@@ -325,5 +361,3 @@ The task runIntegrationNatsToMQ just runs this gradle task which runs the class 
     }
 
 ```
-
-If `runIntegrationNatsToMQ` is missing just add it. It will be in the next release.
