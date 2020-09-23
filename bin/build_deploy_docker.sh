@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e -i
 
-VERSION=${1:-0.24.0-beta21}
+VERSION=${1:-0.24.1-beta21}
 DOCKER_NAMESPACE=${2:-synadia}
 DOCKER_DIR=${3:-cicd/nats-bridge-admin/}
 DOCKER_NAME=${4:-nats-bridge-admin}

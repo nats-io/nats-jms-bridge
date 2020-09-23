@@ -142,6 +142,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
             if (type != null && !NO_TYPE.equals(type)) headerSize++;
             if (priority != -1) headerSize++;
             if (redelivered) headerSize++;
+            if (correlationID!=null) headerSize++;
 
             headerSize += outputHeaders.size();
             streamOut.writeByte(headerSize);
@@ -163,6 +164,13 @@ public class BaseMessageWithHeaders implements BytesMessage {
                 streamOut.writeByte(HEADER_KEY_EXPIRATION_TIME_CODE);
                 streamOut.writeByte(TYPE_LONG);
                 streamOut.writeLong(expirationTime());
+            }
+
+            if (correlationID()!=null) {
+                streamOut.writeByte(HEADER_KEY_CORRELATION_ID_CODE);
+                streamOut.writeByte(TYPE_SHORT_STRING);
+                streamOut.writeByte(correlationID().length());
+                streamOut.write(correlationID().getBytes(StandardCharsets.UTF_8));
             }
             if (timestamp() > 0) {
                 streamOut.writeByte(HEADER_KEY_TIMESTAMP_CODE);
@@ -191,6 +199,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
                 }
 
                 int codeFromHeader = getCodeFromHeader(kv.getKey());
+
                 // If the headers is under 0, it is a header with a code. */
                 if (codeFromHeader > 0) {
                     streamOut.writeByte(kv.getKey().length());
@@ -281,7 +290,7 @@ public class BaseMessageWithHeaders implements BytesMessage {
                 deliveryTime == that.deliveryTime &&
                 mode == that.mode &&
                 redelivered == that.redelivered &&
-                priority == that.priority &&
+                priority == that.priority && Objects.equals(correlationID, that.correlationID) &&
                 Objects.equals(type, that.type) && compareHeaders(that.headers) && Arrays.equals(bodyBytes, that.bodyBytes);
     }
 

@@ -151,9 +151,15 @@ public class JMSMessageBus implements MessageBus {
 
 
         tryHandler.tryWithRethrow(() -> {
-            final String correlationID = UUID.randomUUID().toString();
+            final String correlationID = jmsMessage.getJMSCorrelationID() == null ? UUID.randomUUID().toString()
+                    : jmsMessage.getJMSCorrelationID();
+
+
             jmsMessage.setJMSReplyTo(jms().getResponseDestination());
-            jmsMessage.setJMSCorrelationID(correlationID);
+
+            if (jmsMessage.getJMSCorrelationID() == null)
+                jmsMessage.setJMSCorrelationID(correlationID);
+
             jms().producer().send(jmsMessage);
             if (logger.isDebugEnabled()) logger.debug("REQUEST BODY " + message.toString());
 
