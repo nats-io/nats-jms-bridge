@@ -196,7 +196,7 @@ public class MessageBuilder {
 
     public Message build() {
         if (timestamp == -1 && headers == null && deliveryTime == -1 && expirationTime == -1 && mode == -1
-                && type == Message.NO_TYPE && !redelivered && priority == -1) {
+                && type == Message.NO_TYPE && !redelivered && priority == -1 && correlationID==null) {
             return new BaseMessage(getBody(), getReplyHandler());
         } else {
             return new BaseMessageWithHeaders(getTimestamp(), getExpirationTime(), getDeliveryTime(), getMode(), getType(),
@@ -266,6 +266,7 @@ public class MessageBuilder {
                                 dataInputStream.read(headerNameBytes);
                                 headerName = new String(headerNameBytes, StandardCharsets.UTF_8);
                             }
+
                             /*
                              * Read the header type then based on type read the value from the stream.
                              */
@@ -363,6 +364,10 @@ public class MessageBuilder {
                     if (headers.containsKey(HEADER_KEY_TYPE)) {
                         withType((String) headers.get(HEADER_KEY_TYPE));
                         headers.remove(HEADER_KEY_TYPE);
+                    }
+                    if (headers.containsKey(HEADER_KEY_CORRELATION_ID)) {
+                        withCorrelationID((String) headers.get(HEADER_KEY_CORRELATION_ID));
+                        headers.remove(HEADER_KEY_CORRELATION_ID);
                     }
                     if (headers.containsKey(HEADER_KEY_REDELIVERED)) {
                         withRedelivered((boolean) headers.get(HEADER_KEY_REDELIVERED));

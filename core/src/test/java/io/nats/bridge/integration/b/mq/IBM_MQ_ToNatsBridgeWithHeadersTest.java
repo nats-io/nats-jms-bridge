@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,13 +36,13 @@ public class IBM_MQ_ToNatsBridgeWithHeadersTest {
     @Before
     public void setUp() throws Exception {
         clientMessageBus = TestUtils.getMessageBusIbmMQWithHeaders4("CLIENT",false);
-        serverMessageBus = TestUtils.getMessageBusNats("SERVER","B");
+        serverMessageBus = TestUtils.getMessageBusNats("SERVER","B_HH");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
         bridgeMessageBusSource = TestUtils.getMessageBusIbmMQWithHeaders4("BRIDGE_SOURCE",true);
-        bridgeMessageBusDestination = TestUtils.getMessageBusNats("BRIDGE_DEST","B");
+        bridgeMessageBusDestination = TestUtils.getMessageBusNats("BRIDGE_DEST","B_HH");
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null, Collections.emptyList(), Collections.emptyList());
 
     }
@@ -53,7 +54,8 @@ public class IBM_MQ_ToNatsBridgeWithHeadersTest {
     @Test
     public void test() throws Exception {
 
-
+        TestUtils.drainBus(serverMessageBus);
+        drainClientLoop();
         runServerLoop();
         runBridgeLoop();
 
@@ -73,6 +75,10 @@ public class IBM_MQ_ToNatsBridgeWithHeadersTest {
 
 
         stopServerAndBridgeLoops();
+    }
+
+    private void drainClientLoop() throws Exception {
+        TestUtils.drainBus(clientMessageBus);
     }
 
     private void runClientLoop() throws Exception {

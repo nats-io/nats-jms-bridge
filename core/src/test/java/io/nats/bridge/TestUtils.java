@@ -61,6 +61,22 @@ public class TestUtils {
         }
     }
 
+    public static MessageBus getMessageBusIbmMQCopyHeader(final String name, boolean src) {
+        try {
+            final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().turnOnCopyHeaders()
+                    .withName("IBM_MQ_" + name).useIBMMQ().withDestinationName("DEV.QUEUE.1")
+                    .withResponseDestinationName("DEV.QUEUE.2");
+            jmsMessageBusBuilder.withUserNameConnection("app").withPasswordConnection("passw0rd");
+            if (src) {
+                jmsMessageBusBuilder.asSource();
+            }
+            return jmsMessageBusBuilder.build();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException(ex);
+        }
+    }
+
     public static MessageBus getMessageBusIbmMQWithHeaders(final String name, boolean src) {
         try {
             final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder()
@@ -94,6 +110,18 @@ public class TestUtils {
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new RuntimeException(ex);
+        }
+    }
+
+    public static void drainBus(final MessageBus mb) throws Exception {
+        Optional<Message> receive;
+        for (int idx = 0; idx < 1000; idx++) {
+            receive = mb.receive();
+            if (receive.isPresent()) {
+                Message message = receive.get();
+                System.out.println("##### MESSAGE FOUND IN QUEUE" + message.bodyAsString() + " CLEARED  ");
+                break;
+            }
         }
     }
 

@@ -78,6 +78,11 @@ public class ConvertJmsMessageToBridgeMessageWithHeaders implements FunctionWith
 
             if (!propertyName.startsWith("JMS"))
                 builder.withHeader(propertyName, jmsMessage.getObjectProperty(propertyName));
+            else {
+                //ystem.out.println("HEADER " + propertyName);
+            }
+
+
         }
 
         builder.withRedelivered(jmsMessage.getJMSRedelivered());
@@ -87,7 +92,12 @@ public class ConvertJmsMessageToBridgeMessageWithHeaders implements FunctionWith
         builder.withPriority(jmsMessage.getJMSPriority());
         builder.withExpirationTime(jmsMessage.getJMSExpiration());
         builder.withTimestamp(jmsMessage.getJMSTimestamp());
-        builder.withCorrelationID(jmsMessage.getJMSCorrelationID());
+
+        String jmsCorrelationID = jmsMessage.getJMSCorrelationID();
+
+        if (jmsCorrelationID!=null) {
+            builder.withCorrelationID(jmsCorrelationID);
+        }
     }
 
 }

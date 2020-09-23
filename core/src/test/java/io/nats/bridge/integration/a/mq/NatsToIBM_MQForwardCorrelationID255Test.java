@@ -5,11 +5,11 @@ import io.nats.bridge.MessageBus;
 import io.nats.bridge.TestUtils;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
-import io.nats.bridge.support.MessageBridgeImpl;
+import io.nats.bridge.support.MessageBridgeBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collections;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -18,10 +18,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 
-public class NatsToIBM_MQOneWayMessagesTest {
+public class NatsToIBM_MQForwardCorrelationID255Test {
 
     private final AtomicBoolean stop = new AtomicBoolean(false);
     private final AtomicReference<String> responseFromServer = new AtomicReference<>();
+    private final AtomicReference<String> fooHeaderRef = new AtomicReference<>();
+    private final AtomicReference<String> correlationIDServer = new AtomicReference<>();
     private CountDownLatch resultSignal;
     private CountDownLatch serverStopped;
     private CountDownLatch bridgeStopped;
@@ -35,7 +37,7 @@ public class NatsToIBM_MQOneWayMessagesTest {
     private MessageBus responseBusClient;
     private MessageBridge messageBridge;
 
-    public static void runServerLoop(final AtomicBoolean stop, final MessageBus serverMessageBus, final MessageBus responseBusServer,
+    public  void runServerLoop(final AtomicBoolean stop, final MessageBus serverMessageBus, final MessageBus responseBusServer,
                                      final CountDownLatch serverStopped) {
         final Thread thread = new Thread(() -> {
             while (true) {
@@ -45,12 +47,20 @@ public class NatsToIBM_MQOneWayMessagesTest {
                 }
                 final Optional<Message> receive = serverMessageBus.receive();
 
-                if (!receive.isPresent()) {
-                }
                 receive.ifPresent(message -> {
 
                     System.out.println("Handle message " + message.bodyAsString() + "....................");
-                    responseBusServer.publish(MessageBuilder.builder().withBody("Hello " + message.bodyAsString()).build());
+
+                    fooHeaderRef.set((String) message.headers().get("foo"));
+                    correlationIDServer.set(message.correlationID());
+                    if (message.correlationID()!=null) {
+                        responseBusServer.publish(MessageBuilder.builder().withBody("Hello " + new String(message.getBodyBytes(), StandardCharsets.UTF_8)).build());
+
+                    } else {
+                        responseBusServer.publish(MessageBuilder.builder()
+                                .withCorrelationID(message.correlationID()).withBody("Hello " + new String(message.getBodyBytes(), StandardCharsets.UTF_8)).build());
+
+                    }
 
                 });
                 try {
@@ -69,20 +79,24 @@ public class NatsToIBM_MQOneWayMessagesTest {
     @Before
     public void setUp() throws Exception {
 
-        final String busName = "MessagesOnlyA";
-        final String responseName = "RESPONSEA";
+        final String busName = "MessagesOnly_A_255";
+        final String responseName = "RESPONSE_A_255";
         clientMessageBus = TestUtils.getMessageBusNats("CLIENT", busName);
-        serverMessageBus = TestUtils.getMessageBusIbmMQ("SERVER", true);
+        serverMessageBus = TestUtils.getMessageBusIbmMQCopyHeader("SERVER", true);
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
         bridgeMessageBusSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE", busName);
-        bridgeMessageBusDestination = TestUtils.getMessageBusIbmMQ("BRIDGE_DEST", false);
+        bridgeMessageBusDestination = TestUtils.getMessageBusIbmMQCopyHeader("BRIDGE_DEST", false);
 
         responseBusServer = TestUtils.getMessageBusJms("SERVER_RESPONSE", responseName);
         responseBusClient = TestUtils.getMessageBusJms("CLIENT_RESPONSE", responseName);
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, false, null, Collections.emptyList(), Collections.emptyList());
+
+
+        messageBridge = MessageBridgeBuilder.builder().withDestinationBus(bridgeMessageBusDestination)
+                .withSourceBus(bridgeMessageBusSource).withRequestReply(false).withName("NatsToIBM_MQForwardCopyHeaders254Test").build();
+
 
     }
 
@@ -93,21 +107,29 @@ public class NatsToIBM_MQOneWayMessagesTest {
         runServerLoop();
         runBridgeLoop();
         runClientLoop();
-        clientMessageBus.publish("Rick");
-        resultSignal.await(10, TimeUnit.SECONDS);
 
-        for (int index = 0; index < 20; index++) {
+        final Message  message = MessageBuilder.builder().withHeader("foo", "bar").withCorrelationID("abc").withBody("Rick").build();
+        clientMessageBus.publish(message);
+
+        for (int index = 0 ; index < 20; index++) {
             resultSignal.await(1, TimeUnit.SECONDS);
-            if (responseFromServer.get() != null) break;
+            if (responseFromServer.get()!=null) break;
         }
 
         resultSignal.await(10, TimeUnit.SECONDS);
 
         assertEquals("Hello Rick", responseFromServer.get());
+
+        assertEquals("bar", fooHeaderRef.get());
+
+        assertEquals("abc", correlationIDServer.get());
+
+        System.out.println("CORR_ID " + correlationIDServer.get());
+
         stopServerAndBridgeLoops();
     }
 
-    private void runClientLoop() throws Exception {
+    private void runClientLoop() {
 
         Thread th = new Thread(() -> {
 
@@ -120,6 +142,7 @@ public class NatsToIBM_MQOneWayMessagesTest {
                 if (receive.isPresent()) {
                     Message message = receive.get();
                     responseFromServer.set(message.bodyAsString());
+
                     resultSignal.countDown();
                     break;
                 }
@@ -132,12 +155,10 @@ public class NatsToIBM_MQOneWayMessagesTest {
         });
 
         th.start();
-        Thread.sleep(1000);
     }
 
-
     private void drainClientLoop() throws Exception {
-        TestUtils.drainBus(clientMessageBus);
+        TestUtils.drainBus(responseBusClient);
     }
 
 

@@ -3,12 +3,14 @@ package io.nats.bridge.integration.b.mq;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.TestUtils;
+import io.nats.bridge.messages.Message;
 import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,13 +35,13 @@ public class JmsIbmMqToNatsBridgeTest {
     @Before
     public void setUp() throws Exception {
         clientMessageBus = TestUtils.getMessageBusIbmMQ("CLIENT", false);
-        serverMessageBus = TestUtils.getMessageBusNats("SERVER", "B");
+        serverMessageBus = TestUtils.getMessageBusNats("SERVER", "B1");
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
         bridgeMessageBusSource = TestUtils.getMessageBusIbmMQ("BRIDGE_SRC", true);
-        bridgeMessageBusDestination = TestUtils.getMessageBusNats("BRIDGE_DST","B");
+        bridgeMessageBusDestination = TestUtils.getMessageBusNats("BRIDGE_DST","B1");
         messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null, Collections.emptyList(), Collections.emptyList());
 
     }
@@ -50,6 +52,8 @@ public class JmsIbmMqToNatsBridgeTest {
 
     @Test
     public void test() throws Exception {
+        TestUtils.drainBus(serverMessageBus);
+        drainClientLoop();
         runServerLoop();
         runBridgeLoop();
         clientMessageBus.request("RICK", s -> {
@@ -57,13 +61,18 @@ public class JmsIbmMqToNatsBridgeTest {
             resultSignal.countDown();
         });
         runClientLoop();
+        Thread.sleep(1000);
         assertEquals("Hello RICK", responseFromServer.get());
         stopServerAndBridgeLoops();
     }
 
+    private void drainClientLoop() throws Exception {
+        TestUtils.drainBus(clientMessageBus);
+    }
+
     private void runClientLoop() throws Exception {
 
-        for (int index = 0; index < 10; index++) {
+        for (int index = 0; index < 20; index++) {
 
             System.out.println("Waiting");
             resultSignal.await(1, TimeUnit.SECONDS);
@@ -71,9 +80,13 @@ public class JmsIbmMqToNatsBridgeTest {
 
             if (responseFromServer.get() != null) break;
         }
+        resultSignal.await(10, TimeUnit.SECONDS);
 
 
     }
+
+
+
 
     private void runBridgeLoop() {
         TestUtils.runBridgeLoop(messageBridge, stop, bridgeStopped);

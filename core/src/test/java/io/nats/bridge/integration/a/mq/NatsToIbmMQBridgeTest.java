@@ -3,12 +3,14 @@ package io.nats.bridge.integration.a.mq;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.TestUtils;
+import io.nats.bridge.messages.Message;
 import io.nats.bridge.support.MessageBridgeImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,13 +34,13 @@ public class NatsToIbmMQBridgeTest {
 
     @Before
     public void setUp() throws Exception {
-        clientMessageNatsBus = TestUtils.getMessageBusNats("CLIENT","A");
+        clientMessageNatsBus = TestUtils.getMessageBusNats("CLIENT","A_RR");
         serverMessageJMSBus = TestUtils.getMessageBusIbmMQ("SERVER",true);
         resultSignal = new CountDownLatch(1);
         serverStopped = new CountDownLatch(1);
         bridgeStopped = new CountDownLatch(1);
 
-        bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SRC","A");
+        bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SRC","A_RR");
         bridgeMessageBusJMSDestination = TestUtils.getMessageBusIbmMQ("BRIDGE_DEST", false);
 
         messageBridgeFomrNatsToJMS = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJMSDestination, true, null, Collections.emptyList(), Collections.emptyList());
@@ -49,9 +51,15 @@ public class NatsToIbmMQBridgeTest {
     public void tearDown() throws Exception {
     }
 
+    private void drainClientLoop() throws Exception {
+        TestUtils.drainBus(clientMessageNatsBus);
+    }
+
+
     @Test
     public void test() throws Exception {
-
+        TestUtils.drainBus(serverMessageJMSBus);
+        drainClientLoop();
         runServerLoop();
         runBridgeLoop();
 

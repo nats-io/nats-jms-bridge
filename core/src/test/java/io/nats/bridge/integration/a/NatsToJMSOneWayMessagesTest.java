@@ -46,7 +46,6 @@ public class NatsToJMSOneWayMessagesTest {
                 final Optional<Message> receive = serverMessageBus.receive();
 
                 if (!receive.isPresent()) {
-                    System.out.println("SERVER NO MESSAGE");
                 }
                 receive.ifPresent(message -> {
 

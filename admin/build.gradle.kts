@@ -64,7 +64,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "io.nats.bridge"
             artifactId = "nats-jms-bridge-springboot-app"
-            version = "0.23.0-beta20-1"
+            version = "0.24.1-beta21"
             from(components["java"])
         }
     }
@@ -140,7 +140,7 @@ tasks.getByName<CreateStartScripts>("startScripts") {
 }
 
 
-version = "0.23.0-beta20-1"
+version = "0.24.1-beta21"
 
 tasks {
 
@@ -219,7 +219,7 @@ tasks {
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.23.0-beta20-1")
+        implementation("io.nats.bridge:nats-jms-bridge:0.24.1-beta21")
 
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
@@ -245,11 +245,11 @@ tasks {
 
         implementation("com.github.ajalt:clikt:2.7.1")
 
-        implementation("io.nats.bridge:nats-jms-bridge-message:0.23.0-beta20-1")
+        implementation("io.nats.bridge:nats-jms-bridge-message:0.24.1-beta21")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.23.0-beta20-1")
+        implementation("io.nats.bridge:nats-jms-bridge:0.24.1-beta21")
 
-        //implementation("io.nats.bridge:nats-jms-bridge-example-transforms:0.23.0-beta20-1")
+        //implementation("io.nats.bridge:nats-jms-bridge-example-transforms:0.24.1-beta21")
 
 
 

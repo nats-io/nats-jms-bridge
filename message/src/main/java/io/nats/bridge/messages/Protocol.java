@@ -29,6 +29,7 @@ public class Protocol {
     public static final String HEADER_KEY_TYPE = "BRIDGE_type";
     public static final String HEADER_KEY_PRIORITY = "BRIDGE_priority";
     public static final String HEADER_KEY_REDELIVERED = "BRIDGE_redelivered";
+    public static final String HEADER_KEY_CORRELATION_ID = "BRIDGE_correlation_id";
 
     public static final int HEADER_KEY_DELIVERY_TIME_CODE = -128;
     public static final int HEADER_KEY_TIMESTAMP_CODE = -127;
@@ -37,6 +38,8 @@ public class Protocol {
     public static final int HEADER_KEY_TYPE_CODE = -124;
     public static final int HEADER_KEY_PRIORITY_CODE = -123;
     public static final int HEADER_KEY_REDELIVERED_CODE = -122;
+    public static final int HEADER_KEY_CORRELATION_ID_CODE = -121;
+
     public static final int RESERVED_START_TYPES = -109;
     public static final int TYPE_SHORT_STRING = -110;
     public static final int TYPE_STRING = -111;
@@ -67,12 +70,14 @@ public class Protocol {
         commonHeaders.put(HEADER_KEY_TYPE, HEADER_KEY_TYPE_CODE);
         commonHeaders.put(HEADER_KEY_PRIORITY, HEADER_KEY_PRIORITY_CODE);
         commonHeaders.put(HEADER_KEY_REDELIVERED, HEADER_KEY_REDELIVERED_CODE);
-        commonHeaders.put("ENV", -121);
-        commonHeaders.put("H1", -120);
-        commonHeaders.put("H2", -119);
-        commonHeaders.put("H3", -117);
-        commonHeaders.put("H4", -116);
-        commonHeaders.put("ENVIRONMENT", -115);
+        commonHeaders.put(HEADER_KEY_CORRELATION_ID, HEADER_KEY_CORRELATION_ID_CODE);
+
+        commonHeaders.put("ENV", -120);
+        commonHeaders.put("H1", -119);
+        commonHeaders.put("H2", -118);
+        commonHeaders.put("H3", -116);
+        commonHeaders.put("H4", -115);
+        commonHeaders.put("ENVIRONMENT", -114);
     }
 
     static {
@@ -83,12 +88,13 @@ public class Protocol {
         commonCodesToHeaders.put(HEADER_KEY_TYPE_CODE, HEADER_KEY_TYPE);
         commonCodesToHeaders.put(HEADER_KEY_PRIORITY_CODE, HEADER_KEY_PRIORITY);
         commonCodesToHeaders.put(HEADER_KEY_REDELIVERED_CODE, HEADER_KEY_REDELIVERED);
-        commonCodesToHeaders.put(-121, "ENV");
-        commonCodesToHeaders.put(-120, "H1");
-        commonCodesToHeaders.put(-119, "H2");
-        commonCodesToHeaders.put(-117, "H3");
-        commonCodesToHeaders.put(-116, "H4");
-        commonCodesToHeaders.put(-115, "ENVIRONMENT");
+        commonCodesToHeaders.put(HEADER_KEY_CORRELATION_ID_CODE, HEADER_KEY_CORRELATION_ID);
+        commonCodesToHeaders.put(-120, "ENV");
+        commonCodesToHeaders.put(-119, "H1");
+        commonCodesToHeaders.put(-118, "H2");
+        commonCodesToHeaders.put(-116, "H3");
+        commonCodesToHeaders.put(-115, "H4");
+        commonCodesToHeaders.put(-114, "ENVIRONMENT");
     }
 
     static int getCodeFromHeader(String header) {
