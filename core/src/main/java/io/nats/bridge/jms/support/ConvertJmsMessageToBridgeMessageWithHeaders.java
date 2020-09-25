@@ -88,13 +88,13 @@ public class ConvertJmsMessageToBridgeMessageWithHeaders implements FunctionWith
         builder.withRedelivered(jmsMessage.getJMSRedelivered());
 
 
-        System.out.println("ConvertJmsMessageToBridgeMessageWithHeaders DELIVERY TIME....." +  jmsMessage.getJMSDeliveryTime());
+        //ystem.out.println("ConvertJmsMessageToBridgeMessageWithHeaders DELIVERY TIME....." +  jmsMessage.getJMSDeliveryTime());
         builder.withDeliveryTime(jmsMessage.getJMSDeliveryTime());
         builder.withDeliveryMode(jmsMessage.getJMSDeliveryMode());
         builder.withType(jmsMessage.getJMSType());
         builder.withPriority(jmsMessage.getJMSPriority());
         builder.withExpirationTime(jmsMessage.getJMSExpiration());
-        System.out.println("ConvertJmsMessageToBridgeMessageWithHeaders getJMSExpiration TIME....." +  jmsMessage.getJMSExpiration());
+        //ystem.out.println("ConvertJmsMessageToBridgeMessageWithHeaders getJMSExpiration TIME....." +  jmsMessage.getJMSExpiration());
         builder.withTimestamp(jmsMessage.getJMSTimestamp());
 
         String jmsCorrelationID = jmsMessage.getJMSCorrelationID();

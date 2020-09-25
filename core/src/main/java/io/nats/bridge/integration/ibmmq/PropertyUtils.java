@@ -20,9 +20,6 @@ public class PropertyUtils {
                 )
                 .collect(Collectors.toList());
 
-
-        System.out.println(dynamicProperties);
-
         List<PropertyValue> propValues = new ArrayList<>(dynamicProperties.size());
 
         for (String prop : dynamicProperties) {
