@@ -47,11 +47,15 @@ public class ConvertBridgeMessageToJmsMessageWithHeaders implements FunctionWith
         if (message.timestamp() != -1)
             bytesMessage.setJMSTimestamp(message.timestamp());
 
-        if (message.expirationTime() != -1)
+        if (message.expirationTime() != -1) {
+            System.out.println("ConvertBridgeMessageToJmsMessageWithHeaders EXP TIME " + message.deliveryTime());
             bytesMessage.setJMSExpiration(message.expirationTime());
+        }
 
-        if (message.deliveryTime() != -1)
+        if (message.deliveryTime() != -1) {
+            System.out.println("ConvertBridgeMessageToJmsMessageWithHeaders DELIVERY TIME " + message.deliveryTime());
             bytesMessage.setJMSDeliveryTime(message.deliveryTime());
+        }
 
         if (message.deliveryMode() != -1)
             bytesMessage.setJMSDeliveryMode(message.deliveryMode());
