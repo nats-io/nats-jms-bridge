@@ -1,5 +1,5 @@
 ---
-name: "Failover config for FORWARD with IBM MQ"
+name: "Dynamic Forward"
 dateTime:
   - 2020
   - 4
@@ -9,32 +9,65 @@ dateTime:
   - 50
   - 423615000
 bridges:
-  - name: "natsToIBMMq"
+  - name: "NATS_TO_MQ_FLOW_REQUEST"
     bridgeType: "FORWARD"
     source:
-      name: "nats"
+      name: "NATS_SRC"
       busType: "NATS"
-      subject: "b-subject"
+      subject: "S1"
       clusterName: "natsCluster"
     destination:
-      name: "ibmMQ"
+      name: "IBM_MQ_DEST"
       busType: "JMS"
-      subject: "DEV.QUEUE.1"
+      subject: "Q1"
       clusterName: "ibmMqCluster"
-    copyHeaders: false
+    copyHeaders: true
     workers: 5
     tasks : 2
+  - name: "NATS_TO_MQ_FLOW_RESPONSE"
+    bridgeType: "DYNAMIC_FORWARD"
+    source:
+      name: "ibmMQ"
+      busType: "JMS"
+      subject: "Q2"
+      clusterName: "ibmMqCluster"
+    destination:
+      name: "nats"
+      busType: "NATS"
+      subject: "*"
+      header: "NATS_REPLY_TO_SUBJECT"
+      clusterName: "natsCluster"
+    copyHeaders: true
+    workers: 5
+    tasks: 2
+
+  - name: "MQ_TO_NATS_FLOW_REQUEST"
+    bridgeType: "FORWARD"
+    source:
+      name: "IBM_MQ_SRC"
+      busType: "JMS"
+      subject: "Q1"
+      clusterName: "ibmMqCluster"
+    destination:
+      name: "NATS_DST"
+      busType: "NATS"
+      subject: "S1"
+      clusterName: "natsCluster"
+  - name: "MQ_TO_NATS_FLOW_RESPONSE"
+    bridgeType: "DYNAMIC_FORWARD"
+    destination:
+      name: "IBM_MQ_RESPONSE"
+      busType: "JMS"
+      subject: "*"
+      header: "JMS_REPLY_TO_SUBJECT"
+      clusterName: "ibmMqCluster"
+    source:
+      name: "NATS_RESPONSE"
+      busType: "NATS"
+      subject: "S2"
+      clusterName: "natsCluster"
+
 clusters:
-  jmsCluster:
-    name: "jmsCluster"
-    properties: !<jms>
-      config:
-        java.naming.factory.initial: "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory"
-        connectionFactory.ConnectionFactory: "tcp://localhost:61616"
-        queue.queue/testQueue: "queue.queue/testQueue=testQueue"
-      userName: "cloudurable"
-      password: "cloudurable"
-      jmsDestinationType: "QUEUE"
   natsCluster:
     name: "natsCluster"
     properties: !<nats>
