@@ -4,6 +4,7 @@ import com.ibm.mq.jms.MQConnectionFactory;
 import com.ibm.msg.client.jms.JmsConnectionFactory;
 import com.ibm.msg.client.jms.JmsFactoryFactory;
 import com.ibm.msg.client.wmq.WMQConstants;
+import io.nats.bridge.tls.SslContextBuilderException;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -11,12 +12,18 @@ import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.naming.*;
 import javax.naming.spi.InitialContextFactory;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.util.*;
 
 public class IbmMqInitialContextFactory implements InitialContextFactory {
 
@@ -29,14 +36,35 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
     private final static String QUEUE_MANAGER = PREFIX + "queueManager";
     private final static String QUEUE_MODEL_NAME = PREFIX + "queueModelName";
     private final static String QUEUE_MODEL_PREFIX = PREFIX + "queueModelPrefix";
+    public final static String KEY_STORE_PASS_BASE64_ENV = PREFIX + "keystorePass";
+    public final static String TRUST_STORE_PASS_BASE64_ENV = PREFIX + "truststorePass";
 
+    public static void initSSL(final Hashtable<?, ?> jndiProperties, final Properties properties,
+                               final Map<String, String> env) {
+        final String keystoreBase64Env = getOptionalStringPropWithDefault(jndiProperties,
+                KEY_STORE_PASS_BASE64_ENV, "KEYSTORE_PASSWORD");
+        final String trustStoreBase64Env = getOptionalStringPropWithDefault(jndiProperties,
+                TRUST_STORE_PASS_BASE64_ENV, "TRUSTSTORE_PASSWORD");
+        final String keystorePasswordBase64 = env.get(keystoreBase64Env);
+        final String trustStorePasswordBase64 = env.get(trustStoreBase64Env);
+        if (keystorePasswordBase64 != null) {
+            String keystorePassword = new String(Base64.getDecoder().decode(keystorePasswordBase64), StandardCharsets.UTF_8);
+            properties.setProperty("javax.net.ssl.keyStorePassword", keystorePassword);
+        }
+        if (trustStorePasswordBase64 != null) {
+            String trustStorePassword = new String(Base64.getDecoder().decode(trustStorePasswordBase64), StandardCharsets.UTF_8);
+            properties.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+        }
+    }
 
     @Override
     public Context getInitialContext(final Hashtable<?, ?> jndiProperties) throws NamingException {
-
         try {
+            initSSL(jndiProperties, System.getProperties(), System.getenv());
+
             final JmsFactoryFactory factoryFactory = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
             final JmsConnectionFactory connectionFactory = factoryFactory.createConnectionFactory();
+
 
             final String ccdtURL = getOptionalStringProp(jndiProperties, CCDT_URL);
             if (ccdtURL!=null) {
@@ -63,15 +91,9 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
             }
 
 
-
-
-
             final String queueManagerName = getStringProp(jndiProperties, QUEUE_MANAGER);
             final String queueModelName = getOptionalStringProp(jndiProperties, QUEUE_MODEL_NAME);
             final String queueModelPrefix = getOptionalStringProp(jndiProperties, QUEUE_MODEL_PREFIX);
-
-
-
 
 
             connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
@@ -94,6 +116,12 @@ public class IbmMqInitialContextFactory implements InitialContextFactory {
         } catch (Exception ex) {
             throw new NamingException(ex.getLocalizedMessage()); //TODO something better than this
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static  String getOptionalStringPropWithDefault(Hashtable<?, ?> map, String key, String defaultStr) {
+        final Map<String, String> jndiProperties = (Map<String, String>) map;
+        return (String) jndiProperties.getOrDefault(key, defaultStr);
     }
 
     private String getOptionalStringProp(Hashtable<?, ?> jndiProperties, String key) {

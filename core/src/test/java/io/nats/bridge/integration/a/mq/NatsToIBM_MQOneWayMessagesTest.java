@@ -115,7 +115,7 @@ public class NatsToIBM_MQOneWayMessagesTest {
             while (true) {
                 receive = responseBusClient.receive();
                 if (!receive.isPresent()) {
-                    System.out.println("No Client Message");
+                    //System.out.println("No Client Message");
                 }
                 if (receive.isPresent()) {
                     Message message = receive.get();

@@ -27,7 +27,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "io.nats.bridge"
             artifactId = "nats-jms-bridge-example-transforms"
-            version = "0.24.1-beta21"
+            version = "0.25.0-beta22"
             from(components["java"])
         }
     }
@@ -52,7 +52,7 @@ dependencies {
     implementation ( "org.slf4j:slf4j-api:[1.7,1.8)")
     testImplementation ("ch.qos.logback:logback-classic:1.1.2")
 
-    implementation("io.nats.bridge:nats-jms-bridge-message:0.24.1-beta21")
+    implementation("io.nats.bridge:nats-jms-bridge-message:0.25.0-beta22")
 
 
 

@@ -131,7 +131,9 @@ public class JMSMessageBus implements MessageBus {
 
         if (logger.isDebugEnabled()) logger.debug("publish called " + message);
         tryHandler.tryWithErrorCount(() -> {
-            jms().producer().send(convertToJMSMessage(message));
+
+            final javax.jms.Message jmsMessage = convertToJMSMessage(message);
+            jms().producer().send(jmsMessage);
             countPublish.increment();
         }, countPublishErrors, "Unable to send the message to the producer");
 
