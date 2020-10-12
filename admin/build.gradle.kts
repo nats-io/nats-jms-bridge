@@ -64,7 +64,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "io.nats.bridge"
             artifactId = "nats-jms-bridge-springboot-app"
-            version = "0.25.0-beta22"
+            version = "0.26.0-beta23"
             from(components["java"])
         }
     }
@@ -140,7 +140,7 @@ tasks.getByName<CreateStartScripts>("startScripts") {
 }
 
 
-version = "0.25.0-beta22"
+version = "0.26.0-beta23"
 
 tasks {
 
@@ -164,11 +164,21 @@ tasks {
     create<JavaExec>("runIntegrationNatsToNats") {
         main = "io.nats.bridge.admin.integration.IntegrationRequestReplyMainNatstoNats"
         classpath = sourceSets["main"].runtimeClasspath
+//        environment(mapOf(
+//                "NATS_BRIDGE_KEY_PASS_ENV" to "Y2xvdWR1cmFibGUx",
+//                "NATS_BRIDGE_TRUST_PASS_ENV" to "Y2xvdWR1cmFibGUy"
+//        ))
     }
+
+
 
     create<JavaExec>("runIntegrationNatsToMQ") {
         main = "io.nats.bridge.admin.integration.IntegrationRequestReplyMain"
         classpath = sourceSets["main"].runtimeClasspath
+        environment(mapOf(
+            "NATS_BRIDGE_KEY_PASS_ENV" to "Y2xvdWR1cmFibGUx",
+            "NATS_BRIDGE_TRUST_PASS_ENV" to "Y2xvdWR1cmFibGUy"
+        ))
     }
 
 
@@ -219,7 +229,7 @@ tasks {
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.25.0-beta22")
+        implementation("io.nats.bridge:nats-jms-bridge:0.26.0-beta23")
 
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
@@ -245,14 +255,22 @@ tasks {
 
         implementation("com.github.ajalt:clikt:2.7.1")
 
-        implementation("io.nats.bridge:nats-jms-bridge-message:0.25.0-beta22")
+        implementation("io.nats.bridge:nats-jms-bridge-message:0.26.0-beta23")
 
-        implementation("io.nats.bridge:nats-jms-bridge:0.25.0-beta22")
+        implementation("io.nats.bridge:nats-jms-bridge:0.26.0-beta23")
 
-        //implementation("io.nats.bridge:nats-jms-bridge-example-transforms:0.25.0-beta22")
+        //implementation("io.nats.bridge:nats-jms-bridge-example-transforms:0.26.0-beta23")
 
 
 
 
     }
+
+//    tasks.getByName<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+//        main = "io.nats.bridge.admin.NATSJmsBridgeApplication"
+//        environment(mapOf(
+//                "NATS_BRIDGE_KEY_PASS_ENV" to "Y2xvdWR1cmFibGUx",
+//                "NATS_BRIDGE_TRUST_PASS_ENV" to "Y2xvdWR1cmFibGUy"
+//        ))
+//    }
 }
