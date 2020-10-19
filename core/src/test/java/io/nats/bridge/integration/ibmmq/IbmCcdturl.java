@@ -28,9 +28,7 @@ public class IbmCcdturl {
 
 
     //@Test
-
     public void testSendMessageWithDynamicQueueCcdturl() throws Exception {
-
         try {
 
 
