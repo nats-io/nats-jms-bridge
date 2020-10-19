@@ -1,8 +1,8 @@
 package io.nats.bridge.integration.ibmmq;
 
+
 import org.jgroups.util.Base64;
 import org.junit.Test;
-
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -33,11 +33,9 @@ public class IbmMqInitialContextFactoryTest {
 
 
         IbmMqInitialContextFactory.initSSL(jndiProperties, systemProps, env);
-
         assertEquals(keyStorePass, systemProps.get("javax.net.ssl.keyStorePassword"));
         assertEquals(trustStorePass, systemProps.get("javax.net.ssl.trustStorePassword"));
     }
-
 
 
     @Test
@@ -57,7 +55,6 @@ public class IbmMqInitialContextFactoryTest {
 
 
         IbmMqInitialContextFactory.initSSL(jndiProperties, systemProps, env);
-
         assertEquals(keyStorePass, systemProps.get("javax.net.ssl.keyStorePassword"));
         assertEquals(trustStorePass, systemProps.get("javax.net.ssl.trustStorePassword"));
     }

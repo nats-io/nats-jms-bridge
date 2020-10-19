@@ -27,10 +27,12 @@ public class IbmCcdturl {
     }
 
 
-    //@Test
+    @Test
+
     public void testSendMessageWithDynamicQueueCcdturl() throws Exception {
 
         try {
+
 
             final String hostURL = "file:../cicd/bridge-ibmmq/CCDT.json";
             final String user = "app";
@@ -45,6 +47,7 @@ public class IbmCcdturl {
                 final MQConnectionFactory factory = (MQConnectionFactory) cf;
                 factory.setCCDTURL(new URL(hostURL));
 
+
             } else {
                 System.out.println("Unable to set CCDT file using " + hostURL);
             }
@@ -55,6 +58,7 @@ public class IbmCcdturl {
             cf.setStringProperty(WMQConstants.PASSWORD, password);
             cf.setStringProperty(WMQConstants.WMQ_TEMPORARY_MODEL, "DEV.MODEL");
             cf.setStringProperty(WMQConstants.WMQ_TEMP_Q_PREFIX, "DEV*");
+
 
             // Create JMS objects
             final Connection connection = cf.createConnection();

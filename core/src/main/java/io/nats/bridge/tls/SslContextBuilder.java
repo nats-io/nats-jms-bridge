@@ -30,10 +30,11 @@ public class SslContextBuilder {
     private String trustStorePathEnvVariable = "TRUSTSTORE_PATH";
     private String keyStorePathEnvVariable = "KEYSTORE_PATH";
     private String keyStoreAlias;
+
     public final static String NATS_BRIDGE_KEY_PASS_ENV = "NATS_BRIDGE_KEY_PASS_ENV";
     public final static String NATS_BRIDGE_TRUST_PASS_ENV = "NATS_BRIDGE_TRUST_PASS_ENV";
-    private   String keyStorePassBase64Env = NATS_BRIDGE_KEY_PASS_ENV;
-    private String trustStorePassBase64Env = NATS_BRIDGE_TRUST_PASS_ENV;
+    private String keyStorePassBase64EnvVariable=NATS_BRIDGE_KEY_PASS_ENV;
+    private String trustStorePassBase64EnvVariable=NATS_BRIDGE_TRUST_PASS_ENV;
     private Map<String, String> envMap;
 
     public Map<String, String> getEnvMap() {
@@ -48,24 +49,26 @@ public class SslContextBuilder {
         return this;
     }
 
-    public String getTrustStorePassBase64Env() {
-        return trustStorePassBase64Env;
+
+
+    public String getTrustStorePassBase64EnvVariable() {
+        return trustStorePassBase64EnvVariable;
     }
 
-    public SslContextBuilder withTrustStorePassBase64En(String trustStorePassBase64Env) {
-        this.trustStorePassBase64Env = trustStorePassBase64Env;
+    public SslContextBuilder withTrustStorePassBase64EnvVariable(String trustStorePassBase64EnvVariable) {
+        this.trustStorePassBase64EnvVariable = trustStorePassBase64EnvVariable;
         return this;
     }
 
-    public String getKeyStorePassBase64Env() {
-        return keyStorePassBase64Env;
+
+    public String getKeyStorePassBase64EnvVariable() {
+        return keyStorePassBase64EnvVariable;
     }
 
-    public SslContextBuilder withKeyStorePassBase64En(String keyStorePassBase64Env) {
-        this.keyStorePassBase64Env = keyStorePassBase64Env;
+    public SslContextBuilder withKeyStorePassBase64EnvVariable(String keyStorePassBase64EnvVariable) {
+        this.keyStorePassBase64EnvVariable = keyStorePassBase64EnvVariable;
         return this;
     }
-
 
     public String getTrustStoreValueEnvVariable() {
         return trustStoreValueEnvVariable;
@@ -198,12 +201,19 @@ public class SslContextBuilder {
     }
 
     public char[] getKeystorePassword() {
+
         if (keystorePassword == null) {
-            final String keyStorePass64 = getEnvMap().get(getKeyStorePassBase64Env());
-            if (keyStorePass64 != null){
+            if (keyStorePassBase64EnvVariable != null) {
+                final String keyStorePass64 = getEnvMap().get(getKeyStorePassBase64EnvVariable());
                 keystorePassword = new String(Base64.getDecoder().decode(keyStorePass64), StandardCharsets.UTF_8).toCharArray();
+            } else if(keyStoreValueEnvVariable!=null){
+                final String keyStorePassStr = getEnvMap().get(getKeyStoreValueEnvVariable());
+                if (keyStorePassStr!=null) {
+                    keystorePassword = keyStorePassStr.toCharArray();
+                }
             }
         }
+
         return keystorePassword;
     }
 
@@ -213,10 +223,16 @@ public class SslContextBuilder {
     }
 
     public char[] getTrustStorePassword() {
+
         if (trustStorePassword == null){
-            final String trustStorePass64 = getEnvMap().get(getTrustStorePassBase64Env());
-            if (trustStorePass64 != null){
+            if (trustStorePassBase64EnvVariable != null) {
+                final String trustStorePass64 = getEnvMap().get(getTrustStorePassBase64EnvVariable());
                 trustStorePassword = new String(Base64.getDecoder().decode(trustStorePass64), StandardCharsets.UTF_8).toCharArray();
+            } else {
+                final String trustStorePassStr = getEnvMap().get(getTrustStoreValueEnvVariable());
+                if (trustStorePassStr != null){
+                    trustStorePassword = trustStorePassStr.toCharArray();
+                }
             }
         }
         return trustStorePassword;
