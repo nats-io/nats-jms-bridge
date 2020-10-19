@@ -11,7 +11,7 @@ import java.util.Map;
 public class NatsTlsCrtFile {
 
 
-    @Test
+    //@Test
     public  void test(){
         SslContextBuilder sslContext = new SslContextBuilder();
         sslContext.withAlgorithm("SunX509");
@@ -61,7 +61,7 @@ public class NatsTlsCrtFile {
     }
 
 
-    @Test
+    //@Test
     public  void testPassEncoded(){
 
         //// KEYPASS_ENV=Y2xvdWR1cmFibGUx;TRUSTPASS_ENV=Y2xvdWR1cmFibGUy

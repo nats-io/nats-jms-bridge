@@ -1,6 +1,6 @@
-# 0.27.0-beta24 NATS JMS/MQ Bridge
+# 0.27.1-beta24 NATS JMS/MQ Bridge
 
-#### TAG: 0.27.0-beta24
+#### TAG: 0.27.1-beta24
 
 ## Issues
 
@@ -32,7 +32,7 @@ create<JavaExec>("runIntegrationNatsToMQ") {
 
 ```
 
-You can now specify which env var to use in the bridge config file under the NATs cluster section. 
+You can now specify which env var to use in the bridge config file under the NATs cluster section.
 
 ```yaml
 ...
