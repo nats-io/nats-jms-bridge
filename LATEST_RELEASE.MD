@@ -1,6 +1,6 @@
-# 0.26.0-beta23 NATS JMS/MQ Bridge
+# 0.27.3-beta24 NATS JMS/MQ Bridge
 
-#### TAG: 0.26.0-beta23
+#### TAG: 0.27.3-beta24
 
 ## Issues
 
@@ -30,4 +30,27 @@ create<JavaExec>("runIntegrationNatsToMQ") {
     ))
 }
 
+```
+
+You can now specify which env var to use in the bridge config file under the NATs cluster section.
+
+```yaml
+...
+natsCluster:
+  name: "natsCluster"
+  properties: !<nats>
+    host: "localhost"
+    port: 4222
+    servers: []
+    config:
+      io.nats.client.reconnect.wait: "3000"
+      io.nats.client.reconnect.max: "10"
+      io.nats.client.timeout: "4000"
+      io.nats.client.tls.jssl.enable: "true"
+      io.nats.client.tls.truststore.path: "../certs/truststore.jks"
+      io.nats.client.tls.keystore.path: "../certs/keystore.jks"
+      io.nats.client.tls.algorithm: "SunX509"
+      io.nats.client.tls.keystore.env_var.base64password: "NATS_BRIDGE_KEY_PASS_ENV"
+      io.nats.client.tls.truststore.env_var.base64password: "NATS_BRIDGE_TRUST_PASS_ENV"
+      # NATS_BRIDGE_KEY_PASS_ENV=Y2xvdWR1cmFibGUx;NATS_BRIDGE_TRUST_PASS_ENV=Y2xvdWR1cmFibGUy
 ```

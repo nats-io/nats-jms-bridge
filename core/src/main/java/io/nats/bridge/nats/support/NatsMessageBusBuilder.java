@@ -52,6 +52,9 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
     public static final String JSSL_TRUSTSTORE_ENV_VAR_VALUE =   PFX_TLS + "truststore.env_var.value";
     public static final String JSSL_TRUSTSTORE_ENV_VAR_PATH =   PFX_TLS + "truststore.env_var.path";
 
+    public static final String JSSL_KEY_STORE_PWD_BASE64 =   PFX_TLS + "keystore.env_var.base64password";
+    public static final String JSSL_TRUST_STORE_PWD_BASE64 =   PFX_TLS + "truststore.env_var.base64password";
+
 
     private java.util.Queue<NatsMessageBus.NatsReply> replyQueue;
     private java.util.Queue<NatsMessageBus.NatsReply> replyQueueNotDone;
@@ -131,6 +134,13 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
                 sslContextBuilder.withTrustStoreValueEnvVariable(getOptionProperties().getProperty(JSSL_TRUSTSTORE_ENV_VAR_VALUE));
             }
 
+            if(getOptionProperties().getProperty(JSSL_KEY_STORE_PWD_BASE64) != null) {
+                sslContextBuilder.withKeyStorePassBase64EnvVariable(getOptionProperties().getProperty(JSSL_KEY_STORE_PWD_BASE64));
+            }
+
+            if(getOptionProperties().getProperty(JSSL_TRUST_STORE_PWD_BASE64) != null) {
+                sslContextBuilder.withTrustStorePassBase64EnvVariable(getOptionProperties().getProperty(JSSL_TRUST_STORE_PWD_BASE64));
+            }
         }
         return sslContextBuilder;
     }

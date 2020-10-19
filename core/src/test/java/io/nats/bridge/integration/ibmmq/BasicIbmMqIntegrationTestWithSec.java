@@ -17,7 +17,8 @@ import java.util.UUID;
 
 import static org.junit.Assert.*;
 
-public class IbmSslConection {
+public class BasicIbmMqIntegrationTestWithSec {
+
     private MessageBus serverMessageBus;
     private MessageBus clientMessageBus;
 
@@ -26,8 +27,69 @@ public class IbmSslConection {
 
 
     }
-    //@Test
-    public void testSendMessageWithDynamicQueueTls() throws Exception {
+
+    @Test
+    public void testBasic() throws Exception {
+
+        final String hostURI = System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414");
+        final URI uri = new URI(hostURI);
+        final String host = uri.getHost();
+        final int port = uri.getPort();
+        final String user = "app";
+        final int timeout = 15000; // in ms or 15 seconds
+        final String channel = "DEV.APP.SVRCONN";
+        final String password = "passw0rd";
+        final String queueManagerName = "QM1";
+        final String destinationName = "DEV.QUEUE.1";
+
+        final JmsFactoryFactory ff = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
+        final JmsConnectionFactory cf = ff.createConnectionFactory();
+
+        // Set the properties
+        cf.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
+        cf.setIntProperty(WMQConstants.WMQ_PORT, port);
+        cf.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
+
+        cf.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
+        cf.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
+
+        cf.setStringProperty(WMQConstants.USERID, user);
+        cf.setStringProperty(WMQConstants.PASSWORD, password);
+        cf.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
+
+
+
+        // Create JMS objects
+        Connection connection = cf.createConnection();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Destination destination = session.createQueue(destinationName);
+        MessageConsumer consumer = session.createConsumer(destination);
+
+        // Start the connection
+        //connection.start();
+    }
+
+
+    @Test
+    public void test() throws Exception {
+
+        clientMessageBus = TestUtils.getMessageBusIbmMQ("", true);
+        serverMessageBus = TestUtils.getMessageBusIbmMQ("", true);
+
+        clientMessageBus.publish("hello");
+
+
+        final Optional<Message> message = serverMessageBus.receive(Duration.ofSeconds(5));
+
+
+        assertTrue(message.isPresent());
+        final String result = message.get().bodyAsString();
+        assertEquals("hello", result);
+    }
+
+
+    @Test
+    public void testSendMessageWithDynamicQueue() throws Exception {
 
         try {
             final String hostURI = System.getenv().getOrDefault("NATS_BRIDGE_IBM_MQ_HOST", "tcp://localhost:1414");
@@ -42,30 +104,17 @@ public class IbmSslConection {
             final String destinationName = "DEV.QUEUE.1";
             final JmsFactoryFactory ff = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
             final JmsConnectionFactory cf = ff.createConnectionFactory();
-            final String sslkeyr ="../certs/ibmclientkey.jks";
-            final String sslpass ="cloudurable1";
             // Set the properties
-
-            System.setProperty("javax.net.ssl.trustStore", sslkeyr);
-            System.setProperty("javax.net.ssl.keyStore", sslkeyr );
-            //System.setProperty("javax.net.ssl.trustStorePassword", sslpass );
-            //System.setProperty("javax.net.ssl.keyStorePassword", sslpass );
-            //System.setProperty("javax.net.ssl.trustStoreType", "jks");
-            System.setProperty("com.ibm.mq.cfg.useIBMCipherMappings", "false");
-
-
             cf.setStringProperty(WMQConstants.WMQ_HOST_NAME, host);
             cf.setIntProperty(WMQConstants.WMQ_PORT, port);
             cf.setStringProperty(WMQConstants.WMQ_CHANNEL, channel);
             cf.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
             cf.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManagerName);
-            cf.setStringProperty(WMQConstants.WMQ_SSL_CIPHER_SUITE, "TLS_RSA_WITH_AES_128_CBC_SHA256");
             cf.setStringProperty(WMQConstants.USERID, user);
             cf.setStringProperty(WMQConstants.PASSWORD, password);
             cf.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
             cf.setStringProperty(WMQConstants.WMQ_TEMPORARY_MODEL, "DEV.MODEL");
             cf.setStringProperty(WMQConstants.WMQ_TEMP_Q_PREFIX, "DEV*");
-
             // Create JMS objects
             final Connection connection = cf.createConnection();
             final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -89,7 +138,7 @@ public class IbmSslConection {
             while (consumer.receive(100) != null) {
                 System.out.println("drain");
             }
-            final String correlationID = UUID.randomUUID().toString();
+            final String correlationID = UUID.randomUUID().toString().substring(0, 22);
 
             final TextMessage requestMessage = session.createTextMessage("REQUEST");
             requestMessage.setJMSReplyTo(responseDestination);

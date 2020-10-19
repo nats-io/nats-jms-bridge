@@ -11,7 +11,7 @@ import java.util.Map;
 public class NatsTlsCrtFile {
 
 
-    @Test
+    //@Test
     public  void test(){
         SslContextBuilder sslContext = new SslContextBuilder();
         sslContext.withAlgorithm("SunX509");
@@ -60,7 +60,8 @@ public class NatsTlsCrtFile {
         messageBus.close();
     }
 
-    @Test
+
+    //@Test
     public  void testPassEncoded(){
 
         //// KEYPASS_ENV=Y2xvdWR1cmFibGUx;TRUSTPASS_ENV=Y2xvdWR1cmFibGUy
@@ -68,8 +69,6 @@ public class NatsTlsCrtFile {
         Map<String, String> envMap = new HashMap<>();
         envMap.put("NATS_BRIDGE_KEY_PASS_ENV", "Y2xvdWR1cmFibGUx");
         envMap.put("NATS_BRIDGE_TRUST_PASS_ENV", "Y2xvdWR1cmFibGUy");
-
-
         SslContextBuilder sslContext = new SslContextBuilder();
         sslContext.withAlgorithm("SunX509");
         sslContext.withKeystorePath("../certs/keystore.crt");
@@ -91,4 +90,6 @@ public class NatsTlsCrtFile {
         System.out.println("Connect using Alias - " + sslContext.getKeyStoreAlias());
         messageBus.close();
     }
+
+
 }
