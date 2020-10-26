@@ -43,7 +43,9 @@ public class NatsToIbmMQBridgeTest {
         bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SRC","A_RR");
         bridgeMessageBusJMSDestination = TestUtils.getMessageBusIbmMQ("BRIDGE_DEST", false);
 
-        messageBridgeFomrNatsToJMS = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJMSDestination, true, null, Collections.emptyList(), Collections.emptyList());
+        messageBridgeFomrNatsToJMS = new MessageBridgeImpl("", bridgeMessageBusNatsSource,
+                bridgeMessageBusJMSDestination, true, null,
+                Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
 
     }
 

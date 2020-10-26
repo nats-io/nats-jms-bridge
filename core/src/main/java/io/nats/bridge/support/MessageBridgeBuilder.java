@@ -2,8 +2,11 @@ package io.nats.bridge.support;
 
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
+import io.nats.bridge.messages.transform.TransformMessage;
+import io.nats.bridge.messages.transform.Transformers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 import static java.util.Collections.emptyList;
@@ -20,6 +23,8 @@ public class MessageBridgeBuilder {
     private MessageBusBuilder destinationBusBuilder;
     private List<String> transforms= emptyList();
     private List<String> replyTransforms= emptyList();
+
+    private Map<String, TransformMessage> transformers;
 
     public MessageBusBuilder getSourceBusBuilder() {
         return sourceBusBuilder;
@@ -112,8 +117,21 @@ public class MessageBridgeBuilder {
         return this;
     }
 
+    public Map<String, TransformMessage> getTransformers() {
+        if (transformers == null) {
+            transformers = Transformers.loadTransforms();
+        }
+        return transformers;
+    }
+
+    public MessageBridgeBuilder withTransformers(Map<String, TransformMessage> transformers) {
+        this.transformers = transformers;
+        return this;
+    }
+
     public MessageBridge build() {
-        return new MessageBridgeImpl(getName(), getSourceBus(), getDestinationBus(), isRequestReply(), getReplyMessageQueue(), getTransforms(), getReplyTransforms());
+        return new MessageBridgeImpl(getName(), getSourceBus(), getDestinationBus(), isRequestReply(),
+                getReplyMessageQueue(), getTransforms(), getReplyTransforms(), getTransformers());
     }
 
     public static MessageBridgeBuilder builder() {

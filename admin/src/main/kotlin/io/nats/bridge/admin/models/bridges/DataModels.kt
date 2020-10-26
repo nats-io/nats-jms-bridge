@@ -15,8 +15,11 @@ data class NatsBridgeConfig(val name: String,
                             val secretKey: String? = null,
                             val bridges: List<MessageBridgeInfo>,
                             val clusters: Map<String, Cluster>,
-                            val systemProperties: Map<String, String>? = null)
+                            val systemProperties: Map<String, String>? = null,
+                            val transforms : List<TransformConfig>?=null)
 
+
+data class TransformConfig(val name:String, val className:String, val config: Map<String, String>)
 
 /**
  * A Message bus represents a message bus system, i.e., IBM MQ, Nats, ActiveMQ, JMS, Rabbit MQ, Kafka, SQS, etc.
@@ -25,6 +28,10 @@ data class NatsBridgeConfig(val name: String,
 data class MessageBusInfo(val name: String, val busType: BusType, val subject: String, val responseSubject: String?=null,
                           val subscriptionGroup:String?="",
                           val clusterName: String)
+
+
+
+
 
 /**
  * A Message Bridge connects two MessageBus and will forward messages or relay request replies between the message bus systems.

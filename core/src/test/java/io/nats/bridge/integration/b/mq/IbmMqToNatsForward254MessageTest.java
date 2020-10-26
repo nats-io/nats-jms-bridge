@@ -81,7 +81,7 @@ public class IbmMqToNatsForward254MessageTest {
 
         responseBusServer = TestUtils.getMessageBusNats("",responseName);
         responseBusClient = TestUtils.getMessageBusNats("",responseName);
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSourceForIbmMQ, bridgeMessageBusDestinationForNats, false, null, Collections.emptyList(), Collections.emptyList());
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSourceForIbmMQ, bridgeMessageBusDestinationForNats, false, null, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
 
     }
 
