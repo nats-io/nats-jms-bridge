@@ -1,6 +1,6 @@
-# 0.28.0-beta25 NATS JMS/MQ Bridge
+# 0.28.1-beta25 NATS JMS/MQ Bridge
 
-#### TAG: 0.28.0-beta25
+#### TAG: 0.28.1-beta25
 
 ## Issues
 
