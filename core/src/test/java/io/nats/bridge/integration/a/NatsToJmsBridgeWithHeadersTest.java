@@ -43,7 +43,9 @@ public class NatsToJmsBridgeWithHeadersTest {
 
         bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE","A");
         bridgeMessageBusJmsDestination = TestUtils.getMessageBusJmsWithHeaders("BRIDGE_DEST","A");
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination, true, null, Collections.emptyList(), Collections.emptyList());
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource, bridgeMessageBusJmsDestination,
+                true, null, Collections.emptyList(), Collections.emptyList(),
+                Collections.emptyMap());
 
     }
 

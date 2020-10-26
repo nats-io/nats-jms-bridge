@@ -60,16 +60,17 @@ public class MessageBridgeImpl implements MessageBridge {
 
 
     public MessageBridgeImpl(final String name, final MessageBus sourceBus, final MessageBus destinationBus, boolean requestReply,
-                             final Queue<MessageBridgeRequestReply> replyMessageQueue, final List<String> transforms, List<String> outputTransforms) {
+                             final Queue<MessageBridgeRequestReply> replyMessageQueue, final List<String> inputTransforms,
+                             final List<String> outputTransforms, final Map<String, TransformMessage> transformers) {
         this.sourceBus = sourceBus;
         this.destinationBus = destinationBus;
         this.requestReply = requestReply;
         this.replyMessageQueue = (replyMessageQueue != null) ? replyMessageQueue : new LinkedTransferQueue<>();
         this.name = "bridge-" + name.toLowerCase().replace(".", "-").replace(" ", "-");
-        this.transforms = transforms;
+        this.transforms = inputTransforms;
         this.outputTransforms = outputTransforms;
 
-        boolean inputTransformEnabled = transforms != null  && transforms.size() > 0;
+        boolean inputTransformEnabled = inputTransforms != null  && inputTransforms.size() > 0;
         boolean outputTransformEnabled = outputTransforms != null  && outputTransforms.size() > 0;
 
         this.transformMessage = inputTransformEnabled || outputTransformEnabled;
@@ -77,7 +78,7 @@ public class MessageBridgeImpl implements MessageBridge {
 
 
 
-        this.transformers = transformMessage ? Transformers.loadTransforms() : Collections.emptyMap();
+        this.transformers = transformMessage ? transformers : Collections.emptyMap();
 
     }
 

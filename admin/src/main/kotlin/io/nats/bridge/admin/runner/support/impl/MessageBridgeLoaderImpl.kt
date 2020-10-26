@@ -8,6 +8,8 @@ import io.nats.bridge.admin.runner.support.BridgeConfig
 import io.nats.bridge.admin.runner.support.MessageBridgeLoader
 import io.nats.bridge.admin.util.getLogger
 import io.nats.bridge.jms.support.JMSMessageBusBuilder
+import io.nats.bridge.messages.transform.Configurable
+import io.nats.bridge.messages.transform.TransformMessage
 import io.nats.bridge.nats.support.NatsMessageBusBuilder
 import io.nats.bridge.support.MessageBridgeBuilder
 import io.nats.bridge.support.MessageBusBuilder
@@ -59,18 +61,41 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
 
         val list = if ((bridge.workers == 1 || bridge.workers == 0) && (bridge.tasks==1 || bridge.tasks==0)) {
             val bridgeBuilder = MessageBridgeBuilder()
+            addTransformers(bridgeBuilder, config)
             configureBridge(bridgeBuilder, details, subscriptionName=subscriptionName)
             listOf(bridgeBuilder)
         } else {
             (1..bridge.workers!!).map { workerNum ->
                 (1..bridge.tasks!!).map { taskNum ->
                     val bridgeBuilder = MessageBridgeBuilder()
+                    addTransformers(bridgeBuilder, config)
                     configureBridge(bridgeBuilder, details, "_w_${workerNum}_t_${taskNum}", subscriptionName)
                     bridgeBuilder
                 }
             }.flatten()
         }
         BridgeConfig(bridge.name, list, bridge)
+    }
+
+    private fun addTransformers(bridgeBuilder: MessageBridgeBuilder, config: NatsBridgeConfig) {
+        val transformers = bridgeBuilder.transformers
+        val transformerMapNew = mutableMapOf<String, TransformMessage>()
+
+        transformerMapNew.putAll(transformers)
+
+        config.transforms?.forEach { transformConfig ->
+            val instance = Class.forName(transformConfig.className).newInstance()
+            if (instance is Configurable) {
+                val props = Properties()
+                transformConfig.config.forEach {
+                    props[it.key] = it.value
+                }
+                instance.configure(props)
+            }
+            transformerMapNew[transformConfig.name] = instance as TransformMessage
+        }
+
+        bridgeBuilder.withTransformers(transformerMapNew)
     }
 
     private fun configureBridge(b: MessageBridgeBuilder, details: Details, postFix: String = "", subscriptionName:String="") {

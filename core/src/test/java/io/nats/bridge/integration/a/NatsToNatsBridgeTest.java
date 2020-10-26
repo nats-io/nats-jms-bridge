@@ -40,7 +40,9 @@ public class NatsToNatsBridgeTest {
         bridgeMessageBusSource = TestUtils.getMessageBusNats("BRIDGE_SRC","A");
         bridgeMessageBusDestination = TestUtils.getMessageBusNats("BRIDGE_DEST","B");
 
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null, Collections.emptyList(), Collections.emptyList());
+        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination,
+                true, null, Collections.emptyList(), Collections.emptyList(),
+                Collections.emptyMap());
 
     }
 

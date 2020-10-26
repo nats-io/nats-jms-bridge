@@ -2,7 +2,7 @@
 set -e
 
 
-VERSION=${VERSION:-0.27.3-beta24}
+VERSION=${VERSION:-0.28.1-beta25}
 DOCKER_NAMESPACE=${DOCKER_NAMESPACE:-synadia}
 
 wrapper() {
@@ -27,6 +27,10 @@ build_all() {
   pwd
   cd ..
   cd core
+  ./gradlew clean build publishToMavenLocal -x test
+  pwd
+  cd ..
+  cd example-transform
   ./gradlew clean build publishToMavenLocal -x test
   pwd
   cd ..
