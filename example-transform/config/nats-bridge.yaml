@@ -1,29 +1,37 @@
 ---
 name: "Starter Config"
 dateTime:
-- 2020
-- 4
-- 30
-- 0
-- 53
-- 50
-- 423615000
+  - 2020
+  - 4
+  - 30
+  - 0
+  - 53
+  - 50
+  - 423615000
 bridges:
-- name: "natsToIBMMq"
-  bridgeType: "REQUEST_REPLY"
-  source:
-    name: "nats"
-    busType: "NATS"
-    subject: "b-subject"
-    clusterName: "natsCluster"
-  destination:
-    name: "ibmMQ"
-    busType: "JMS"
-    subject: "DEV.QUEUE.1"
-    clusterName: "ibmMqCluster"
-  copyHeaders: false
-  workers: 5
-  tasks : 2
+  - name: "natsToIBMMq"
+    bridgeType: "REQUEST_REPLY"
+    transforms: [ "addHeader2" ]
+    replyTransforms: [ "changeBody" ]
+    source:
+      name: "nats"
+      busType: "NATS"
+      subject: "b-subject"
+      clusterName: "natsCluster"
+    destination:
+      name: "ibmMQ"
+      busType: "JMS"
+      subject: "DEV.QUEUE.1"
+      clusterName: "ibmMqCluster"
+    copyHeaders: false
+    workers: 5
+    tasks : 2
+
+transforms:
+  - name: "addHeader2"
+    className: "io.nats.bridge.transform.examples2.AddHeaderTransform2"
+    config:
+      H1: H1
 
 clusters:
   jmsCluster:
