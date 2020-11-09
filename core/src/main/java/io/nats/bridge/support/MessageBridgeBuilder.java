@@ -8,6 +8,7 @@ import io.nats.bridge.messages.transform.Transformers;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
 
@@ -15,16 +16,43 @@ public class MessageBridgeBuilder {
 
     private MessageBus sourceBus;
     private MessageBus destinationBus;
-    private boolean requestReply=true;
+    private boolean requestReply = true;
+    private boolean dynamicHeader = false;
+    private String dynamicHeaderName = "REPLY_DESTINATION";
+
     private String name;
     private Queue<MessageBridgeRequestReply.MessageBridgeRequestReply> replyMessageQueue;
 
     private MessageBusBuilder sourceBusBuilder;
     private MessageBusBuilder destinationBusBuilder;
-    private List<String> transforms= emptyList();
-    private List<String> replyTransforms= emptyList();
+    private List<String> transforms = emptyList();
+    private List<String> replyTransforms = emptyList();
 
     private Map<String, TransformMessage> transformers;
+
+    public static MessageBridgeBuilder builder() {
+        return new MessageBridgeBuilder();
+    }
+
+
+    public String getDynamicHeaderName() {
+        return dynamicHeaderName;
+    }
+
+    public MessageBridgeBuilder withDynamicHeaderName(String dynamicHeaderName) {
+        withDynamicHeader(true);
+        this.dynamicHeaderName = dynamicHeaderName;
+        return this;
+    }
+
+    public boolean isDynamicHeader() {
+        return dynamicHeader;
+    }
+
+    public MessageBridgeBuilder withDynamicHeader(boolean dynamicHeader) {
+        this.dynamicHeader = dynamicHeader;
+        return this;
+    }
 
     public MessageBusBuilder getSourceBusBuilder() {
         return sourceBusBuilder;
@@ -77,7 +105,8 @@ public class MessageBridgeBuilder {
     }
 
     public MessageBus getDestinationBus() {
-        if (destinationBus == null && destinationBusBuilder == null) throw new IllegalStateException("Destination Bus must be set");
+        if (destinationBus == null && destinationBusBuilder == null)
+            throw new IllegalStateException("Destination Bus must be set");
         if (destinationBus == null) {
             destinationBus = getDestinationBusBuilder().build();
         }
@@ -134,15 +163,17 @@ public class MessageBridgeBuilder {
         if (isRequestReply()) {
             return new MessageBridgeRequestReply(getName(), getSourceBus(), getDestinationBus(),
                     getReplyMessageQueue(), getTransforms(), getReplyTransforms(), getTransformers());
-        }
-        else  {
-            return new MessageBridgeForward(getName(), getSourceBus(), getDestinationBus(),
-                     getTransforms(), getReplyTransforms(), getTransformers());
+        } else {
+
+            if (isDynamicHeader()) {
+                return new MessageBridgeDynamicForward(getName(), getSourceBus(), getDestinationBus(),
+                        getTransforms(), getReplyTransforms(), getTransformers(), this.getDynamicHeaderName(),
+                        s -> getDestinationBusBuilder().build(s));
+            } else {
+                return new MessageBridgeForward(getName(), getSourceBus(), getDestinationBus(),
+                        getTransforms(), getReplyTransforms(), getTransformers());
+            }
         }
 
-    }
-
-    public static MessageBridgeBuilder builder() {
-        return new MessageBridgeBuilder();
     }
 }

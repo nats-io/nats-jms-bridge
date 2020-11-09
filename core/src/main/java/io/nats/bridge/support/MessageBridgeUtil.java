@@ -13,11 +13,11 @@ import java.util.Map;
 public class MessageBridgeUtil {
 
     public static Message transformMessageIfNeeded(final Message receiveMessageFromSource,
-                                            final List<String> transforms,
-                                            final boolean transformMessage,
-                                            final Map<String, TransformMessage> transformers,
-                                            final Logger logger,
-                                            final Logger runtimeLogger) {
+                                                   final List<String> transforms,
+                                                   final boolean transformMessage,
+                                                   final Map<String, TransformMessage> transformers,
+                                                   final Logger logger,
+                                                   final Logger runtimeLogger) {
         if (transforms.isEmpty()) return receiveMessageFromSource;
 
         Message currentMessage = receiveMessageFromSource;

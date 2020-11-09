@@ -20,7 +20,6 @@ import io.nats.bridge.messages.transform.TransformMessage;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 
 /**
@@ -32,12 +31,10 @@ import java.util.Queue;
 public class MessageBridgeForward extends MessageBridgeBase {
 
 
-
-
     public MessageBridgeForward(final String name, final MessageBus sourceBus, final MessageBus destinationBus,
-                                 final List<String> inputTransforms,
+                                final List<String> inputTransforms,
                                 final List<String> outputTransforms, final Map<String, TransformMessage> transformers) {
-        super(name, sourceBus, destinationBus,  inputTransforms, outputTransforms, transformers);
+        super(name, sourceBus, destinationBus, inputTransforms, outputTransforms, transformers);
 
 
     }
@@ -52,11 +49,10 @@ public class MessageBridgeForward extends MessageBridgeBase {
         try {
             destinationBus.publish(currentMessageFinal);
         } catch (Exception ex) {
-            restartDestinationBus(ex);
+            restartMessageBus(ex, destinationBus);
             destinationBus.publish(currentMessageFinal);
         }
     }
-
 
 
 }

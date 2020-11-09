@@ -38,7 +38,7 @@ public class MessageBridgeRequestReply extends MessageBridgeBase {
     public MessageBridgeRequestReply(final String name, final MessageBus sourceBus, final MessageBus destinationBus,
                                      final Queue<MessageBridgeRequestReply> replyMessageQueue, final List<String> inputTransforms,
                                      final List<String> outputTransforms, final Map<String, TransformMessage> transformers) {
-        super(name, sourceBus, destinationBus,   inputTransforms, outputTransforms, transformers);
+        super(name, sourceBus, destinationBus, inputTransforms, outputTransforms, transformers);
         this.replyMessageQueue = (replyMessageQueue != null) ? replyMessageQueue : new LinkedTransferQueue<>();
 
 
@@ -67,7 +67,7 @@ public class MessageBridgeRequestReply extends MessageBridgeBase {
                         replyMessageFinal != null ? replyMessageFinal : replyMessage));
             });
         } catch (Exception ex) {
-            restartDestinationBus(ex);
+            restartMessageBus(ex, destinationBus);
             destinationBus.request(currentMessageFinal, replyMessage -> {
                 if (runtimeLogger.isTraceEnabled()) {
                     runtimeLogger.info("The bridge {} got reply message {} \n for request message {} ",

@@ -9,8 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.LinkedTransferQueue;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public abstract class MessageBridgeBase implements MessageBridge {
     protected final MessageBus sourceBus;
@@ -58,13 +60,13 @@ public abstract class MessageBridgeBase implements MessageBridge {
 
         } catch (Exception ex) {
             receiveMessageFromSourceOption = Optional.empty();
-            restartSourceBus(ex);
+            restartMessageBus(ex, sourceBus);
         }
         return doProcess(receiveMessageFromSourceOption);
     }
 
     protected Message transformMessageIfNeeded(final Message receiveMessageFromSource,
-                                             final List<String> transforms) {
+                                               final List<String> transforms) {
         return MessageBridgeUtil.transformMessageIfNeeded(receiveMessageFromSource, transforms, transformMessage, transformers, logger, runtimeLogger);
     }
 
@@ -75,16 +77,13 @@ public abstract class MessageBridgeBase implements MessageBridge {
         }
 
 
-            receiveMessageFromSourceOption.ifPresent(this::processMessage);
+        receiveMessageFromSourceOption.ifPresent(this::processMessage);
 
         return processMessageBusQueues(receiveMessageFromSourceOption);
     }
 
 
-
-
-
-    protected abstract void processMessage(final Message receiveMessageFromSource) ;
+    protected abstract void processMessage(final Message receiveMessageFromSource);
 
     protected int processBus(MessageBus bus) {
 
@@ -112,17 +111,11 @@ public abstract class MessageBridgeBase implements MessageBridge {
         return 0;
     }
 
-    private void restartMessageBus(final Exception ex, final MessageBus messageBus) {
+    protected void restartMessageBus(final Exception ex, final MessageBus messageBus) {
         messageBusRestarter.restartMessageBus(ex, messageBus);
     }
 
-    protected void restartDestinationBus(final Exception ex) {
-        restartMessageBus(ex, destinationBus);
-    }
 
-    private void restartSourceBus(Exception ex) {
-        restartMessageBus(ex, sourceBus);
-    }
 
     @Override
     public int process(final Duration duration) {
@@ -134,13 +127,12 @@ public abstract class MessageBridgeBase implements MessageBridge {
 
         } catch (Exception ex) {
             receiveMessageFromSourceOption = Optional.empty();
-            restartSourceBus(ex);
+            restartMessageBus(ex, sourceBus);
         }
 
 
         return doProcess(receiveMessageFromSourceOption);
     }
-
 
 
     @Override

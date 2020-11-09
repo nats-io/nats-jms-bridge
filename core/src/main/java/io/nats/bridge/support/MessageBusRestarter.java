@@ -2,20 +2,18 @@ package io.nats.bridge.support;
 
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.jms.JMSMessageBus;
+import org.slf4j.Logger;
 
 import java.time.Duration;
-
-import org.slf4j.Logger;
 
 public class MessageBusRestarter {
 
 
-
     private final String name;
     private final Logger logger;
-    private long lastRestart = System.currentTimeMillis();
     private final Duration ignoreRestartBackoffAfter = Duration.ofMinutes(10);
     private final int backoffMax = 60;
+    private long lastRestart = System.currentTimeMillis();
     private int backoffSeconds = 1;
 
     public MessageBusRestarter(String name, Logger logger) {
@@ -36,7 +34,7 @@ public class MessageBusRestarter {
                 backoffSeconds = backoffSeconds * 2;
             }
 
-            logger.info("Restart reason for " + name,  ex);
+            logger.info("Restart reason for " + name, ex);
 
             try {
                 messageBus.close();
@@ -70,7 +68,7 @@ public class MessageBusRestarter {
 
     private void rethrow(Exception ex) {
         if (ex instanceof RuntimeException) {
-            throw ((RuntimeException)ex);
+            throw ((RuntimeException) ex);
         } else {
             throw new RuntimeException(ex);
         }
