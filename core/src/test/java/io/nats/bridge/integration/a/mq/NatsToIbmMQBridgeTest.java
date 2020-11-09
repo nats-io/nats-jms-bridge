@@ -3,14 +3,13 @@ package io.nats.bridge.integration.a.mq;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.TestUtils;
-import io.nats.bridge.messages.Message;
-import io.nats.bridge.support.MessageBridgeImpl;
+import io.nats.bridge.support.MessageBridgeForward;
+import io.nats.bridge.support.MessageBridgeRequestReply;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,8 +42,8 @@ public class NatsToIbmMQBridgeTest {
         bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SRC","A_RR");
         bridgeMessageBusJMSDestination = TestUtils.getMessageBusIbmMQ("BRIDGE_DEST", false);
 
-        messageBridgeFomrNatsToJMS = new MessageBridgeImpl("", bridgeMessageBusNatsSource,
-                bridgeMessageBusJMSDestination, true, null,
+        messageBridgeFomrNatsToJMS = new MessageBridgeRequestReply("", bridgeMessageBusNatsSource,
+                bridgeMessageBusJMSDestination,  null,
                 Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
 
     }

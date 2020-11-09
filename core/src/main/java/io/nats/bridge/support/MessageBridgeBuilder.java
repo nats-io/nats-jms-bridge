@@ -17,7 +17,7 @@ public class MessageBridgeBuilder {
     private MessageBus destinationBus;
     private boolean requestReply=true;
     private String name;
-    private Queue<MessageBridgeImpl.MessageBridgeRequestReply> replyMessageQueue;
+    private Queue<MessageBridgeRequestReply.MessageBridgeRequestReply> replyMessageQueue;
 
     private MessageBusBuilder sourceBusBuilder;
     private MessageBusBuilder destinationBusBuilder;
@@ -108,11 +108,11 @@ public class MessageBridgeBuilder {
         return this;
     }
 
-    public Queue<MessageBridgeImpl.MessageBridgeRequestReply> getReplyMessageQueue() {
+    public Queue<MessageBridgeRequestReply.MessageBridgeRequestReply> getReplyMessageQueue() {
         return replyMessageQueue;
     }
 
-    public MessageBridgeBuilder withReplyMessageQueue(Queue<MessageBridgeImpl.MessageBridgeRequestReply> replyMessageQueue) {
+    public MessageBridgeBuilder withReplyMessageQueue(Queue<MessageBridgeRequestReply.MessageBridgeRequestReply> replyMessageQueue) {
         this.replyMessageQueue = replyMessageQueue;
         return this;
     }
@@ -130,8 +130,16 @@ public class MessageBridgeBuilder {
     }
 
     public MessageBridge build() {
-        return new MessageBridgeImpl(getName(), getSourceBus(), getDestinationBus(), isRequestReply(),
-                getReplyMessageQueue(), getTransforms(), getReplyTransforms(), getTransformers());
+
+        if (isRequestReply()) {
+            return new MessageBridgeRequestReply(getName(), getSourceBus(), getDestinationBus(),
+                    getReplyMessageQueue(), getTransforms(), getReplyTransforms(), getTransformers());
+        }
+        else  {
+            return new MessageBridgeForward(getName(), getSourceBus(), getDestinationBus(),
+                    getReplyMessageQueue(), getTransforms(), getReplyTransforms(), getTransformers());
+        }
+
     }
 
     public static MessageBridgeBuilder builder() {

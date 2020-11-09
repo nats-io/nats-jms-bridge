@@ -5,7 +5,8 @@ import io.nats.bridge.MessageBus;
 import io.nats.bridge.TestUtils;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
-import io.nats.bridge.support.MessageBridgeImpl;
+import io.nats.bridge.support.MessageBridgeForward;
+import io.nats.bridge.support.MessageBridgeRequestReply;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -82,8 +83,8 @@ public class NatsToIBM_MQOneWayMessagesTest {
 
         responseBusServer = TestUtils.getMessageBusJms("SERVER_RESPONSE", responseName);
         responseBusClient = TestUtils.getMessageBusJms("CLIENT_RESPONSE", responseName);
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination,
-                false, null, Collections.emptyList(),
+        messageBridge = new MessageBridgeForward("", bridgeMessageBusSource, bridgeMessageBusDestination,
+                 null, Collections.emptyList(),
                 Collections.emptyList(), Collections.emptyMap());
 
     }
