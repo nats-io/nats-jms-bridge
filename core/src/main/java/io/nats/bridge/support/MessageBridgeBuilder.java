@@ -41,6 +41,7 @@ public class MessageBridgeBuilder {
 
     public MessageBridgeBuilder withDynamicHeaderName(String dynamicHeaderName) {
         withDynamicHeader(true);
+        withRequestReply(false);
         this.dynamicHeaderName = dynamicHeaderName;
         return this;
     }
