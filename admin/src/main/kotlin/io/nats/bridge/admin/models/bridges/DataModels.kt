@@ -38,6 +38,7 @@ data class MessageBusInfo(val name: String, val busType: BusType, val subject: S
  *
  */
 data class MessageBridgeInfo(val name: String, val bridgeType: BridgeType,
+                             val headerDestinationSubjectName : String = "DESTINATION_HEADER",
                              val source: MessageBusInfo, val destination: MessageBusInfo, val copyHeaders: Boolean? = false,
                              val workers: Int? = 1, val tasks:Int? = 1, val transforms:List<String> = emptyList(),
                              val replyTransforms:List<String> = emptyList()
@@ -68,7 +69,7 @@ enum class JmsAutoConfig { IBM_MQ, ACTIVE_MQ, SQS, OTHER, NONE }
 /** Two Supported Bridge types are request/reply and
  *  forward to subject/destination (queue to queue).
  */
-enum class BridgeType { REQUEST_REPLY, FORWARD }
+enum class BridgeType { REQUEST_REPLY, FORWARD, DYNAMIC_FORWARD }
 
 
 /** Cluster config is a way to set up servers for a MessageBus like Nats, or IBM MQ. */

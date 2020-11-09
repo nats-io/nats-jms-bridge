@@ -112,6 +112,10 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
                 .withTransforms(details.bridge.transforms)
                 .withReplyTransforms(details.bridge.replyTransforms)
 
+        if (details.bridge.bridgeType == BridgeType.DYNAMIC_FORWARD) {
+            b.withDynamicHeaderName(details.bridge.headerDestinationSubjectName)
+        }
+
 
         if (src is JMSMessageBusBuilder) {
             src.withName(src.name + postFix)
@@ -151,7 +155,7 @@ class MessageBridgeLoaderImpl(private val repo: ConfigRepo, private val metricsR
 
         if (busInfo.responseSubject != null) {
             builder.withResponseDestinationName(busInfo.responseSubject)
-        } else if  (bridge.bridgeType == BridgeType.FORWARD) {
+        } else if  (bridge.bridgeType == BridgeType.FORWARD || bridge.bridgeType == BridgeType.DYNAMIC_FORWARD) {
             builder.withRequestReply(false)
         }
 
