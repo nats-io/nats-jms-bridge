@@ -137,7 +137,7 @@ public class MessageBridgeBuilder {
         }
         else  {
             return new MessageBridgeForward(getName(), getSourceBus(), getDestinationBus(),
-                    getReplyMessageQueue(), getTransforms(), getReplyTransforms(), getTransformers());
+                     getTransforms(), getReplyTransforms(), getTransformers());
         }
 
     }

@@ -78,7 +78,7 @@ public class JMSToNatsOneWayMessagesTest {
 
         responseBusServer = TestUtils.getMessageBusNats("",responseName);
         responseBusClient = TestUtils.getMessageBusNats("",responseName);
-        messageBridge = new MessageBridgeForward("", bridgeMessageBusSource, bridgeMessageBusDestination,  null, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
+        messageBridge = new MessageBridgeForward("", bridgeMessageBusSource, bridgeMessageBusDestination,   Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
 
     }
 

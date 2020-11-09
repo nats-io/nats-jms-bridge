@@ -17,7 +17,7 @@ public abstract class MessageBridgeBase implements MessageBridge {
     protected final MessageBus destinationBus;
     protected final String name;
     protected final boolean transformMessage;
-    protected final Queue<MessageBridgeRequestReply> replyMessageQueue;
+
     protected final List<String> transforms;
     protected final Map<String, TransformMessage> transformers;
     protected final List<String> outputTransforms;
@@ -27,13 +27,12 @@ public abstract class MessageBridgeBase implements MessageBridge {
     protected final MessageBusRestarter messageBusRestarter;
 
     public MessageBridgeBase(final String name, final MessageBus sourceBus, final MessageBus destinationBus,
-                            final Queue<MessageBridgeRequestReply> replyMessageQueue,
+
                              final List<String> inputTransforms, final List<String> outputTransforms,
                              final Map<String, TransformMessage> transformers) {
         this.sourceBus = sourceBus;
         this.destinationBus = destinationBus;
         this.name = "bridge-" + name.toLowerCase().replace(".", "-").replace(" ", "-");
-        this.replyMessageQueue = (replyMessageQueue != null) ? replyMessageQueue : new LinkedTransferQueue<>();
         this.transforms = inputTransforms;
         this.outputTransforms = outputTransforms;
 
@@ -87,24 +86,30 @@ public abstract class MessageBridgeBase implements MessageBridge {
 
     protected abstract void processMessage(final Message receiveMessageFromSource) ;
 
+    protected int processBus(MessageBus bus) {
+
+        try {
+            return bus.process();
+        } catch (Exception ex) {
+            restartMessageBus(ex, bus);
+            return bus.process();
+        }
+
+    }
+
     private int processMessageBusQueues(Optional<Message> receiveMessageFromSourceOption) {
         int count = 0;
         if (receiveMessageFromSourceOption.isPresent()) count++;
-        try {
-            count += sourceBus.process();
-        } catch (Exception ex) {
-            restartSourceBus(ex);
-            count += sourceBus.process();
-        }
 
-        try {
-            count += destinationBus.process();
-        } catch (Exception ex) {
-            restartDestinationBus(ex);
-            count += destinationBus.process();
-        }
-        count += processReplies();
+
+        count += processBus(sourceBus);
+        count += processBus(destinationBus);
+        count += otherProcess();
         return count;
+    }
+
+    protected int otherProcess() {
+        return 0;
     }
 
     private void restartMessageBus(final Exception ex, final MessageBus messageBus) {
@@ -136,16 +141,7 @@ public abstract class MessageBridgeBase implements MessageBridge {
         return doProcess(receiveMessageFromSourceOption);
     }
 
-    private int processReplies() {
-        int i = 0;
-        MessageBridgeRequestReply requestReply = replyMessageQueue.poll();
-        while (requestReply != null) {
-            i++;
-            requestReply.respond();
-            requestReply = replyMessageQueue.poll();
-        }
-        return i;
-    }
+
 
     @Override
     public void close() {

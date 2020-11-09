@@ -84,7 +84,7 @@ public class NatsToIBM_MQOneWayMessagesTest {
         responseBusServer = TestUtils.getMessageBusJms("SERVER_RESPONSE", responseName);
         responseBusClient = TestUtils.getMessageBusJms("CLIENT_RESPONSE", responseName);
         messageBridge = new MessageBridgeForward("", bridgeMessageBusSource, bridgeMessageBusDestination,
-                 null, Collections.emptyList(),
+                  Collections.emptyList(),
                 Collections.emptyList(), Collections.emptyMap());
 
     }

@@ -80,7 +80,7 @@ public class IbmMqToNatsOneWayMessageTest  {
 
         responseBusServer = TestUtils.getMessageBusNats("",responseName);
         responseBusClient = TestUtils.getMessageBusNats("",responseName);
-        messageBridge = new MessageBridgeForward("", bridgeMessageBusSourceForIbmMQ, bridgeMessageBusDestinationForNats,  null, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
+        messageBridge = new MessageBridgeForward("", bridgeMessageBusSourceForIbmMQ, bridgeMessageBusDestinationForNats,   Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
 
     }
 

@@ -14,16 +14,13 @@
 package io.nats.bridge.support;
 
 
-import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.transform.TransformMessage;
-import io.nats.bridge.metrics.Metrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.LinkedTransferQueue;
 
 
@@ -35,11 +32,15 @@ import java.util.concurrent.LinkedTransferQueue;
  */
 public class MessageBridgeRequestReply extends MessageBridgeBase {
 
+    protected final Queue<MessageBridgeRequestReply> replyMessageQueue;
+
 
     public MessageBridgeRequestReply(final String name, final MessageBus sourceBus, final MessageBus destinationBus,
                                      final Queue<MessageBridgeRequestReply> replyMessageQueue, final List<String> inputTransforms,
                                      final List<String> outputTransforms, final Map<String, TransformMessage> transformers) {
-        super(name, sourceBus, destinationBus,  replyMessageQueue, inputTransforms, outputTransforms, transformers);
+        super(name, sourceBus, destinationBus,   inputTransforms, outputTransforms, transformers);
+        this.replyMessageQueue = (replyMessageQueue != null) ? replyMessageQueue : new LinkedTransferQueue<>();
+
 
     }
 
@@ -83,5 +84,19 @@ public class MessageBridgeRequestReply extends MessageBridgeBase {
     }
 
 
+    private int processReplies() {
+        int i = 0;
+        MessageBridgeRequestReply requestReply = replyMessageQueue.poll();
+        while (requestReply != null) {
+            i++;
+            requestReply.respond();
+            requestReply = replyMessageQueue.poll();
+        }
+        return i;
+    }
 
+    @Override
+    protected int otherProcess() {
+        return processReplies();
+    }
 }

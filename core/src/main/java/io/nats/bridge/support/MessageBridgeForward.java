@@ -35,9 +35,9 @@ public class MessageBridgeForward extends MessageBridgeBase {
 
 
     public MessageBridgeForward(final String name, final MessageBus sourceBus, final MessageBus destinationBus,
-                                final Queue<MessageBridgeRequestReply> replyMessageQueue, final List<String> inputTransforms,
+                                 final List<String> inputTransforms,
                                 final List<String> outputTransforms, final Map<String, TransformMessage> transformers) {
-        super(name, sourceBus, destinationBus,  replyMessageQueue, inputTransforms, outputTransforms, transformers);
+        super(name, sourceBus, destinationBus,  inputTransforms, outputTransforms, transformers);
 
 
     }
