@@ -5,13 +5,12 @@ import io.nats.bridge.MessageBus;
 import io.nats.bridge.TestUtils;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
-import io.nats.bridge.support.MessageBridgeImpl;
+import io.nats.bridge.support.MessageBridgeRequestReply;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,7 +42,7 @@ public class IBM_MQ_ToNatsBridgeWithHeadersTest {
 
         bridgeMessageBusSource = TestUtils.getMessageBusIbmMQWithHeaders4("BRIDGE_SOURCE",true);
         bridgeMessageBusDestination = TestUtils.getMessageBusNats("BRIDGE_DEST","B_HH");
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
+        messageBridge = new MessageBridgeRequestReply("", bridgeMessageBusSource, bridgeMessageBusDestination,  null, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
 
     }
 

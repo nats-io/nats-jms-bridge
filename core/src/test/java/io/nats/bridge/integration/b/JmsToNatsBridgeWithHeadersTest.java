@@ -5,7 +5,7 @@ import io.nats.bridge.MessageBus;
 import io.nats.bridge.TestUtils;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
-import io.nats.bridge.support.MessageBridgeImpl;
+import io.nats.bridge.support.MessageBridgeRequestReply;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +42,7 @@ public class JmsToNatsBridgeWithHeadersTest {
 
         bridgeMessageBusSource = TestUtils.getMessageBusJmsWithHeaders("","B");
         bridgeMessageBusDestination = TestUtils.getMessageBusNats("","B");
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
+        messageBridge = new MessageBridgeRequestReply("", bridgeMessageBusSource, bridgeMessageBusDestination,  null, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
 
     }
 

@@ -588,6 +588,11 @@ public class JMSMessageBusBuilder implements MessageBusBuilder {
 
     }
 
+    public MessageBus build(String destinationName) {
+        this.withDestinationName(destinationName);
+        return build();
+    }
+
     public MessageBus build() {
 
         if (getConnectionFactory() != null && getConnectionFactory().getClass().getPackage().getName().contains("io.nats.bridge.integration.ibmmq")) {

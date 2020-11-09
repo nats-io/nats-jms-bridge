@@ -3,7 +3,7 @@ package io.nats.bridge.integration.b;
 import io.nats.bridge.MessageBridge;
 import io.nats.bridge.MessageBus;
 import io.nats.bridge.TestUtils;
-import io.nats.bridge.support.MessageBridgeImpl;
+import io.nats.bridge.support.MessageBridgeRequestReply;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +40,7 @@ public class JmsToNatsBridgeTest {
 
         bridgeMessageBusSource = TestUtils.getMessageBusJms("BRIDGE_SRC","B");
         bridgeMessageBusDestination = TestUtils.getMessageBusNats("BRIDGE_DEST","B");
-        messageBridge = new MessageBridgeImpl("", bridgeMessageBusSource, bridgeMessageBusDestination, true, null, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
+        messageBridge = new MessageBridgeRequestReply("", bridgeMessageBusSource, bridgeMessageBusDestination,  null, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
 
     }
 

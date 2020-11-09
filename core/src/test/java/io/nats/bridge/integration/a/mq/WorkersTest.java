@@ -7,7 +7,7 @@ import io.nats.bridge.TestUtils;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
 
-import io.nats.bridge.support.MessageBridgeImpl;
+import io.nats.bridge.support.MessageBridgeRequestReply;
 import io.nats.bridge.task.MessageBridgeTasksManagerBuilder;
 import org.junit.After;
 import org.junit.Before;
@@ -50,8 +50,8 @@ public class WorkersTest {
                 final MessageBus bridgeMessageBusNatsSource = TestUtils.getMessageBusNats("BRIDGE_SOURCE", "A");
                 final MessageBus bridgeMessageBusJmsDestination = TestUtils.getMessageBusIbmMQWithHeaders4("BRIDGE_DEST", false);
 
-                final MessageBridge messageBridge = new MessageBridgeImpl("", bridgeMessageBusNatsSource,
-                        bridgeMessageBusJmsDestination, true, null, Collections.emptyList(),
+                final MessageBridge messageBridge = new MessageBridgeRequestReply("", bridgeMessageBusNatsSource,
+                        bridgeMessageBusJmsDestination,  null, Collections.emptyList(),
                         Collections.emptyList(), Collections.emptyMap());
                 return messageBridge;
             }catch (Exception ex) {

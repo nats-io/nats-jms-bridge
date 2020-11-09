@@ -22,6 +22,7 @@ import io.nats.bridge.jms.support.JMSMessageBusBuilder;
 import io.nats.bridge.messages.Message;
 import io.nats.bridge.messages.MessageBuilder;
 import io.nats.bridge.nats.support.NatsMessageBusBuilder;
+import io.nats.bridge.support.MessageBusBuilder;
 import io.nats.bridge.tls.SslContextBuilder;
 
 import javax.jms.*;
@@ -43,6 +44,14 @@ public class TestUtils {
         final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().withDestinationName(queueName).withName("JMS_" + name);
 
         return jmsMessageBusBuilder.withUserNameConnection("cloudurable").withPasswordConnection("cloudurable").build();
+    }
+
+    public static MessageBusBuilder getMessageBusJmsBuilder(final String name, final String topicPostFix) {
+        final String queueName = "dynamicQueues/message-only-" + topicPostFix;
+        final JMSMessageBusBuilder jmsMessageBusBuilder = new JMSMessageBusBuilder().turnOnCopyHeaders()
+                .withDestinationName(queueName).withName("JMS_" + name);
+
+        return jmsMessageBusBuilder.withUserNameConnection("cloudurable").withPasswordConnection("cloudurable");
     }
 
     public static MessageBus getMessageBusIbmMQ(final String name, boolean src) {
@@ -241,6 +250,26 @@ public class TestUtils {
         return natsMessageBusBuilder.build();
     }
 
+    public static MessageBusBuilder getMessageBusNatsBuilder(final String name, final String topicPostFix) throws IOException, InterruptedException {
+
+
+        SslContextBuilder sslContextBuilder = new SslContextBuilder();
+        sslContextBuilder.withTruststorePath("../certs/truststore.jks");
+        sslContextBuilder.withKeystorePath("../certs/keystore.jks");
+        sslContextBuilder.withKeyPassword("cloudurable1");
+        sslContextBuilder.withStorePassword("cloudurable2");
+        sslContextBuilder.withAlgorithm("SunX509");
+
+        final String subject = topicPostFix + "NatsMessageBus";
+
+        final NatsMessageBusBuilder natsMessageBusBuilder = NatsMessageBusBuilder.builder()
+                .withSslContext(sslContextBuilder.build())
+                .withName("NATS_" + name).withSubject(subject);
+        natsMessageBusBuilder.withUseTls(true);
+
+        natsMessageBusBuilder.getOptionsBuilder().noReconnect();
+        return natsMessageBusBuilder;
+    }
 
     public static void runBridgeLoop(final MessageBridge messageBridge, final AtomicBoolean stop, final CountDownLatch countDownLatch) {
 

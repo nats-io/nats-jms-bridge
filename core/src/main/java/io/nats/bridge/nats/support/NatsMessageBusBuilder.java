@@ -418,6 +418,10 @@ public class NatsMessageBusBuilder implements MessageBusBuilder {
         return this;
     }
 
+    public NatsMessageBus build(String subject) {
+        this.withSubject(subject);
+        return build();
+    }
     public NatsMessageBus build() {
         return new NatsMessageBus(getName(), getSubject(),
                 getConnection(),
