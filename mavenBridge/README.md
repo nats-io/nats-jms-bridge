@@ -30,7 +30,7 @@ To extend the spring boot application, you need the following dependencies.
 
 You can find the bridge dependencies in the [Maven Central Repository](https://search.maven.org/classic/#search%7Cga%7C1%7Cg%3A%22io.nats.bridge%22) which is available and searchable with sample gradle, maven, and sbt dependency declaration from [this maven repo search web tool](https://mvnrepository.com/artifact/io.nats.bridge). 
 
-You can find the source code for this example in [the main github repo for this project, look for mavenBridge](https://github.com/nats-io/nats-jms-bridge/tree/master/mavenBridge).
+You can find the source code for this example in [the main github repo for this project, look for mavenBridge](https://github.com/nats-io/nats-jms-bridge/tree/main/mavenBridge).
 
 To extend the NATS JMS Bridge Admin just create a SpringApplication class as follows:
 

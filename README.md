@@ -80,7 +80,7 @@ bridges:
   tasks : 5
 ```
 
-See [Admin guide](https://github.com/nats-io/nats-jms-bridge/tree/master/admin) for information on how to set up bridges and import new bridge data with csv files.
+See [Admin guide](https://github.com/nats-io/nats-jms-bridge/tree/main/admin) for information on how to set up bridges and import new bridge data with csv files.
 
 ## Bridge works with JMS and NATS
 The NATS bridge works with JMS and NATS.
@@ -94,7 +94,7 @@ As part of the install, you can run this bridge against a docker images that has
 ![Admin Console Swagger Open API](https://user-images.githubusercontent.com/382678/82646981-5598d580-9bca-11ea-9bc8-5dfa6875c61e.png)
 
 The Admin Console for NATS JMS/MQ Bridge uses Open API REST end points and comes with a command line utility.
-See [Admin guide](https://github.com/nats-io/nats-jms-bridge/tree/master/admin) for information on how to set up bridges and import new
+See [Admin guide](https://github.com/nats-io/nats-jms-bridge/tree/main/admin) for information on how to set up bridges and import new
 bridge data with csv files.
 
 # Admin features
@@ -113,7 +113,7 @@ Configure these environment variables to enable your NATS JMS/MQ Bridge to acces
 * `NATS_BRIDGE_IBM_MQ_CHANNEL` - the channel you are using for your IBM MQ cluster (defaults to `"DEV.APP.SVRCONN`)
 * `NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER` - the name of the queue manager for your IBM MQ cluster (defaults to `QM1`).
 
-There is a sample IBM MQ Docker image configured to run with these defaults as an example see `docker pull synadia/bridge-ibmmq` on [the Synadia DockerHub](https://hub.docker.com/r/synadia/bridge-ibmmq). The source for this IBM MQ docker image is in this [NATS JMQ/MQ Bridge repo under cicd](https://github.com/nats-io/nats-jms-bridge/tree/master/cicd/bridge-ibmmq).
+There is a sample IBM MQ Docker image configured to run with these defaults as an example see `docker pull synadia/bridge-ibmmq` on [the Synadia DockerHub](https://hub.docker.com/r/synadia/bridge-ibmmq). The source for this IBM MQ docker image is in this [NATS JMQ/MQ Bridge repo under cicd](https://github.com/nats-io/nats-jms-bridge/tree/main/cicd/bridge-ibmmq).
 
 In order to use the request/reply pattern over IBM MQ you have to set up a [dynamic queue using a temporary queue model](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.1.0/com.ibm.mq.ref.dev.doc/prx_wmq_tempy_model.htm). This [queue model](https://www.ibm.com/support/knowledgecenter/SSFKSJ_9.0.0/com.ibm.mq.dev.doc/q032240_.htm) will need DISPLAY exposed so it can be used a prototype pattern to create reply queues.
 
