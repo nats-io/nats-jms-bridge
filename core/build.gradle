@@ -47,7 +47,7 @@ publishing {
         maven(MavenPublication) {
             groupId ='io.nats.bridge'
             artifactId = 'nats-jms-bridge'
-            version = '0.29.0-beta26'
+            version = '0.29.0-beta27'
             from components.java
         }
     }
@@ -64,7 +64,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'io.nats', name: 'jnats', version: '2.6.7'
+    implementation group: 'io.nats', name: 'jnats', version: '2.11.4'
     implementation group: 'org.apache.activemq', name: 'artemis-jms-client-all', version: '2.11.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.3'
 
@@ -77,6 +77,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 
-    implementation("io.nats.bridge:nats-jms-bridge-message:0.29.0-beta26")
+    implementation("io.nats.bridge:nats-jms-bridge-message:0.29.0-beta27")
 
 }

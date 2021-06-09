@@ -31,7 +31,7 @@ dependencies {
     implementation("com.ibm.mq:com.ibm.mq.allclient:9.1.5.0")
 
 
-    implementation( group= "io.nats", name= "jnats", version= "2.6.7")
+    implementation( group= "io.nats", name= "jnats", version= "2.11.4")
     implementation( group= "org.apache.activemq", name= "artemis-jms-client-all", version= "2.11.0")
     implementation("com.ibm.mq:com.ibm.mq.allclient:9.1.5.0")
     testImplementation(group= "org.apache.activemq", name= "artemis-server", version= "2.11.0")

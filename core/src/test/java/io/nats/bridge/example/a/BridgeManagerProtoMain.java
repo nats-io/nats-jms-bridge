@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 //TODO turn this into a test.
-// See https://github.com/nats-io/nats-jms-mq-bridge/issues/16
+// See https://github.com/nats-io/nats-jms-bridge/issues/16
 public class BridgeManagerProtoMain {
 
     public static void main(String... args) {

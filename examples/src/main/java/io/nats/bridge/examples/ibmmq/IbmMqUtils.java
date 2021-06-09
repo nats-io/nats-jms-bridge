@@ -94,14 +94,14 @@ public class IbmMqUtils {
         try {
 
             //copy tabl file from IBM docker image
-            //      docker cp 08a3a58be213:/mnt/mqm/data/qmgrs/QM1/@ipcc/AMQCLCHL.TAB ~/synadia/nats-jms-mq-bridge/AMQCLCHL.TAB
+            //      docker cp 08a3a58be213:/mnt/mqm/data/qmgrs/QM1/@ipcc/AMQCLCHL.TAB ~/synadia/nats-jms-bridge/AMQCLCHL.TAB
             //Using https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.0.0/com.ibm.mq.dev.doc/q032510_.htm as a guide
             //java.net.URL chanTab2 = new URL("ftp://ftp.server/admdata/ccdt2.tab"); //Example from IBM.
             //factory.setCCDTURL(chanTab2);
             //((MQConnectionFactory) connectionFactory).setCCDTURL(new URL("file://./ipcc/AMQCLCHL.TAB")); //Did not work
             //((MQConnectionFactory) connectionFactory).setCCDTURL(new URL("file:///./ipcc/AMQCLCHL.TAB")); //Did not work
 
-            ((MQConnectionFactory) connectionFactory).setCCDTURL(new URL("file:///Users/richardhightower/synadia/nats-jms-mq-bridge/examples/ipcc/AMQCLCHL.TAB"));
+            ((MQConnectionFactory) connectionFactory).setCCDTURL(new URL("file:///Users/richardhightower/synadia/nats-jms-bridge/examples/ipcc/AMQCLCHL.TAB"));
 
 
 
