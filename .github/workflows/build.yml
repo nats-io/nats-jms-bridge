@@ -40,7 +40,7 @@ jobs:
         docker run --net bnet --name active-mq -d synadia/bridge-activemq:latest
         docker run --net bnet --name ibm-mq -d synadia/bridge-ibmmq:latest
     - name: Run Core Build With Tests
-        docker run --net bnet --name bridge -v $(pwd):/usr/app synadia/bridge-travis-build:latest
+      run: docker run --net bnet --name bridge -v $(pwd):/usr/app synadia/bridge-travis-build:latest
     - name: Generate wrappers and prepare gradle
       run: bin/build.sh wrapper_and_chmod
     - name: Build Messages Lib
