@@ -6,6 +6,7 @@ import io.nats.client.Message;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 
+import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
@@ -18,7 +19,7 @@ public class SimpleNatsClientSsl {
             sslContextBuilder.withKeystorePath("../certs/keystore.jks");
             sslContextBuilder.withKeyPassword("cloudurable");
             sslContextBuilder.withStorePassword("cloudurable");
-            var sslContext = sslContextBuilder.build();
+            SSLContext sslContext = sslContextBuilder.build();
 
             final Options.Builder builder = new Options.Builder().sslContext(sslContext)
                     .server("nats://localhost:4222");
