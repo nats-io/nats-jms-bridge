@@ -61,6 +61,7 @@ jobs:
     - name: Cleanup
       if: ${{ always() }}
       run: |
+        docker rm -f bridge
         docker rm -f nats-server
         docker rm -f active-mq
         docker rm -f ibm-mq
