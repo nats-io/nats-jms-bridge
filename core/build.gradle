@@ -12,12 +12,11 @@ plugins {
 def jarVersion = "0.29.0-beta27"
 group = 'io.nats.bridge'
 
-def isPr = System.getenv("BUILD_EVENT") == "pull_request"
-def isMerge = System.getenv("BUILD_EVENT") == "push"
-def isRelease = System.getenv("BUILD_EVENT") == "release"
+def publishSnapshot = System.getenv("BUILD_EVENT") == "publish_snapshot"
+def isRelease = System.getenv("BUILD_EVENT") == "publish_release"
 
 // version is the variable the build actually uses.
-version = isPr || isMerge ? jarVersion + "-SNAPSHOT" : jarVersion
+version = publishSnapshot ? jarVersion + "-SNAPSHOT" : jarVersion
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -27,11 +26,6 @@ java {
 test {
     testLogging.showStandardStreams = true
     testLogging.exceptionFormat = 'full'
-    retry {
-        failOnPassedAfterRetry = false
-        maxFailures = 5
-        maxRetries = 5
-    }
 }
 
 repositories {
@@ -46,7 +40,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.3'
 
     implementation 'org.slf4j:slf4j-api:[1.7,1.8)'
-    testImplementation 'ch.qos.logback:logback-classic:1.1.2'
+    testImplementation 'ch.qos.logback:logback-classic:1.2.3'
 
     implementation("com.ibm.mq:com.ibm.mq.allclient:9.1.5.0")
 

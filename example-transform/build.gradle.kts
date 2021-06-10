@@ -50,7 +50,7 @@ dependencies {
     implementation (group= "com.fasterxml.jackson.core", name= "jackson-databind", version= "2.10.3")
 
     implementation ( "org.slf4j:slf4j-api:[1.7,1.8)")
-    testImplementation ("ch.qos.logback:logback-classic:1.1.2")
+    testImplementation ("ch.qos.logback:logback-classic:1.2.3")
 
     implementation("io.nats.bridge:nats-jms-bridge-message:0.29.0-beta27")
 
