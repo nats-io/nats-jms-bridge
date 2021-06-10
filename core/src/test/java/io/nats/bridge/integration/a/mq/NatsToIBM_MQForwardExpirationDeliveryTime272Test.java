@@ -126,7 +126,7 @@ public class NatsToIBM_MQForwardExpirationDeliveryTime272Test {
         assertEquals("Hello Rick", responseFromServer.get());
 
         /**
-         * Looks like you can’t set delivery time direct. It has to be set on the producer in JMS so the behavior is expected and we have unit tests to show that we are setting the properties. They are just not getting passed bc IBM MQ implementation.
+         * Looks like you can't set delivery time direct. It has to be set on the producer in JMS so the behavior is expected and we have unit tests to show that we are setting the properties. They are just not getting passed bc IBM MQ implementation.
          * https://www.ibm.com/support/knowledgecenter/SSFKSJ_9.0.0/com.ibm.mq.dev.doc/q119200_.htm
          * Same with expiration time.. the queue has to be configured to accept this
          * https://www.ibm.com/support/pages/how-specify-expiration-mq-message-and-when-expired-messages-are-removed-queue
