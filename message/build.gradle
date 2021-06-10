@@ -23,11 +23,6 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-test {
-    testLogging.showStandardStreams = true
-    testLogging.exceptionFormat = 'full'
-}
-
 repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
@@ -35,26 +30,17 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'io.nats', name: 'jnats', version: '2.11.4'
-    implementation group: 'org.apache.activemq', name: 'artemis-jms-client-all', version: '2.11.0'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.3'
-
+    implementation 'com.ibm.mq:com.ibm.mq.allclient:9.1.5.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.3'
     implementation 'org.slf4j:slf4j-api:[1.7,1.8)'
-    testImplementation 'ch.qos.logback:logback-classic:1.1.2'
-
-    implementation("com.ibm.mq:com.ibm.mq.allclient:9.1.5.0")
-
-    testImplementation group: 'org.apache.activemq', name: 'artemis-server', version: '2.11.0'
     testImplementation 'junit:junit:4.12'
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
-
-    implementation("io.nats.bridge:nats-jms-bridge-message:0.29.0-beta27")
+    testImplementation 'ch.qos.logback:logback-classic:1.1.2'
 }
 
 javadoc {
     options.overview = 'src/main/javadoc/overview.html' // relative to source root
     source = sourceSets.main.allJava
-    title = "NATS.IO Java JMS Bridge Core Library"
+    title = "NATS.IO Java JMS Bridge Message Library"
     classpath = sourceSets.main.runtimeClasspath
     doLast {
         if (!OperatingSystem.current().isWindows()) {
@@ -108,7 +94,7 @@ publishing {
                 packaging = 'jar'
                 groupId = group
                 artifactId = archivesBaseName
-                description = 'NATS.IO Java JMS Bridge Core Library'
+                description = 'NATS.IO Java JMS Bridge Message Library'
                 url = 'https://github.com/nats-io/nats-jms-bridge'
                 licenses {
                     license {

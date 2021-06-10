@@ -8,31 +8,56 @@ DOCKER_NAMESPACE=${DOCKER_NAMESPACE:-synadia}
 wrapper() {
   cd message
   gradle wrapper
-  pwd
   cd ..
   cd core
   gradle wrapper
-  pwd
   cd ..
   cd admin
   gradle wrapper
-  pwd
   cd ..
+  cd examples
+  gradle wrapper
+  cd ..
+  cd example-transform
+  gradle wrapper
+  cd ..
+}
+
+wrapper_and_chmod() {
+  cd message
+  gradle wrapper
+  chmod +x gradlew
+  cd ..
+  cd core
+  gradle wrapper
+  chmod +x gradlew
+  cd ..
+  cd admin
+  gradle wrapper
+  chmod +x gradlew
+  cd ..
+  cd examples
+  gradle wrapper
+  chmod +x gradlew
+  cd ..
+  cd example-transform
+  gradle wrapper
+  chmod +x gradlew
 }
 
 
 build_all() {
   cd message
   ./gradlew clean build publishToMavenLocal -x test
-  pwd
   cd ..
   cd core
   ./gradlew clean build publishToMavenLocal -x test
-  pwd
+  cd ..
+  cd examples
+  ./gradlew clean build -x test
   cd ..
   cd example-transform
-  ./gradlew clean build publishToMavenLocal -x test
-  pwd
+  ./gradlew clean build -x test
   cd ..
   cd admin
   ./gradlew clean build publishToMavenLocal -x test
@@ -44,15 +69,18 @@ build_all() {
 test_all() {
   cd message
   ./gradlew clean build
-  pwd
   cd ..
   cd core
   ./gradlew clean build
-  pwd
   cd ..
   cd admin
   ./gradlew clean build
-  pwd
+  cd ..
+  cd examples
+  ./gradlew clean build
+  cd ..
+  cd example-transform
+  ./gradlew clean build
   cd ..
 }
 
@@ -251,10 +279,13 @@ wrapper)
     wrapper
     ;;
 
+wrapper_and_chmod)
+    wrapper_and_chmod
+    ;;
+
 build_all)
   build_all
   ;;
-
 
 docker_deploy_nats_only)
   docker_deploy_nats_only
