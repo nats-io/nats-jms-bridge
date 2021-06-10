@@ -1,4 +1,4 @@
-# nats-jms-mq-bridge
+# nats-jms-bridge
 
 
 Nats MQ JMS Bridge.

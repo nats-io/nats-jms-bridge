@@ -4,7 +4,7 @@ FROM nginx:1.17.10
 
 ## Some environment variables
 # Bridge Version
-ENV BRIDGE_VERSION 0.29.0-beta26
+ENV BRIDGE_VERSION 0.29.0-beta27
 
 
 
@@ -44,7 +44,7 @@ RUN mkdir bridge
 # Enter bridge folder
 WORKDIR /opt/bridge
 # Download the version
-RUN wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/$BRIDGE_VERSION/nats-bridge-admin-$BRIDGE_VERSION.zip
+RUN wget https://github.com/nats-io/nats-jms-bridge/releases/download/$BRIDGE_VERSION/nats-bridge-admin-$BRIDGE_VERSION.zip
 # Unpack version
 RUN unzip nats-bridge-admin-$BRIDGE_VERSION.zip
 # Delete the zip file

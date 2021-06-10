@@ -9,5 +9,5 @@ echo Starting NATS JMS Bridge
 cd admin
 ./gradlew bootRun
 
-#wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.3.0-Alpha1/nats-bridge-admin-boot-0.3.0-ALPHA1.zip
+#wget https://github.com/nats-io/nats-jms-bridge/releases/download/0.3.0-Alpha1/nats-bridge-admin-boot-0.3.0-ALPHA1.zip
 #unzip nats-bridge-admin-boot-0.3.0-ALPHA1.zip

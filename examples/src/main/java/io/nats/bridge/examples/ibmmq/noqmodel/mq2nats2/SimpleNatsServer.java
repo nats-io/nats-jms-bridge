@@ -3,6 +3,7 @@ package io.nats.bridge.examples.ibmmq.noqmodel.mq2nats2;
 import io.nats.bridge.examples.ssl.SslContextBuilder;
 import io.nats.client.*;
 
+import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
@@ -17,7 +18,7 @@ public class SimpleNatsServer {
             sslContextBuilder.withKeystorePath("../certs/keystore.jks");
             sslContextBuilder.withKeyPassword("cloudurable");
             sslContextBuilder.withStorePassword("cloudurable");
-            var sslContext = sslContextBuilder.build();
+            SSLContext sslContext = sslContextBuilder.build();
 
             final Options.Builder builder = new Options.Builder().sslContext(sslContext)
                     .server("nats://localhost:4222");

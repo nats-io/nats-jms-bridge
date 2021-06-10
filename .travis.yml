@@ -1,3 +1,5 @@
+dist: xenial
+language: java
 sudo: required
 services:
   - docker
@@ -8,7 +10,6 @@ before_install:
   - docker pull synadia/bridge-activemq:latest
   - docker pull synadia/bridge-nats-server:latest
   - docker pull synadia/bridge-travis-build:latest
-
 
 script:
   - docker run --net bnet --name nats-server -d synadia/bridge-nats-server:latest

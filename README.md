@@ -5,7 +5,7 @@ NATS MQ JMS Bridge.
 
 ## Travis Build
 
-![Build Status](https://api.travis-ci.org/nats-io/nats-jms-mq-bridge.svg "Build Status")
+![Build Status](https://api.travis-ci.org/nats-io/nats-jms-bridge.svg "Build Status")
 
 
 
@@ -26,7 +26,7 @@ The focus is on forwarding `request/reply` message from `JMS and IBM MQ` to `nat
                         +-------------------+         +-----------------+ 3      +-----------+ 4      +------------+
                         |                   | 2       |                 |        |           |sendTo  |            |
                         | NATS Server       |sendToQueue                |send    |JMS Server |Queue   |   ServiceA |
-                        |  subject serivceA +---------> NATSMqJMSBridge +------->+           +-------->            |
+                        |  subject serviceA +---------> NATSMqJMSBridge +------->+           +-------->            |
                         |                   |         |                 |        |Queue      |        |            |
 +----------+ request 1  |                   |publish  |                 |        |ServiceA   |        |            |
 |          +------------>                   +<--------+                 <--------+           <--------+            |
@@ -80,7 +80,7 @@ bridges:
   tasks : 5
 ```
 
-See [Admin guide](https://github.com/nats-io/nats-jms-mq-bridge/tree/master/admin) for information on how to set up bridges and import new bridge data with csv files.
+See [Admin guide](https://github.com/nats-io/nats-jms-bridge/tree/main/admin) for information on how to set up bridges and import new bridge data with csv files.
 
 ## Bridge works with JMS and NATS
 The NATS bridge works with JMS and NATS.
@@ -94,7 +94,7 @@ As part of the install, you can run this bridge against a docker images that has
 ![Admin Console Swagger Open API](https://user-images.githubusercontent.com/382678/82646981-5598d580-9bca-11ea-9bc8-5dfa6875c61e.png)
 
 The Admin Console for NATS JMS/MQ Bridge uses Open API REST end points and comes with a command line utility.
-See [Admin guide](https://github.com/nats-io/nats-jms-mq-bridge/tree/master/admin) for information on how to set up bridges and import new
+See [Admin guide](https://github.com/nats-io/nats-jms-bridge/tree/main/admin) for information on how to set up bridges and import new
 bridge data with csv files.
 
 # Admin features
@@ -113,7 +113,7 @@ Configure these environment variables to enable your NATS JMS/MQ Bridge to acces
 * `NATS_BRIDGE_IBM_MQ_CHANNEL` - the channel you are using for your IBM MQ cluster (defaults to `"DEV.APP.SVRCONN`)
 * `NATS_BRIDGE_IBM_MQ_QUEUE_MANAGER` - the name of the queue manager for your IBM MQ cluster (defaults to `QM1`).
 
-There is a sample IBM MQ Docker image configured to run with these defaults as an example see `docker pull synadia/bridge-ibmmq` on [the Synadia DockerHub](https://hub.docker.com/r/synadia/bridge-ibmmq). The source for this IBM MQ docker image is in this [NATS JMQ/MQ Bridge repo under cicd](https://github.com/nats-io/nats-jms-mq-bridge/tree/master/cicd/bridge-ibmmq).
+There is a sample IBM MQ Docker image configured to run with these defaults as an example see `docker pull synadia/bridge-ibmmq` on [the Synadia DockerHub](https://hub.docker.com/r/synadia/bridge-ibmmq). The source for this IBM MQ docker image is in this [NATS JMQ/MQ Bridge repo under cicd](https://github.com/nats-io/nats-jms-bridge/tree/main/cicd/bridge-ibmmq).
 
 In order to use the request/reply pattern over IBM MQ you have to set up a [dynamic queue using a temporary queue model](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.1.0/com.ibm.mq.ref.dev.doc/prx_wmq_tempy_model.htm). This [queue model](https://www.ibm.com/support/knowledgecenter/SSFKSJ_9.0.0/com.ibm.mq.dev.doc/q032240_.htm) will need DISPLAY exposed so it can be used a prototype pattern to create reply queues.
 
@@ -152,8 +152,8 @@ Use this install guide to download and test the NATS JMS/MQ Bridge with IBM MQ.
 mkdir bridge
 cd bridge
 
-wget https://github.com/nats-io/nats-jms-mq-bridge/releases/download/0.29.0-beta26/nats-bridge-admin-0.29.0-beta26.zip
-unzip nats-bridge-admin-0.29.0-beta26.zip
+wget https://github.com/nats-io/nats-jms-bridge/releases/download/0.29.0-beta27/nats-bridge-admin-0.29.0-beta27.zip
+unzip nats-bridge-admin-0.29.0-beta27.zip
 rm *.zip
 ```
 
@@ -163,8 +163,8 @@ Before you run the server you may want to download the source code and run the `
 the `cicd` folder which starts up IBM MQ, ActiveMQ and NATS Servers in Docker.
 
 ```sh
-git clone https://github.com/nats-io/nats-jms-mq-bridge.git
-cd nats-jms-mq-bridge
+git clone https://github.com/nats-io/nats-jms-bridge.git
+cd nats-jms-bridge
 bin/build.sh localdev
 ```
 The command `bin/build.sh localdev` uses `docker-deploy` to deploy IBM MQ, NATS Server, and ActiveMQ for testing and development.
@@ -180,7 +180,7 @@ $ pwd
 
 $ mkdir certs                       
 
-$ cp nats-jms-mq-bridge/certs/* certs/
+$ cp nats-jms-bridge/certs/* certs/
 
 ```
 
@@ -212,7 +212,7 @@ bin/nats-bridge-admin
 =========|_|==============|___/=/_/_/_/
 :: Spring Boot ::        (v2.2.6.RELEASE)
 
-2020-05-01 03:22:06.114  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Starting ApplicationMain on Richards-MacBook-Pro.local with PID 92828 (/Users/richardhightower/bridge/nats-bridge-admin-0.29.0-beta26/lib/nats-bridge-admin-0.29.0-beta26.jar started by richardhightower in /Users/richardhightower/bridge/nats-bridge-admin-0.29.0-beta26)
+2020-05-01 03:22:06.114  INFO 92828 --- [           main] io.nats.bridge.admin.ApplicationMain     : Starting ApplicationMain on Richards-MacBook-Pro.local with PID 92828 (/Users/richardhightower/bridge/nats-bridge-admin-0.29.0-beta27/lib/nats-bridge-admin-0.29.0-beta27.jar started by richardhightower in /Users/richardhightower/bridge/nats-bridge-admin-0.29.0-beta27)
 2
 ...
 2020-05-01 03:22:09.211  INFO 92828 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''

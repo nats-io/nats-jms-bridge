@@ -1,0 +1,43 @@
+name: Build Nats JMS Bridge Projects
+
+on:
+  pull_request:
+    types: [opened, synchronize, edited, reopened]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      BUILD_EVENT: ${{ github.event_name }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Generate wrappers and prepare gradle
+      run: bin/build.sh wrapper_and_chmod
+    - name: Build Messages Lib
+      run: ./gradlew clean build publishToMavenLocal
+      working-directory: ./message
+    - name: Build Core Lib
+      run: ./gradlew clean build publishToMavenLocal -x test
+      working-directory: ./core
+    - name: Build Bridge Admin Server
+      run: ./gradlew clean publishToMavenLocal -x test
+      working-directory: ./admin
+    - name: Build Examples
+      run: ./gradlew clean build
+      working-directory: ./examples
+    - name: Build Example Transforms
+      run: ./gradlew clean build
+      working-directory: ./example-transform
+    - name: Build Maven Bridge
+      run: mvn clean compile
+      working-directory: ./mavenBridge
+    - name: Review
+      run: |
+        ls -la message/build/libs
+        ls -la core/build/libs
+        ls -la admin/build/libs

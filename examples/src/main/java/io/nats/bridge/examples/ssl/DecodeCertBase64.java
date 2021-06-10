@@ -1,5 +1,6 @@
 package io.nats.bridge.examples.ssl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
@@ -9,10 +10,20 @@ public class DecodeCertBase64 {
 
     public static void main(String[] args) throws Exception {
 
-        final File binFile = new File("../certs/keystore.jks");
+        final File binFile = new File("C:\\nats\\nats-jms-bridge\\certs\\keystore.jks");
         final FileInputStream inputStream = new FileInputStream(binFile);
 
-        byte[] bytes = inputStream.readAllBytes();
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        int nRead;
+        byte[] data = new byte[1024];
+
+        while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
+        }
+
+        buffer.flush();
+        byte[] bytes = buffer.toByteArray();
 
         byte[] encodedBytes = Base64.getEncoder().encode(bytes);
 

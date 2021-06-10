@@ -5,23 +5,23 @@ To extend the spring boot application, you need the following dependencies.
 #### pom.xml 
 
 ```xml
-                <dependency>
-			<groupId>io.nats.bridge</groupId>
-			<artifactId>nats-jms-bridge-message</artifactId>
-			<version>0.21.3-beta18</version>
-		</dependency>
+<dependency>
+    <groupId>io.nats.bridge</groupId>
+    <artifactId>nats-jms-bridge-message</artifactId>
+    <version>0.29.0-beta27</version>
+</dependency>
 
-		<dependency>
-			<groupId>io.nats.bridge</groupId>
-			<artifactId>nats-jms-bridge</artifactId>
-			<version>0.21.3-beta18</version>
-		</dependency>
+<dependency>
+    <groupId>io.nats.bridge</groupId>
+    <artifactId>nats-jms-bridge</artifactId>
+    <version>0.29.0-beta27</version>
+</dependency>
 
-		<dependency>
-			<groupId>io.nats.bridge</groupId>
-			<artifactId>nats-jms-bridge-springboot-app</artifactId>
-			<version>0.21.3-beta18</version>
-		</dependency>
+<dependency>
+    <groupId>io.nats.bridge</groupId>
+    <artifactId>nats-jms-bridge-springboot-app</artifactId>
+    <version>0.29.0-beta27</version>
+</dependency>
 ```
 
 * ***nats-jms-bridge-message*** - holds transform and message builders, can be used in your client code as well and is needed for custom transformations
@@ -30,7 +30,7 @@ To extend the spring boot application, you need the following dependencies.
 
 You can find the bridge dependencies in the [Maven Central Repository](https://search.maven.org/classic/#search%7Cga%7C1%7Cg%3A%22io.nats.bridge%22) which is available and searchable with sample gradle, maven, and sbt dependency declaration from [this maven repo search web tool](https://mvnrepository.com/artifact/io.nats.bridge). 
 
-You can find the source code for this example in [the main github repo for this project, look for mavenBridge](https://github.com/nats-io/nats-jms-mq-bridge/tree/master/mavenBridge).
+You can find the source code for this example in [the main github repo for this project, look for mavenBridge](https://github.com/nats-io/nats-jms-bridge/tree/main/mavenBridge).
 
 To extend the NATS JMS Bridge Admin just create a SpringApplication class as follows:
 
@@ -111,19 +111,19 @@ To create an executable spring boot jar file, we use the following maven pom fil
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-message</artifactId>
-			<version>0.21.3-beta18</version>
+			<version>0.29.0-beta27</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge</artifactId>
-			<version>0.21.3-beta18</version>
+			<version>0.29.0-beta27</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-springboot-app</artifactId>
-			<version>0.21.3-beta18</version>
+			<version>0.29.0-beta27</version>
 		</dependency>
 
 		<dependency>
@@ -233,7 +233,7 @@ java -jar ./target/mavenBridge-0.0.1-SNAPSHOT.jar
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::        (v2.3.3.RELEASE)
 
-2020-09-17 18:59:26.238  INFO 7312 --- [           main] c.github.ajalt.clikt.core.CliktCommand   : Starting CliktCommand on Richards-MacBook-Pro.local with PID 7312 (/Users/richardhightower/synadia/nats-jms-mq-bridge/mavenBridge/target/mavenBridge-0.0.1-SNAPSHOT.jar started by richardhightower in /Users/richardhightower/synadia/nats-jms-mq-bridge/mavenBridge)
+2020-09-17 18:59:26.238  INFO 7312 --- [           main] c.github.ajalt.clikt.core.CliktCommand   : Starting CliktCommand on Richards-MacBook-Pro.local with PID 7312 (/Users/richardhightower/synadia/nats-jms-bridge/mavenBridge/target/mavenBridge-0.0.1-SNAPSHOT.jar started by richardhightower in /Users/richardhightower/synadia/nats-jms-bridge/mavenBridge)
 
 ...
 
@@ -253,8 +253,8 @@ The above ran because the config in the directory `./BOOT-INF/classes/config/` w
 If you want to test this out fully, do the following.
 
 ```
-git clone https://github.com/nats-io/nats-jms-mq-bridge.git
-cd nats-jms-mq-bridge
+git clone https://github.com/nats-io/nats-jms-bridge.git
+cd nats-jms-bridge
 
 ## Run docker-deploy for integration testing NATS JMS Bridge  
 bin/build.sh localdev
