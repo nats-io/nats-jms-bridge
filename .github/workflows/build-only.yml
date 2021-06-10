@@ -35,7 +35,7 @@ jobs:
       run: ./gradlew clean build
       working-directory: ./example-transforms
     - name: Build Example Transforms
-      run: ./gradlew clean build
+      run: ./gradlew clean test
       working-directory: ./example-transforms
     - name: Build Maven Bridge
       run: mvn clean compile
