@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     env:
       BUILD_EVENT: ${{ github.event_name }}
@@ -37,7 +36,7 @@ jobs:
     - name: Build Maven Bridge
       run: mvn clean compile
       working-directory: ./mavenBridge
-    - name: Verify
+    - name: Review
       run: |
         ls -la message/build/libs
         ls -la core/build/libs

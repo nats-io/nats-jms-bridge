@@ -1,9 +1,7 @@
-name: Build Nats JMS Bridge Snapshot
+name: Publish Nats JMS Bridge Snapshots
 
 on:
   workflow_dispatch:
-    branches:
-      - main
 
 jobs:
   build:
@@ -31,6 +29,3 @@ jobs:
     - name: Build Core Lib
       run: ./gradlew clean build publishToMavenLocal publishToSonatype -x test -i
       working-directory: ./core
-    - name: Build Bridge Admin Server
-      run: ./gradlew clean distZip
-      working-directory: ./admin
