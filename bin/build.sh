@@ -18,7 +18,7 @@ wrapper() {
   cd examples
   gradle wrapper
   cd ..
-  cd example-transforms
+  cd example-transform
   gradle wrapper
   cd ..
 }
@@ -40,7 +40,7 @@ wrapper_and_chmod() {
   gradle wrapper
   chmod +x gradlew
   cd ..
-  cd example-transforms
+  cd example-transform
   gradle wrapper
   chmod +x gradlew
 }
@@ -56,7 +56,7 @@ build_all() {
   cd examples
   ./gradlew clean build -x test
   cd ..
-  cd example-transforms
+  cd example-transform
   ./gradlew clean build -x test
   cd ..
   cd admin
@@ -79,7 +79,7 @@ test_all() {
   cd examples
   ./gradlew clean build
   cd ..
-  cd example-transforms
+  cd example-transform
   ./gradlew clean build
   cd ..
 }
