@@ -23,9 +23,12 @@ jobs:
         java-version: 1.8
     - name: Generate wrappers and prepare gradle
       run: bin/build.sh wrapper_and_chmod
-    - name: Build Messages Lib
+    - name: Publish Messages Lib
       run: ./gradlew clean build publishToMavenLocal publishToSonatype -i
       working-directory: ./message
-    - name: Build Core Lib
-      run: ./gradlew clean build publishToMavenLocal publishToSonatype -x test -i
+    - name: Publish Core Lib
+      run: ./gradlew clean build publishToMavenLocal publishToSonatype -x test
       working-directory: ./core
+    - name: Publish Admin
+      run: ./gradlew clean build publishToMavenLocal publishToSonatype -x test -i
+      working-directory: ./admin

@@ -13,7 +13,6 @@ buildscript {
     }
 }
 
-
 plugins {
 
     val kotlinVersion = "1.3.71"
@@ -26,8 +25,8 @@ plugins {
     distribution
     id("org.springframework.boot") version "2.2.6.RELEASE"
     `maven-publish`
-
-
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("signing")
 }
 
 repositories {
@@ -38,7 +37,11 @@ repositories {
     mavenCentral()
 }
 
+val jarVersion = "0.29.0-beta27"
+val isRelease = System.getenv("BUILD_EVENT") == "publish_release"
 
+// version is the variable the build actually uses.
+version = if (isRelease) jarVersion else jarVersion + "-SNAPSHOT"
 
 springBoot {
     mainClassName = "io.nats.bridge.admin.ApplicationMain"
@@ -56,6 +59,15 @@ application {
     mainClassName = "io.nats.bridge.admin.ApplicationMain"
 }
 
+nexusPublishing {
+    repositories {
+        sonatype {
+            username.set(System.getenv("OSSRH_USERNAME"))
+            password.set(System.getenv("OSSRH_PASSWORD"))
+        }
+    }
+}
+
 publishing {
     publications {
 //        create<MavenPublication>("bootJava") {
@@ -65,19 +77,31 @@ publishing {
             groupId = "io.nats.bridge"
             artifactId = "nats-jms-bridge-springboot-app"
 
-            version = "0.29.0-beta27"
-
             from(components["java"])
-        }
-    }
-    repositories {
-        maven {
-            name = "OSSRH"
-            //url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            url = uri("https://oss.sonatype.org/service/local/repositories/releases/content/")
-            credentials {
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
+            pom {
+                name.set(rootProject.name)
+                packaging = "jar"
+                groupId = "io.nats.bridge"
+                artifactId = "nats-jms-bridge-springboot-app"
+                description.set("NATS.IO Java JMS Bridge Admin App")
+                url.set("https://github.com/nats-io/nats-jms-bridge")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("synadia")
+                        name.set("Synadia")
+                        email.set("info@synadia.com")
+                        url.set("https://nats.io")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/nats-io/nats-jms-bridge")
+                }
             }
         }
     }
@@ -126,10 +150,7 @@ tasks.getByName<BootJar>("bootJar") {
     launchScript()
 
     archiveClassifier.set("boot")
-
 }
-
-
 
 tasks.getByName<Jar>("jar") {
     enabled = true
@@ -140,11 +161,6 @@ tasks.getByName<CreateStartScripts>("startScripts") {
     val gen = unixStartScriptGenerator as org.gradle.api.internal.plugins.UnixStartScriptGenerator
     gen.template = resources.text.fromFile(file("src/main/bash/unix.txt"))
 }
-
-
-
-version = "0.29.0-beta27"
-
 
 tasks {
 
