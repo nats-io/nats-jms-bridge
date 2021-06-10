@@ -6,6 +6,7 @@ plugins {
     id 'maven-publish'
     id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
     id 'signing'
+    id "org.gradle.test-retry" version "1.1.9"
 }
 
 def jarVersion = "0.29.0-beta27"
@@ -26,6 +27,11 @@ java {
 test {
     testLogging.showStandardStreams = true
     testLogging.exceptionFormat = 'full'
+    retry {
+        failOnPassedAfterRetry = false
+        maxFailures = 5
+        maxRetries = 5
+    }
 }
 
 repositories {
