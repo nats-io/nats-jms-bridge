@@ -1,4 +1,4 @@
-name: GitHub Build Actions For Nats JMS Brdige
+name: Build Nats JMS Brdige
 
 on:
   pull_request:
