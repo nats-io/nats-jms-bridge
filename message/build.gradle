@@ -11,12 +11,10 @@ plugins {
 def jarVersion = "0.29.0-beta27"
 group = 'io.nats.bridge'
 
-def isPr = System.getenv("BUILD_EVENT") == "pull_request"
-def isMerge = System.getenv("BUILD_EVENT") == "push"
-def isRelease = System.getenv("BUILD_EVENT") == "release"
+def isRelease = System.getenv("BUILD_EVENT") == "publish_release"
 
 // version is the variable the build actually uses.
-version = isPr || isMerge ? jarVersion + "-SNAPSHOT" : jarVersion
+version = isRelease ? jarVersion : jarVersion + "-SNAPSHOT"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
