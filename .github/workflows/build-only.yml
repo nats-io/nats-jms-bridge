@@ -37,3 +37,8 @@ jobs:
     - name: Build Maven Bridge
       run: mvn clean compile
       working-directory: ./mavenBridge
+    - name: Verify
+      run: |
+        ls -la message/build/libs
+        ls -la core/build/libs
+        ls -la admin/build/libs
