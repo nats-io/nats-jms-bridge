@@ -1,7 +1,9 @@
-name: Publish Nats JMS Bridge Snapshot
+name: Build Nats JMS Bridge Snapshot
 
 on:
   workflow_dispatch:
+    branches:
+      - main
 
 jobs:
   build:
