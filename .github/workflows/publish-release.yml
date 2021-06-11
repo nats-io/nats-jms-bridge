@@ -24,11 +24,11 @@ jobs:
     - name: Generate wrappers and prepare gradle
       run: bin/build.sh wrapper_and_chmod
     - name: Publish Messages Lib
-      run: ./gradlew clean build publishToMavenLocal signArchives signMavenJavaPublication publishToSonatype closeAndReleaseSonatypeStagingRepository -i
+      run: ./gradlew clean build signArchives signMavenJavaPublication publishToMavenLocal publishToSonatype closeAndReleaseSonatypeStagingRepository -i
       working-directory: ./message
     - name: Publish Core Lib
-      run: ./gradlew clean build publishToMavenLocal signArchives signMavenJavaPublication publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -i
+      run: ./gradlew clean build signArchives signMavenJavaPublication publishToMavenLocal publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -i
       working-directory: ./core
     - name: Publish Admin
-      run: ./gradlew clean distZip publishToMavenLocal signArchives signMavenJavaPublication publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -i
+      run: ./gradlew clean distZip signArchives signMavenJavaPublication publishToMavenLocal publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -i
       working-directory: ./admin

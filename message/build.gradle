@@ -22,8 +22,6 @@ java {
 }
 
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
 }
 
@@ -35,40 +33,12 @@ dependencies {
     testImplementation 'ch.qos.logback:logback-classic:1.2.3'
 }
 
-javadoc {
-    options.overview = 'src/main/javadoc/overview.html' // relative to source root
-    source = sourceSets.main.allJava
-    title = "NATS.IO Java JMS Bridge Message Library"
-    classpath = sourceSets.main.runtimeClasspath
-    doLast {
-        if (!OperatingSystem.current().isWindows()) {
-            exec {
-                println "Updating favicon on all html files"
-                workingDir 'build/docs/javadoc'
-                // Only on linux, mac at this point
-                commandLine 'find', '.', '-name', '*.html', '-exec', 'sed', '-i', '-e', 's#<head>#<head><link rel="icon" type="image/ico" href="favicon.ico">#', '{}', ';'
-            }
-            copy {
-                println "Copying images to javadoc folder"
-                from 'src/main/javadoc/images'
-                into 'build/docs/javadoc'
-            }
-        }
-    }
-}
-
-//task javadocJar(type: Jar) {
-//    archiveClassifier.set('javadoc')
-//    from javadoc
-//}
-
 task sourcesJar(type: Jar) {
     archiveClassifier.set('sources')
     from sourceSets.main.allSource
 }
 
 artifacts {
-//    archives javadocJar, sourcesJar
     archives sourcesJar
 }
 
@@ -86,7 +56,6 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             artifact sourcesJar
-//            artifact javadocJar
             pom {
                 name = rootProject.name
                 packaging = 'jar'
