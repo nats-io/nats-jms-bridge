@@ -8,19 +8,19 @@ To extend the spring boot application, you need the following dependencies.
 <dependency>
     <groupId>io.nats.bridge</groupId>
     <artifactId>nats-jms-bridge-message</artifactId>
-    <version>0.29.0-beta28</version>
+    <version>0.0.0-notforuse-01</version>
 </dependency>
 
 <dependency>
     <groupId>io.nats.bridge</groupId>
     <artifactId>nats-jms-bridge</artifactId>
-    <version>0.29.0-beta28</version>
+    <version>0.0.0-notforuse-01</version>
 </dependency>
 
 <dependency>
     <groupId>io.nats.bridge</groupId>
     <artifactId>nats-jms-bridge-springboot-app</artifactId>
-    <version>0.29.0-beta28</version>
+    <version>0.0.0-notforuse-01</version>
 </dependency>
 ```
 
@@ -111,19 +111,19 @@ To create an executable spring boot jar file, we use the following maven pom fil
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-message</artifactId>
-			<version>0.29.0-beta28</version>
+			<version>0.0.0-notforuse-01</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge</artifactId>
-			<version>0.29.0-beta28</version>
+			<version>0.0.0-notforuse-01</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-springboot-app</artifactId>
-			<version>0.29.0-beta28</version>
+			<version>0.0.0-notforuse-01</version>
 		</dependency>
 
 		<dependency>
