@@ -20,7 +20,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
 
-    id("maven-publish")
     application
     distribution
     id("org.springframework.boot") version "2.2.6.RELEASE"
@@ -37,7 +36,7 @@ repositories {
     mavenCentral()
 }
 
-val jarVersion = "0.0.0-notforuse-03"
+val jarVersion = "0.0.0-notforuse-04"
 val isRelease = System.getenv("BUILD_EVENT") == "release"
 
 // version is the variable the build actually uses.
@@ -74,7 +73,7 @@ publishing {
 //        create<MavenPublication>("bootJava") {
 //            artifact(tasks.getByName("bootJar"))
 //        }
-        create<MavenPublication>("springbootApp") {
+        create<MavenPublication>("mavenJava") {
             groupId = "io.nats.bridge"
             artifactId = "nats-jms-bridge-springboot-app"
 
@@ -108,16 +107,16 @@ publishing {
     }
 }
 
-if (isRelease) {
+//if (isRelease) {
     signing {
         val signingKeyId = System.getenv("SIGNING_KEY_ID")
         val signingKey = System.getenv("SIGNING_KEY")
         val signingPassword = System.getenv("SIGNING_PASSWORD")
         useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
         sign(configurations.archives.get())
-        sign(publishing.publications["springbootApp"])
+        sign(publishing.publications["mavenJava"])
     }
-}
+//}
 
 distributions {
     main {
@@ -260,7 +259,7 @@ tasks {
         // Swagger
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
-        implementation("io.nats.bridge:nats-jms-bridge:0.0.0-notforuse-03")
+        implementation("io.nats.bridge:nats-jms-bridge:0.0.0-notforuse-04")
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
         // https://mvnrepository.com/artifact/com.ibm.mq/com.ibm.mq.allclient
@@ -285,8 +284,8 @@ tasks {
 
         implementation("com.github.ajalt:clikt:2.7.1")
 
-        implementation("io.nats.bridge:nats-jms-bridge-message:0.0.0-notforuse-03" + libType)
-        implementation("io.nats.bridge:nats-jms-bridge:0.0.0-notforuse-03" + libType)
+        implementation("io.nats.bridge:nats-jms-bridge-message:0.0.0-notforuse-04" + libType)
+        implementation("io.nats.bridge:nats-jms-bridge:0.0.0-notforuse-04" + libType)
 
     }
 
