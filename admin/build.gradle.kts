@@ -38,7 +38,7 @@ repositories {
 }
 
 val jarVersion = "0.29.0-beta27"
-val isRelease = System.getenv("BUILD_EVENT") == "publish_release"
+val isRelease = System.getenv("BUILD_EVENT") == "release"
 
 // version is the variable the build actually uses.
 version = if (isRelease) jarVersion else jarVersion + "-SNAPSHOT"
@@ -104,6 +104,17 @@ publishing {
                 }
             }
         }
+    }
+}
+
+if (isRelease) {
+    signing {
+        val signingKeyId = System.getenv("SIGNING_KEY_ID")
+        val signingKey = System.getenv("SIGNING_KEY")
+        val signingPassword = System.getenv("SIGNING_PASSWORD")
+        useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+        sign(configurations.archives.get())
+        sign(publishing.publications["mavenJava"])
     }
 }
 

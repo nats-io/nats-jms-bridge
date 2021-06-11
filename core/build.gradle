@@ -11,7 +11,7 @@ plugins {
 def jarVersion = "0.29.0-beta27"
 group = 'io.nats.bridge'
 
-def isRelease = System.getenv("BUILD_EVENT") == "publish_release"
+def isRelease = System.getenv("BUILD_EVENT") == "release"
 
 // version is the variable the build actually uses.
 version = isRelease ? jarVersion : jarVersion + "-SNAPSHOT"
