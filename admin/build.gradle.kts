@@ -36,7 +36,7 @@ repositories {
     mavenCentral()
 }
 
-val jarVersion = "0.0.0-notforuse-05"
+val jarVersion = "0.0.0-notforuse-06"
 val isRelease = System.getenv("BUILD_EVENT") == "release"
 
 // version is the variable the build actually uses.
@@ -168,7 +168,7 @@ tasks.getByName<Jar>("jar") {
 }
 
 tasks.getByName<CreateStartScripts>("startScripts") {
-
+    mainClassName = "io.nats.bridge.admin.ApplicationMain"
     val gen = unixStartScriptGenerator as org.gradle.api.internal.plugins.UnixStartScriptGenerator
     gen.template = resources.text.fromFile(file("src/main/bash/unix.txt"))
 }
@@ -259,7 +259,7 @@ tasks {
         // Swagger
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
-        implementation("io.nats.bridge:nats-jms-bridge:0.0.0-notforuse-05")
+        implementation("io.nats.bridge:nats-jms-bridge:0.0.0-notforuse-06")
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
         // https://mvnrepository.com/artifact/com.ibm.mq/com.ibm.mq.allclient
@@ -284,8 +284,8 @@ tasks {
 
         implementation("com.github.ajalt:clikt:2.7.1")
 
-        implementation("io.nats.bridge:nats-jms-bridge-message:0.0.0-notforuse-05" + libType)
-        implementation("io.nats.bridge:nats-jms-bridge:0.0.0-notforuse-05" + libType)
+        implementation("io.nats.bridge:nats-jms-bridge-message:0.0.0-notforuse-06" + libType)
+        implementation("io.nats.bridge:nats-jms-bridge:0.0.0-notforuse-06" + libType)
 
     }
 
