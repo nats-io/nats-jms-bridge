@@ -8,7 +8,7 @@ plugins {
     id 'signing'
 }
 
-def jarVersion = "0.29.0-beta27"
+def jarVersion = "0.29.0-beta28"
 group = 'io.nats.bridge'
 
 def isRelease = System.getenv("BUILD_EVENT") == "release"
@@ -36,11 +36,22 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.3'
     implementation 'org.slf4j:slf4j-api:[1.7,1.8)'
     implementation 'com.ibm.mq:com.ibm.mq.allclient:9.1.5.0'
-    implementation 'io.nats.bridge:nats-jms-bridge-message:0.29.0-beta27'
+    implementation 'io.nats.bridge:nats-jms-bridge-message:0.29.0-beta28'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.apache.activemq:artemis-server:2.11.0'
     testImplementation 'ch.qos.logback:logback-classic:1.2.3'
+}
+
+javadoc {
+    source = sourceSets.main.allJava
+    title = "NATS.IO Java JMS Bridge Core Library"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task javadocJar(type: Jar) {
+    archiveClassifier.set('javadoc')
+    from javadoc
 }
 
 task sourcesJar(type: Jar) {
@@ -49,7 +60,7 @@ task sourcesJar(type: Jar) {
 }
 
 artifacts {
-    archives sourcesJar
+    archives javadocJar, sourcesJar
 }
 
 nexusPublishing {
@@ -66,6 +77,7 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             artifact sourcesJar
+            artifact javadocJar
             pom {
                 name = rootProject.name
                 packaging = 'jar'

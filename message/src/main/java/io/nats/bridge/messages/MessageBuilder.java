@@ -205,12 +205,13 @@ public class MessageBuilder {
     }
 
 
-    /** Init the builder with an input message to modify
+    /**
+     * Init the builder with an input message to modify
      * Note: This will call withReplyHandler and will delegate the reply to the original message.
      * This method uses buildFromBytes and builds the whole message from the bytes of the input message including headers. git
      *
-     * @param inputMessage
-     * @return
+     * @param inputMessage the source message
+     * @return the builder
      */
     public MessageBuilder initFromMessage(final Message inputMessage) {
         buildFromBytes(inputMessage.getMessageBytes());
