@@ -40,19 +40,19 @@
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-message</artifactId>
-			<version>0.0.0-notforuse-04</version>
+			<version>0.0.0-notforuse-05</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge</artifactId>
-			<version>0.0.0-notforuse-04</version>
+			<version>0.0.0-notforuse-05</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.nats.bridge</groupId>
 			<artifactId>nats-jms-bridge-springboot-app</artifactId>
-			<version>0.0.0-notforuse-04</version>
+			<version>0.0.0-notforuse-05</version>
 		</dependency>
 
 		<dependency>

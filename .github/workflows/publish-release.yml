@@ -27,7 +27,7 @@ jobs:
       run: ./gradlew clean build signArchives signMavenJavaPublication publishToMavenLocal publishToSonatype closeAndReleaseSonatypeStagingRepository -i
       working-directory: ./message
     - name: Publish Core Lib
-      run: ./gradlew clean build signArchives signMavenJavaPublication publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -i
+      run: ./gradlew clean build signArchives signMavenJavaPublication publishToMavenLocal publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -i
       working-directory: ./core
     - name: Publish Admin
       run: ./gradlew clean distZip signArchives signMavenJavaPublication publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -i
