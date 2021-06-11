@@ -5,7 +5,7 @@ This file lists the dependencies used in this repository.
 | Dependency | License |
 |-|-|
 | io.nats', name: 'jnats', version: '2.6.7' | Apache 2.0 license |
-| com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.3' | Apache 2.0 License |
+| com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3' | Apache 2.0 License |
 | org.slf4j:slf4j-api:[1.7,1.8)' | [MIT Identical](https://www.slf4j.org/license.html) |
 | com.ibm.mq:com.ibm.mq.allclient:9.1.5.0 | [IBM](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/maven/licenses/L-APIG-BBSH75/LA_en.html) |
 | org.apache.activemq', name: 'artemis-server', version: '2.11.0' | Apache 2.0 License |

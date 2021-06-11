@@ -8,9 +8,10 @@ plugins {
     id 'signing'
 }
 
-def jarVersion = "0.0.0-notforuse-02"
+def jarVersion = "0.0.0-notforuse-03"
 group = 'io.nats.bridge'
 
+def isLocal = System.getenv("BUILD_EVENT") == null
 def isRelease = System.getenv("BUILD_EVENT") == "release"
 
 // version is the variable the build actually uses.
@@ -27,7 +28,7 @@ repositories {
 
 dependencies {
     implementation 'com.ibm.mq:com.ibm.mq.allclient:9.1.5.0'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
     implementation 'org.slf4j:slf4j-api:[1.7,1.8)'
     testImplementation 'junit:junit:4.12'
     testImplementation 'ch.qos.logback:logback-classic:1.2.3'

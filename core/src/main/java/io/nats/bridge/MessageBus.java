@@ -80,6 +80,7 @@ public interface MessageBus extends Closeable {
     /**
      * Receives a message. The optional is none if the message is not received.
      *
+     * @param duration the timeout
      * @return a possible message.
      */
     Optional<Message> receive(Duration duration);
