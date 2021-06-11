@@ -73,7 +73,7 @@ publishing {
 //        create<MavenPublication>("bootJava") {
 //            artifact(tasks.getByName("bootJar"))
 //        }
-        create<MavenPublication>("maven") {
+        create<MavenPublication>("springbootApp") {
             groupId = "io.nats.bridge"
             artifactId = "nats-jms-bridge-springboot-app"
 
@@ -114,7 +114,7 @@ if (isRelease) {
         val signingPassword = System.getenv("SIGNING_PASSWORD")
         useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
         sign(configurations.archives.get())
-        sign(publishing.publications["mavenJava"])
+        sign(publishing.publications["springbootApp"])
     }
 }
 
