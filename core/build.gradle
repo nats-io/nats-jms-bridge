@@ -8,7 +8,7 @@ plugins {
     id 'signing'
 }
 
-def jarVersion = "0.0.0-notforuse-01"
+def jarVersion = "0.0.0-notforuse-02"
 group = 'io.nats.bridge'
 
 def isRelease = System.getenv("BUILD_EVENT") == "release"
@@ -36,7 +36,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.3'
     implementation 'org.slf4j:slf4j-api:[1.7,1.8)'
     implementation 'com.ibm.mq:com.ibm.mq.allclient:9.1.5.0'
-    implementation 'io.nats.bridge:nats-jms-bridge-message:0.0.0-notforuse-01'
+    implementation 'io.nats.bridge:nats-jms-bridge-message:0.0.0-notforuse-02'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.apache.activemq:artemis-server:2.11.0'
