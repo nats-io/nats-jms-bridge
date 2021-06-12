@@ -45,7 +45,7 @@ jobs:
         run: ./gradlew clean build
         working-directory: ./example-transform
       - name: Build Maven Bridge (Snapshot)
-        if: ${{ github.event_name <> 'release' }}
+        if: ${{ github.event_name != 'release' }}
         run: mvn clean compile
         working-directory: ./mavenBridge
       - name: Build Maven Bridge (Release)
