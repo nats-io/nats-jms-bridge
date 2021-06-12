@@ -18,8 +18,9 @@ plugins {
     val kotlinVersion = "1.3.71"
     kotlin("jvm") version kotlinVersion
     id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
-    id("io.spring.dependency-management") version "1.0.9.RELEASE"
+    id("io.spring.dependency-management") version "1.0.11.RELEASE"
 
+    id("maven-publish")
     application
     distribution
     id("org.springframework.boot") version "2.2.6.RELEASE"
@@ -48,7 +49,7 @@ springBoot {
     buildInfo {
         properties {
             additional = mapOf(
-                    "release" to "Beta2",
+                    "release" to "0.0.0-notforuse-06",
                     "author" to "NATS team"
             )
         }
@@ -70,9 +71,6 @@ nexusPublishing {
 
 publishing {
     publications {
-//        create<MavenPublication>("bootJava") {
-//            artifact(tasks.getByName("bootJar"))
-//        }
         create<MavenPublication>("mavenJava") {
             groupId = "io.nats.bridge"
             artifactId = "nats-jms-bridge-springboot-app"
@@ -107,7 +105,7 @@ publishing {
     }
 }
 
-//if (isRelease) {
+if (isRelease) {
     signing {
         val signingKeyId = System.getenv("SIGNING_KEY_ID")
         val signingKey = System.getenv("SIGNING_KEY")
@@ -116,7 +114,7 @@ publishing {
         sign(configurations.archives.get())
         sign(publishing.publications["mavenJava"])
     }
-//}
+}
 
 distributions {
     main {
@@ -151,8 +149,6 @@ dependencyManagement {
     }
 }
 
-
-
 tasks.getByName<BootJar>("bootJar") {
     mainClassName = "io.nats.bridge.admin.ApplicationMain"
     manifest {
@@ -168,7 +164,6 @@ tasks.getByName<Jar>("jar") {
 }
 
 tasks.getByName<CreateStartScripts>("startScripts") {
-    mainClassName = "io.nats.bridge.admin.ApplicationMain"
     val gen = unixStartScriptGenerator as org.gradle.api.internal.plugins.UnixStartScriptGenerator
     gen.template = resources.text.fromFile(file("src/main/bash/unix.txt"))
 }

@@ -1,0 +1,37 @@
+name: Publish Admin
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    env:
+      BUILD_EVENT: release
+      OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+      OSSRH_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+      SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+      SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+      SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Generate wrappers and prepare gradle
+      run: bin/build.sh wrapper_and_chmod
+    - name: Publish Messages Lib
+      run: ./gradlew clean build publishToMavenLocal
+      working-directory: ./message
+    - name: Publish Core Lib
+      run: ./gradlew clean build publishToMavenLocal -x test
+      working-directory: ./core
+    - name: Admin Gradle Version
+      run: ./gradlew -version
+      working-directory: ./admin
+    - name: Publish Admin
+      run: ./gradlew clean distZip signArchives signMavenJavaPublication publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -i
+      working-directory: ./admin
