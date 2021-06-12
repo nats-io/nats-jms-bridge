@@ -30,13 +30,13 @@ jobs:
       - name: Generate wrappers and prepare gradle
         run: bin/build.sh wrapper_and_chmod
       - name: Build Messages Lib
-        run: ./gradlew clean build publishToMavenLocal
+        run: ./gradlew clean build publishToMavenLocal -i
         working-directory: ./message
       - name: Build Core Lib
-        run: ./gradlew clean build publishToMavenLocal -x test
+        run: ./gradlew clean build publishToMavenLocal -x test -i
         working-directory: ./core
       - name: Build Bridge Admin Server
-        run: ./gradlew clean distZip publishToMavenLocal -x test
+        run: ./gradlew clean distZip publishToMavenLocal -x test -i
         working-directory: ./admin
       - name: Build Examples
         run: ./gradlew clean build
