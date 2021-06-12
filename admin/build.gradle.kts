@@ -67,6 +67,7 @@ nexusPublishing {
             password.set(System.getenv("OSSRH_PASSWORD"))
         }
     }
+    packageGroup.set("io.nats.bridge")
 }
 
 publishing {

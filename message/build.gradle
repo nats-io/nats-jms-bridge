@@ -11,7 +11,6 @@ plugins {
 def jarVersion = "0.0.0-notforuse-06"
 group = 'io.nats.bridge'
 
-def isLocal = System.getenv("BUILD_EVENT") == null
 def isRelease = System.getenv("BUILD_EVENT") == "release"
 
 // version is the variable the build actually uses.
