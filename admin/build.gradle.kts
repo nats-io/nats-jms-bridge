@@ -44,6 +44,16 @@ val isRelease = System.getenv("BUILD_EVENT") == "release"
 version = if (isRelease) jarVersion else jarVersion + "-SNAPSHOT"
 val libType = if (isRelease) "" else "-SNAPSHOT"
 
+//tasks.named<Javadoc>("javadoc") {
+//    (options as StandardJavadocDocletOptions).addStringOption("jaxrscontext", "http://localhost:8080/myapp")
+//    (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+//}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 springBoot {
     mainClassName = "io.nats.bridge.admin.ApplicationMain"
     buildInfo {
