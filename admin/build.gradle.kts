@@ -37,7 +37,7 @@ repositories {
     mavenCentral()
 }
 
-val jarVersion = "0.29.0-beta-28"
+val jarVersion = "1.0.29"
 val isRelease = System.getenv("BUILD_EVENT") == "release"
 
 // version is the variable the build actually uses.
@@ -59,7 +59,7 @@ springBoot {
     buildInfo {
         properties {
             additional = mapOf(
-                    "release" to "0.29.0-beta-28",
+                    "release" to "1.0.29",
                     "author" to "NATS team"
             )
         }
@@ -265,7 +265,7 @@ tasks {
         // Swagger
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
-        implementation("io.nats.bridge:nats-jms-bridge:0.29.0-beta-28")
+        implementation("io.nats.bridge:nats-jms-bridge:1.0.29")
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
         // https://mvnrepository.com/artifact/com.ibm.mq/com.ibm.mq.allclient
@@ -290,8 +290,8 @@ tasks {
 
         implementation("com.github.ajalt:clikt:2.7.1")
 
-        implementation("io.nats.bridge:nats-jms-bridge-message:0.29.0-beta-28" + libType)
-        implementation("io.nats.bridge:nats-jms-bridge:0.29.0-beta-28" + libType)
+        implementation("io.nats.bridge:nats-jms-bridge-message:1.0.29" + libType)
+        implementation("io.nats.bridge:nats-jms-bridge:1.0.29" + libType)
 
     }
 

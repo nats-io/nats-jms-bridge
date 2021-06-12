@@ -2,7 +2,7 @@
 set -e
 
 
-VERSION=${VERSION:-0.29.0-beta-28}
+VERSION=${VERSION:-1.0.29}
 DOCKER_NAMESPACE=${DOCKER_NAMESPACE:-synadia}
 
 wrapper() {

@@ -21,7 +21,7 @@ java {
 }
 
 def isRelease = System.getenv("BUILD_EVENT") == "release"
-def messageLib = "io.nats.bridge:nats-jms-bridge-message:0.29.0-beta-28" + (isRelease ? "" : "-SNAPSHOT")
+def messageLib = "io.nats.bridge:nats-jms-bridge-message:1.0.29" + (isRelease ? "" : "-SNAPSHOT")
 
 dependencies {
     implementation messageLib
