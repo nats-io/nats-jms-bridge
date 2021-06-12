@@ -7,41 +7,41 @@ DOCKER_NAMESPACE=${DOCKER_NAMESPACE:-synadia}
 
 wrapper() {
   cd message
-  gradle wrapper
+  gradle wrapper --gradle-version 6.3 --distribution-type all
   cd ..
   cd core
-  gradle wrapper
+  gradle wrapper --gradle-version 6.3 --distribution-type all
   cd ..
   cd admin
-  gradle wrapper
+  gradle wrapper --gradle-version 6.3 --distribution-type all
   cd ..
   cd examples
-  gradle wrapper
+  gradle wrapper --gradle-version 6.3 --distribution-type all
   cd ..
   cd example-transform
-  gradle wrapper
+  gradle wrapper --gradle-version 6.3 --distribution-type all
   cd ..
 }
 
 wrapper_and_chmod() {
   cd message
-  gradle wrapper
+  gradle wrapper --gradle-version 6.3 --distribution-type all
   chmod +x gradlew
   cd ..
   cd core
-  gradle wrapper
+  gradle wrapper --gradle-version 6.3 --distribution-type all
   chmod +x gradlew
   cd ..
   cd admin
-  gradle wrapper
+  gradle wrapper --gradle-version 6.3 --distribution-type all
   chmod +x gradlew
   cd ..
   cd examples
-  gradle wrapper
+  gradle wrapper --gradle-version 6.3 --distribution-type all
   chmod +x gradlew
   cd ..
   cd example-transform
-  gradle wrapper
+  gradle wrapper --gradle-version 6.3 --distribution-type all
   chmod +x gradlew
 }
 
