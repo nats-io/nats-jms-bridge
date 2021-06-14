@@ -7,7 +7,7 @@ NATS MQ JMS Bridge.
 
 ![Build Status](https://api.travis-ci.org/nats-io/nats-jms-bridge.svg "Build Status")
 
-## Current Release
+## Current Release 1.0.0
 
 beta 26 has been released as version 1.0.0!
 
