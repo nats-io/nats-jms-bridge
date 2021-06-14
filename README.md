@@ -1,7 +1,6 @@
-# NATS JMS/MQ Bridge.
+# NATS JMS Bridge.
 
-NATS MQ JMS Bridge.
-
+NATS JMS Bridge.
 
 ## Travis Build
 
@@ -9,7 +8,7 @@ NATS MQ JMS Bridge.
 
 ## Current Release 1.0.0
 
-beta 26 has been released as version 1.0.0!
+The NATS JMS Bridge has been released as version 1.0.0!
 
 ## Beta 26
 
