@@ -8,7 +8,7 @@ plugins {
     id 'signing'
 }
 
-def jarVersion = "0.29.0-beta-28"
+def jarVersion = "1.0.0"
 group = 'io.nats.bridge'
 
 def isRelease = System.getenv("BUILD_EVENT") == "release"
