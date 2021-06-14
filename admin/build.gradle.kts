@@ -9,13 +9,13 @@ buildscript {
         maven("https://repo.spring.io/snapshot")
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.6.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.5.1")
     }
 }
 
 plugins {
 
-    val kotlinVersion = "1.3.71"
+    val kotlinVersion = "1.4.20"
     kotlin("jvm") version kotlinVersion
     id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
@@ -23,7 +23,7 @@ plugins {
     id("maven-publish")
     application
     distribution
-    id("org.springframework.boot") version "2.2.6.RELEASE"
+    id("org.springframework.boot") version "2.5.1"
     `maven-publish`
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     id("signing")
@@ -37,7 +37,7 @@ repositories {
     mavenCentral()
 }
 
-val jarVersion = "1.0.0"
+val jarVersion = "1.0.1"
 val isRelease = System.getenv("BUILD_EVENT") == "release"
 
 // version is the variable the build actually uses.
@@ -59,7 +59,7 @@ springBoot {
     buildInfo {
         properties {
             additional = mapOf(
-                    "release" to "1.0.0",
+                    "release" to "1.0.1",
                     "author" to "NATS team"
             )
         }
@@ -265,7 +265,7 @@ tasks {
         // Swagger
         implementation("io.springfox:springfox-swagger-ui:2.7.0")
         implementation("io.springfox:springfox-swagger2:2.7.0")
-        implementation("io.nats.bridge:nats-jms-bridge:1.0.0")
+        implementation("io.nats.bridge:nats-jms-bridge:1.0.1")
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
         // https://mvnrepository.com/artifact/com.ibm.mq/com.ibm.mq.allclient
@@ -290,8 +290,8 @@ tasks {
 
         implementation("com.github.ajalt:clikt:2.7.1")
 
-        implementation("io.nats.bridge:nats-jms-bridge-message:1.0.0" + libType)
-        implementation("io.nats.bridge:nats-jms-bridge:1.0.0" + libType)
+        implementation("io.nats.bridge:nats-jms-bridge-message:1.0.1" + libType)
+        implementation("io.nats.bridge:nats-jms-bridge:1.0.1" + libType)
 
     }
 

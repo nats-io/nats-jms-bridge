@@ -2,7 +2,7 @@
 set -e
 
 
-VERSION=${VERSION:-1.0.0}
+VERSION=${VERSION:-1.0.1}
 DOCKER_NAMESPACE=${DOCKER_NAMESPACE:-synadia}
 
 wrapper() {
@@ -13,7 +13,7 @@ wrapper() {
   gradle wrapper --gradle-version 6.3 --distribution-type all
   cd ..
   cd admin
-  gradle wrapper --gradle-version 6.3 --distribution-type all
+  gradle wrapper --gradle-version 6.8.3 --distribution-type all
   cd ..
   cd examples
   gradle wrapper --gradle-version 6.3 --distribution-type all
@@ -33,7 +33,7 @@ wrapper_and_chmod() {
   chmod +x gradlew
   cd ..
   cd admin
-  gradle wrapper --gradle-version 6.3 --distribution-type all
+  gradle wrapper --gradle-version 6.8.3 --distribution-type all
   chmod +x gradlew
   cd ..
   cd examples
