@@ -9,7 +9,7 @@ buildscript {
         maven("https://repo.spring.io/snapshot")
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.5.1")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.6.1")
     }
 }
 
@@ -23,7 +23,7 @@ plugins {
     id("maven-publish")
     application
     distribution
-    id("org.springframework.boot") version "2.5.1"
+    id("org.springframework.boot") version "2.6.1"
     `maven-publish`
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     id("signing")
@@ -55,7 +55,7 @@ java {
 }
 
 springBoot {
-    mainClassName = "io.nats.bridge.admin.ApplicationMain"
+    mainClass.set("io.nats.bridge.admin.ApplicationMain")
     buildInfo {
         properties {
             additional = mapOf(
@@ -67,7 +67,7 @@ springBoot {
 }
 
 application {
-    mainClassName = "io.nats.bridge.admin.ApplicationMain"
+    mainClass.set("io.nats.bridge.admin.ApplicationMain")
 }
 
 nexusPublishing {
@@ -161,7 +161,7 @@ dependencyManagement {
 }
 
 tasks.getByName<BootJar>("bootJar") {
-    mainClassName = "io.nats.bridge.admin.ApplicationMain"
+    mainClass.set("io.nats.bridge.admin.ApplicationMain")
     manifest {
         attributes("Start-Class" to "io.nats.bridge.admin.ApplicationMain")
     }
@@ -281,7 +281,7 @@ tasks {
         implementation("io.jsonwebtoken:jjwt-api:0.11.1")
         implementation("io.jsonwebtoken:jjwt-impl:0.11.1")
         implementation("io.jsonwebtoken:jjwt-jackson:0.11.1")
-        implementation("io.nats:jnats:2.11.4")
+        implementation("io.nats:jnats:2.13.1")
 
 
         // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp

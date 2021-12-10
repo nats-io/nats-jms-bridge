@@ -18,7 +18,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
 
-    implementation 'io.nats:jnats:2.11.4'
+    implementation 'io.nats:jnats:2.13.1'
 
     implementation 'org.apache.activemq:artemis-jms-client-all:2.11.0'
     implementation 'com.ibm.mq:com.ibm.mq.allclient:9.1.5.0'
