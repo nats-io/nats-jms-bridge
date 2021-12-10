@@ -153,8 +153,8 @@ Use this install guide to download and test the NATS JMS/MQ Bridge with IBM MQ.
 mkdir bridge
 cd bridge
 
-wget https://github.com/nats-io/nats-jms-bridge/releases/download/1.0.2/nats-bridge-admin-1.0.2.zip
-unzip nats-bridge-admin-1.0.2.zip
+wget https://github.com/nats-io/nats-jms-bridge/releases/download/1.0.1/nats-bridge-admin-1.0.2.zip
+unzip nats-bridge-admin-1.0.1.zip
 rm *.zip
 ```
 
