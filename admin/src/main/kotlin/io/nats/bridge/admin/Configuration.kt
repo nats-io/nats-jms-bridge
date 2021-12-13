@@ -19,7 +19,7 @@ import springfox.documentation.builders.PathSelectors
 import springfox.documentation.service.Contact
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spring.web.plugins.Docket
-import springfox.documentation.swagger2.annotations.EnableSwagger2
+import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc
 import java.io.File
 import java.net.URI
 import java.nio.file.FileSystem
@@ -177,7 +177,7 @@ open class Configuration {
 }
 
 @Configuration
-@EnableSwagger2
+@EnableSwagger2WebMvc
 open class SwaggerConfig {
     @Bean
     open fun natsBridgeAPI(@Value(value = "\${version:dev}") version: String): Docket {
