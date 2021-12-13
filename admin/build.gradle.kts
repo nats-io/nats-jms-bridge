@@ -15,7 +15,7 @@ buildscript {
 
 plugins {
 
-    val kotlinVersion = "1.4.20"
+    val kotlinVersion = "1.4.21"
     kotlin("jvm") version kotlinVersion
     id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
@@ -263,8 +263,8 @@ tasks {
         implementation("org.springframework.boot:spring-boot-starter-security")
 
         // Swagger
-        implementation("io.springfox:springfox-swagger-ui:2.7.0")
-        implementation("io.springfox:springfox-swagger2:2.7.0")
+        implementation("io.springfox:springfox-swagger-ui:2.10.5")
+        implementation("io.springfox:springfox-swagger2:2.10.5")
         implementation("io.nats.bridge:nats-jms-bridge:1.0.1")
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
