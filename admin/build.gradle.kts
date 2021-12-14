@@ -30,9 +30,6 @@ plugins {
 }
 
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
     mavenLocal()
     mavenCentral()
 }
@@ -172,6 +169,7 @@ tasks.getByName<BootJar>("bootJar") {
 
 tasks.getByName<Jar>("jar") {
     enabled = true
+    archiveClassifier.set("")
 }
 
 tasks.getByName<CreateStartScripts>("startScripts") {
@@ -236,6 +234,9 @@ tasks {
 
 
     dependencies {
+        // force version of log4j
+        implementation("org.apache.logging.log4j:log4j-api:2.16.0")
+        implementation("org.apache.logging.log4j:log4j-to-slf4j:2.16.0")
 
         // Kotlin
         implementation("org.jetbrains.kotlin:kotlin-stdlib")
