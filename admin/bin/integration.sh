@@ -64,7 +64,7 @@ case "`uname`" in
     ;;
 esac
 
-# You may need to customize this
+# You may need to customize this. Please refer to dependencies-admin.txt for known dependencies
 CLASSPATH=$APP_HOME/lib/*
 
 # Determine the Java command to use to start the JVM.
