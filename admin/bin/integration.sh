@@ -90,7 +90,7 @@ $APP_HOME/lib/springfox-spi-2.10.5.jar: \
 $APP_HOME/lib/springfox-core-2.10.5.jar: \
 $APP_HOME/lib/spring-plugin-metadata-1.2.0.RELEASE.jar: \
 $APP_HOME/lib/spring-plugin-core-1.2.0.RELEASE.jar: \
-$APP_HOME/lib/log4j-to-slf4j-2.15.0.jar: \
+$APP_HOME/lib/log4j-to-slf4j-2.16.0.jar: \
 $APP_HOME/lib/jul-to-slf4j-1.7.30.jar: \
 $APP_HOME/lib/slf4j-api-1.7.25.jar: \
 $APP_HOME/lib/logstash-logback-encoder-4.11.jar: \
@@ -151,7 +151,7 @@ $APP_HOME/lib/spring-jcl-5.2.5.RELEASE.jar: \
 $APP_HOME/lib/jboss-logging-3.4.1.Final.jar: \
 $APP_HOME/lib/javassist-3.21.0-GA.jar: \
 $APP_HOME/lib/byte-buddy-1.10.8.jar \
-$APP_HOME/lib/log4j-api-2.15.0.jar
+$APP_HOME/lib/log4j-api-2.16.0.jar
 
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then
