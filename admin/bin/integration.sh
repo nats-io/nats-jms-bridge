@@ -64,7 +64,7 @@ case "`uname`" in
     ;;
 esac
 
-CLASSPATH=$APP_HOME/lib/nats-bridge-admin-1.0.2.jar: \
+CLASSPATH=$APP_HOME/lib/nats-bridge-admin-1.0.3.jar: \
 $APP_HOME/lib/jackson-module-kotlin-2.9.5.jar: \
 $APP_HOME/lib/kotlin-reflect-1.3.71.jar: \
 $APP_HOME/lib/okhttp-4.5.0.jar: \
@@ -79,8 +79,8 @@ $APP_HOME/lib/spring-boot-starter-2.2.6.RELEASE.jar: \
 $APP_HOME/lib/spring-boot-starter-logging-2.2.6.RELEASE.jar: \
 $APP_HOME/lib/logback-classic-1.2.3.jar: \
 $APP_HOME/lib/springfox-swagger2-2.10.5.jar: \
-$APP_HOME/lib/nats-jms-bridge-1.0.2.jar: \
-$APP_HOME/lib/nats-jms-bridge-message-1.0.2.jar: \
+$APP_HOME/lib/nats-jms-bridge-1.0.3.jar: \
+$APP_HOME/lib/nats-jms-bridge-message-1.0.3.jar: \
 $APP_HOME/lib/springfox-swagger-ui-2.10.5.jar: \
 $APP_HOME/lib/springfox-swagger-common-2.10.5.jar: \
 $APP_HOME/lib/springfox-spring-web-2.10.5.jar: \
