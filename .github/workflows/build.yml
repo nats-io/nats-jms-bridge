@@ -46,7 +46,7 @@ jobs:
         working-directory: ./example-transform
       - name: Build Maven Bridge
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
-        run: mvn clean package -Dbridge-snapshot=-SNAPSHOT
+        run: mvn clean package -B -Dbridge-snapshot=-SNAPSHOT
         working-directory: ./mavenBridge
       - name: Merge to Main, Publish Messages Lib Snapshot
         if: ${{ success() && github.event_name == 'push' }}
