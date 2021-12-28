@@ -27,10 +27,10 @@ bootArchives - Configuration for Spring Boot archive artifacts. (n)
 No dependencies
 
 compileClasspath - Compile classpath for compilation 'main' (target  (jvm)).
-+--- org.apache.logging.log4j:log4j-api:2.16.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.16.0
++--- org.apache.logging.log4j:log4j-api:2.17.0
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.16.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.0
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -64,7 +64,7 @@ compileClasspath - Compile classpath for compilation 'main' (target  (jvm)).
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.16.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -234,8 +234,8 @@ developmentOnly - Configuration for development-only dependencies such as Spring
 No dependencies
 
 implementation - Implementation only dependencies for compilation 'main' (target  (jvm)). (n)
-+--- org.apache.logging.log4j:log4j-api:2.16.0 (n)
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.16.0 (n)
++--- org.apache.logging.log4j:log4j-api:2.17.0 (n)
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0 (n)
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0 (n)
 +--- org.jetbrains.kotlin:kotlin-reflect:1.6.0 (n)
 +--- ch.qos.logback:logback-classic:1.2.3 (n)
@@ -265,10 +265,10 @@ implementation - Implementation only dependencies for compilation 'main' (target
 \--- io.nats.bridge:nats-jms-bridge:1.0.3-SNAPSHOT (n)
 
 implementationDependenciesMetadata
-+--- org.apache.logging.log4j:log4j-api:2.16.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.16.0
++--- org.apache.logging.log4j:log4j-api:2.17.0
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.16.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.0
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -302,7 +302,7 @@ implementationDependenciesMetadata
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.16.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -544,10 +544,10 @@ kotlinScriptDefExtensions
 No dependencies
 
 productionRuntimeClasspath
-+--- org.apache.logging.log4j:log4j-api:2.16.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.16.0
++--- org.apache.logging.log4j:log4j-api:2.17.0
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.16.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.0
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -581,7 +581,7 @@ productionRuntimeClasspath
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.16.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -752,10 +752,10 @@ productionRuntimeClasspath
 \--- io.nats.bridge:nats-jms-bridge:1.0.3-SNAPSHOT (*)
 
 runtimeClasspath - Runtime classpath of compilation 'main' (target  (jvm)).
-+--- org.apache.logging.log4j:log4j-api:2.16.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.16.0
++--- org.apache.logging.log4j:log4j-api:2.17.0
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.16.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.0
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -789,7 +789,7 @@ runtimeClasspath - Runtime classpath of compilation 'main' (target  (jvm)).
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.16.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -990,10 +990,10 @@ testApiDependenciesMetadata
 No dependencies
 
 testCompileClasspath - Compile classpath for compilation 'test' (target  (jvm)).
-+--- org.apache.logging.log4j:log4j-api:2.16.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.16.0
++--- org.apache.logging.log4j:log4j-api:2.17.0
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.16.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.0
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -1027,7 +1027,7 @@ testCompileClasspath - Compile classpath for compilation 'test' (target  (jvm)).
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.16.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -1241,10 +1241,10 @@ testImplementation - Implementation only dependencies for compilation 'test' (ta
 \--- org.junit.jupiter:junit-jupiter-engine (n)
 
 testImplementationDependenciesMetadata
-+--- org.apache.logging.log4j:log4j-api:2.16.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.16.0
++--- org.apache.logging.log4j:log4j-api:2.17.0
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.16.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.0
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -1278,7 +1278,7 @@ testImplementationDependenciesMetadata
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.16.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -1490,10 +1490,10 @@ testKotlinScriptDefExtensions
 No dependencies
 
 testRuntimeClasspath - Runtime classpath of compilation 'test' (target  (jvm)).
-+--- org.apache.logging.log4j:log4j-api:2.16.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.16.0
++--- org.apache.logging.log4j:log4j-api:2.17.0
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.16.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.0
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -1527,7 +1527,7 @@ testRuntimeClasspath - Runtime classpath of compilation 'test' (target  (jvm)).
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.16.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5

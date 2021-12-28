@@ -235,8 +235,8 @@ tasks {
 
     dependencies {
         // force version of log4j
-        implementation("org.apache.logging.log4j:log4j-api:2.16.0")
-        implementation("org.apache.logging.log4j:log4j-to-slf4j:2.16.0")
+        implementation("org.apache.logging.log4j:log4j-api:2.17.0")
+        implementation("org.apache.logging.log4j:log4j-to-slf4j:2.17.0")
 
         // Kotlin
         implementation("org.jetbrains.kotlin:kotlin-stdlib")
