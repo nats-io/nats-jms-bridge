@@ -27,10 +27,10 @@ bootArchives - Configuration for Spring Boot archive artifacts. (n)
 No dependencies
 
 compileClasspath - Compile classpath for compilation 'main' (target  (jvm)).
-+--- org.apache.logging.log4j:log4j-api:2.17.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
++--- org.apache.logging.log4j:log4j-api:2.17.1
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.1
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.17.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.1
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -64,7 +64,7 @@ compileClasspath - Compile classpath for compilation 'main' (target  (jvm)).
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.1 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -188,7 +188,7 @@ compileClasspath - Compile classpath for compilation 'main' (target  (jvm)).
 |    +--- org.springframework.plugin:spring-plugin-core:2.0.0.RELEASE (*)
 |    +--- org.springframework.plugin:spring-plugin-metadata:2.0.0.RELEASE (*)
 |    \--- org.mapstruct:mapstruct:1.3.1.Final
-+--- io.nats.bridge:nats-jms-bridge:1.0.3 -> 1.0.3-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge:1.0.4 -> 1.0.4-SNAPSHOT
 +--- io.micrometer:micrometer-registry-prometheus:1.3.6
 |    +--- io.micrometer:micrometer-core:1.3.6 -> 1.8.0 (*)
 |    \--- io.prometheus:simpleclient_common:0.7.0 -> 0.12.0
@@ -218,8 +218,8 @@ compileClasspath - Compile classpath for compilation 'main' (target  (jvm)).
 +--- com.github.ajalt:clikt:2.7.1
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.6.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.3.72 -> 1.6.0
-+--- io.nats.bridge:nats-jms-bridge-message:1.0.3-SNAPSHOT
-\--- io.nats.bridge:nats-jms-bridge:1.0.3-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge-message:1.0.4-SNAPSHOT
+\--- io.nats.bridge:nats-jms-bridge:1.0.4-SNAPSHOT
 
 compileOnly - Compile only dependencies for compilation 'main' (target  (jvm)). (n)
 No dependencies
@@ -234,8 +234,8 @@ developmentOnly - Configuration for development-only dependencies such as Spring
 No dependencies
 
 implementation - Implementation only dependencies for compilation 'main' (target  (jvm)). (n)
-+--- org.apache.logging.log4j:log4j-api:2.17.0 (n)
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0 (n)
++--- org.apache.logging.log4j:log4j-api:2.17.1 (n)
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.1 (n)
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0 (n)
 +--- org.jetbrains.kotlin:kotlin-reflect:1.6.0 (n)
 +--- ch.qos.logback:logback-classic:1.2.3 (n)
@@ -252,7 +252,7 @@ implementation - Implementation only dependencies for compilation 'main' (target
 +--- org.springframework.boot:spring-boot-starter-security (n)
 +--- io.springfox:springfox-swagger-ui:2.10.5 (n)
 +--- io.springfox:springfox-swagger2:2.10.5 (n)
-+--- io.nats.bridge:nats-jms-bridge:1.0.3 (n)
++--- io.nats.bridge:nats-jms-bridge:1.0.4 (n)
 +--- io.micrometer:micrometer-registry-prometheus:1.3.6 (n)
 +--- com.ibm.mq:com.ibm.mq.allclient:9.1.5.0 (n)
 +--- io.jsonwebtoken:jjwt-api:0.11.1 (n)
@@ -261,14 +261,14 @@ implementation - Implementation only dependencies for compilation 'main' (target
 +--- io.nats:jnats:2.13.1 (n)
 +--- com.squareup.okhttp3:okhttp:4.5.0 (n)
 +--- com.github.ajalt:clikt:2.7.1 (n)
-+--- io.nats.bridge:nats-jms-bridge-message:1.0.3-SNAPSHOT (n)
-\--- io.nats.bridge:nats-jms-bridge:1.0.3-SNAPSHOT (n)
++--- io.nats.bridge:nats-jms-bridge-message:1.0.4-SNAPSHOT (n)
+\--- io.nats.bridge:nats-jms-bridge:1.0.4-SNAPSHOT (n)
 
 implementationDependenciesMetadata
-+--- org.apache.logging.log4j:log4j-api:2.17.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
++--- org.apache.logging.log4j:log4j-api:2.17.1
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.1
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.17.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.1
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -302,7 +302,7 @@ implementationDependenciesMetadata
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.1 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -426,7 +426,7 @@ implementationDependenciesMetadata
 |    +--- org.springframework.plugin:spring-plugin-core:2.0.0.RELEASE (*)
 |    +--- org.springframework.plugin:spring-plugin-metadata:2.0.0.RELEASE (*)
 |    \--- org.mapstruct:mapstruct:1.3.1.Final
-+--- io.nats.bridge:nats-jms-bridge:1.0.3 -> 1.0.3-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge:1.0.4 -> 1.0.4-SNAPSHOT
 +--- io.micrometer:micrometer-registry-prometheus:1.3.6
 |    +--- io.micrometer:micrometer-core:1.3.6 -> 1.8.0 (*)
 |    \--- io.prometheus:simpleclient_common:0.7.0 -> 0.12.0
@@ -456,8 +456,8 @@ implementationDependenciesMetadata
 +--- com.github.ajalt:clikt:2.7.1
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.6.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.3.72 -> 1.6.0
-+--- io.nats.bridge:nats-jms-bridge-message:1.0.3-SNAPSHOT
-\--- io.nats.bridge:nats-jms-bridge:1.0.3-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge-message:1.0.4-SNAPSHOT
+\--- io.nats.bridge:nats-jms-bridge:1.0.4-SNAPSHOT
 
 intransitiveDependenciesMetadata
 No dependencies
@@ -544,10 +544,10 @@ kotlinScriptDefExtensions
 No dependencies
 
 productionRuntimeClasspath
-+--- org.apache.logging.log4j:log4j-api:2.17.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
++--- org.apache.logging.log4j:log4j-api:2.17.1
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.1
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.17.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.1
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -581,7 +581,7 @@ productionRuntimeClasspath
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.1 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -708,7 +708,7 @@ productionRuntimeClasspath
 |    +--- org.springframework.plugin:spring-plugin-core:2.0.0.RELEASE (*)
 |    +--- org.springframework.plugin:spring-plugin-metadata:2.0.0.RELEASE (*)
 |    \--- org.mapstruct:mapstruct:1.3.1.Final
-+--- io.nats.bridge:nats-jms-bridge:1.0.3 -> 1.0.3-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge:1.0.4 -> 1.0.4-SNAPSHOT
 |    +--- io.nats:jnats:2.13.1
 |    |    \--- net.i2p.crypto:eddsa:0.3.0
 |    +--- org.apache.activemq:artemis-jms-client-all:2.11.0
@@ -720,7 +720,7 @@ productionRuntimeClasspath
 |    |    |    \--- org.bouncycastle:bcprov-jdk15on:1.64
 |    |    +--- javax.jms:javax.jms-api:2.0.1
 |    |    \--- org.json:json:20080701
-|    \--- io.nats.bridge:nats-jms-bridge-message:1.0.3-SNAPSHOT
+|    \--- io.nats.bridge:nats-jms-bridge-message:1.0.4-SNAPSHOT
 |         +--- com.ibm.mq:com.ibm.mq.allclient:9.1.5.0 (*)
 |         +--- com.fasterxml.jackson.core:jackson-databind:2.12.3 -> 2.11.2 (*)
 |         \--- org.slf4j:slf4j-api:[1.7,1.8) -> 1.7.25
@@ -748,14 +748,14 @@ productionRuntimeClasspath
 +--- com.github.ajalt:clikt:2.7.1
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.6.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.3.72 -> 1.6.0
-+--- io.nats.bridge:nats-jms-bridge-message:1.0.3-SNAPSHOT (*)
-\--- io.nats.bridge:nats-jms-bridge:1.0.3-SNAPSHOT (*)
++--- io.nats.bridge:nats-jms-bridge-message:1.0.4-SNAPSHOT (*)
+\--- io.nats.bridge:nats-jms-bridge:1.0.4-SNAPSHOT (*)
 
 runtimeClasspath - Runtime classpath of compilation 'main' (target  (jvm)).
-+--- org.apache.logging.log4j:log4j-api:2.17.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
++--- org.apache.logging.log4j:log4j-api:2.17.1
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.1
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.17.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.1
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -789,7 +789,7 @@ runtimeClasspath - Runtime classpath of compilation 'main' (target  (jvm)).
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.1 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -916,7 +916,7 @@ runtimeClasspath - Runtime classpath of compilation 'main' (target  (jvm)).
 |    +--- org.springframework.plugin:spring-plugin-core:2.0.0.RELEASE (*)
 |    +--- org.springframework.plugin:spring-plugin-metadata:2.0.0.RELEASE (*)
 |    \--- org.mapstruct:mapstruct:1.3.1.Final
-+--- io.nats.bridge:nats-jms-bridge:1.0.3 -> 1.0.3-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge:1.0.4 -> 1.0.4-SNAPSHOT
 |    +--- io.nats:jnats:2.13.1
 |    |    \--- net.i2p.crypto:eddsa:0.3.0
 |    +--- org.apache.activemq:artemis-jms-client-all:2.11.0
@@ -928,7 +928,7 @@ runtimeClasspath - Runtime classpath of compilation 'main' (target  (jvm)).
 |    |    |    \--- org.bouncycastle:bcprov-jdk15on:1.64
 |    |    +--- javax.jms:javax.jms-api:2.0.1
 |    |    \--- org.json:json:20080701
-|    \--- io.nats.bridge:nats-jms-bridge-message:1.0.3-SNAPSHOT
+|    \--- io.nats.bridge:nats-jms-bridge-message:1.0.4-SNAPSHOT
 |         +--- com.ibm.mq:com.ibm.mq.allclient:9.1.5.0 (*)
 |         +--- com.fasterxml.jackson.core:jackson-databind:2.12.3 -> 2.11.2 (*)
 |         \--- org.slf4j:slf4j-api:[1.7,1.8) -> 1.7.25
@@ -956,8 +956,8 @@ runtimeClasspath - Runtime classpath of compilation 'main' (target  (jvm)).
 +--- com.github.ajalt:clikt:2.7.1
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.6.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.3.72 -> 1.6.0
-+--- io.nats.bridge:nats-jms-bridge-message:1.0.3-SNAPSHOT (*)
-\--- io.nats.bridge:nats-jms-bridge:1.0.3-SNAPSHOT (*)
++--- io.nats.bridge:nats-jms-bridge-message:1.0.4-SNAPSHOT (*)
+\--- io.nats.bridge:nats-jms-bridge:1.0.4-SNAPSHOT (*)
 
 runtimeElements - Elements of runtime for main. (n)
 No dependencies
@@ -990,10 +990,10 @@ testApiDependenciesMetadata
 No dependencies
 
 testCompileClasspath - Compile classpath for compilation 'test' (target  (jvm)).
-+--- org.apache.logging.log4j:log4j-api:2.17.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
++--- org.apache.logging.log4j:log4j-api:2.17.1
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.1
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.17.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.1
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -1027,7 +1027,7 @@ testCompileClasspath - Compile classpath for compilation 'test' (target  (jvm)).
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.1 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -1151,7 +1151,7 @@ testCompileClasspath - Compile classpath for compilation 'test' (target  (jvm)).
 |    +--- org.springframework.plugin:spring-plugin-core:2.0.0.RELEASE (*)
 |    +--- org.springframework.plugin:spring-plugin-metadata:2.0.0.RELEASE (*)
 |    \--- org.mapstruct:mapstruct:1.3.1.Final
-+--- io.nats.bridge:nats-jms-bridge:1.0.3 -> 1.0.3-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge:1.0.4 -> 1.0.4-SNAPSHOT
 +--- io.micrometer:micrometer-registry-prometheus:1.3.6
 |    +--- io.micrometer:micrometer-core:1.3.6 -> 1.8.0 (*)
 |    \--- io.prometheus:simpleclient_common:0.7.0 -> 0.12.0
@@ -1181,8 +1181,8 @@ testCompileClasspath - Compile classpath for compilation 'test' (target  (jvm)).
 +--- com.github.ajalt:clikt:2.7.1
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.6.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.3.72 -> 1.6.0
-+--- io.nats.bridge:nats-jms-bridge-message:1.0.3-SNAPSHOT
-+--- io.nats.bridge:nats-jms-bridge:1.0.3-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge-message:1.0.4-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge:1.0.4-SNAPSHOT
 +--- org.springframework.boot:spring-boot-starter-test -> 2.6.1
 |    +--- org.springframework.boot:spring-boot-starter:2.6.1 (*)
 |    +--- org.springframework.boot:spring-boot-test:2.6.1
@@ -1241,10 +1241,10 @@ testImplementation - Implementation only dependencies for compilation 'test' (ta
 \--- org.junit.jupiter:junit-jupiter-engine (n)
 
 testImplementationDependenciesMetadata
-+--- org.apache.logging.log4j:log4j-api:2.17.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
++--- org.apache.logging.log4j:log4j-api:2.17.1
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.1
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.17.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.1
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -1278,7 +1278,7 @@ testImplementationDependenciesMetadata
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.1 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -1402,7 +1402,7 @@ testImplementationDependenciesMetadata
 |    +--- org.springframework.plugin:spring-plugin-core:2.0.0.RELEASE (*)
 |    +--- org.springframework.plugin:spring-plugin-metadata:2.0.0.RELEASE (*)
 |    \--- org.mapstruct:mapstruct:1.3.1.Final
-+--- io.nats.bridge:nats-jms-bridge:1.0.3 -> 1.0.3-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge:1.0.4 -> 1.0.4-SNAPSHOT
 +--- io.micrometer:micrometer-registry-prometheus:1.3.6
 |    +--- io.micrometer:micrometer-core:1.3.6 -> 1.8.0 (*)
 |    \--- io.prometheus:simpleclient_common:0.7.0 -> 0.12.0
@@ -1432,8 +1432,8 @@ testImplementationDependenciesMetadata
 +--- com.github.ajalt:clikt:2.7.1
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.6.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.3.72 -> 1.6.0
-+--- io.nats.bridge:nats-jms-bridge-message:1.0.3-SNAPSHOT
-+--- io.nats.bridge:nats-jms-bridge:1.0.3-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge-message:1.0.4-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge:1.0.4-SNAPSHOT
 +--- org.springframework.boot:spring-boot-starter-test -> 2.6.1
 |    +--- org.springframework.boot:spring-boot-starter:2.6.1 (*)
 |    +--- org.springframework.boot:spring-boot-test:2.6.1
@@ -1490,10 +1490,10 @@ testKotlinScriptDefExtensions
 No dependencies
 
 testRuntimeClasspath - Runtime classpath of compilation 'test' (target  (jvm)).
-+--- org.apache.logging.log4j:log4j-api:2.17.0
-+--- org.apache.logging.log4j:log4j-to-slf4j:2.17.0
++--- org.apache.logging.log4j:log4j-api:2.17.1
++--- org.apache.logging.log4j:log4j-to-slf4j:2.17.1
 |    +--- org.slf4j:slf4j-api:1.7.25
-|    \--- org.apache.logging.log4j:log4j-api:2.17.0
+|    \--- org.apache.logging.log4j:log4j-api:2.17.1
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0
 |    +--- org.jetbrains:annotations:13.0
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.0
@@ -1527,7 +1527,7 @@ testRuntimeClasspath - Runtime classpath of compilation 'test' (target  (jvm)).
 |    |    |    \--- org.springframework.boot:spring-boot:2.6.1 (*)
 |    |    +--- org.springframework.boot:spring-boot-starter-logging:2.6.1
 |    |    |    +--- ch.qos.logback:logback-classic:1.2.7 -> 1.2.3 (*)
-|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.0 (*)
+|    |    |    +--- org.apache.logging.log4j:log4j-to-slf4j:2.14.1 -> 2.17.1 (*)
 |    |    |    \--- org.slf4j:jul-to-slf4j:1.7.32
 |    |    |         \--- org.slf4j:slf4j-api:1.7.32 -> 1.7.25
 |    |    +--- jakarta.annotation:jakarta.annotation-api:1.3.5
@@ -1654,7 +1654,7 @@ testRuntimeClasspath - Runtime classpath of compilation 'test' (target  (jvm)).
 |    +--- org.springframework.plugin:spring-plugin-core:2.0.0.RELEASE (*)
 |    +--- org.springframework.plugin:spring-plugin-metadata:2.0.0.RELEASE (*)
 |    \--- org.mapstruct:mapstruct:1.3.1.Final
-+--- io.nats.bridge:nats-jms-bridge:1.0.3 -> 1.0.3-SNAPSHOT
++--- io.nats.bridge:nats-jms-bridge:1.0.4 -> 1.0.4-SNAPSHOT
 |    +--- io.nats:jnats:2.13.1
 |    |    \--- net.i2p.crypto:eddsa:0.3.0
 |    +--- org.apache.activemq:artemis-jms-client-all:2.11.0
@@ -1666,7 +1666,7 @@ testRuntimeClasspath - Runtime classpath of compilation 'test' (target  (jvm)).
 |    |    |    \--- org.bouncycastle:bcprov-jdk15on:1.64
 |    |    +--- javax.jms:javax.jms-api:2.0.1
 |    |    \--- org.json:json:20080701
-|    \--- io.nats.bridge:nats-jms-bridge-message:1.0.3-SNAPSHOT
+|    \--- io.nats.bridge:nats-jms-bridge-message:1.0.4-SNAPSHOT
 |         +--- com.ibm.mq:com.ibm.mq.allclient:9.1.5.0 (*)
 |         +--- com.fasterxml.jackson.core:jackson-databind:2.12.3 -> 2.11.2 (*)
 |         \--- org.slf4j:slf4j-api:[1.7,1.8) -> 1.7.25
@@ -1694,8 +1694,8 @@ testRuntimeClasspath - Runtime classpath of compilation 'test' (target  (jvm)).
 +--- com.github.ajalt:clikt:2.7.1
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.6.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.3.72 -> 1.6.0
-+--- io.nats.bridge:nats-jms-bridge-message:1.0.3-SNAPSHOT (*)
-+--- io.nats.bridge:nats-jms-bridge:1.0.3-SNAPSHOT (*)
++--- io.nats.bridge:nats-jms-bridge-message:1.0.4-SNAPSHOT (*)
++--- io.nats.bridge:nats-jms-bridge:1.0.4-SNAPSHOT (*)
 +--- org.springframework.boot:spring-boot-starter-test -> 2.6.1
 |    +--- org.springframework.boot:spring-boot-starter:2.6.1 (*)
 |    +--- org.springframework.boot:spring-boot-test:2.6.1

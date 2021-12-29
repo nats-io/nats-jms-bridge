@@ -34,7 +34,7 @@ repositories {
     mavenCentral()
 }
 
-val jarVersion = "1.0.3"
+val jarVersion = "1.0.4"
 val isRelease = System.getenv("BUILD_EVENT") == "release"
 
 // version is the variable the build actually uses.
@@ -56,7 +56,7 @@ springBoot {
     buildInfo {
         properties {
             additional = mapOf(
-                    "release" to "1.0.3",
+                    "release" to "1.0.4",
                     "author" to "NATS team"
             )
         }
@@ -235,8 +235,8 @@ tasks {
 
     dependencies {
         // force version of log4j
-        implementation("org.apache.logging.log4j:log4j-api:2.17.0")
-        implementation("org.apache.logging.log4j:log4j-to-slf4j:2.17.0")
+        implementation("org.apache.logging.log4j:log4j-api:2.17.1")
+        implementation("org.apache.logging.log4j:log4j-to-slf4j:2.17.1")
 
         // Kotlin
         implementation("org.jetbrains.kotlin:kotlin-stdlib")
@@ -266,7 +266,7 @@ tasks {
         // Swagger
         implementation("io.springfox:springfox-swagger-ui:2.10.5")
         implementation("io.springfox:springfox-swagger2:2.10.5")
-        implementation("io.nats.bridge:nats-jms-bridge:1.0.3")
+        implementation("io.nats.bridge:nats-jms-bridge:1.0.4")
         implementation("io.micrometer:micrometer-registry-prometheus:1.3.6")
 
         // https://mvnrepository.com/artifact/com.ibm.mq/com.ibm.mq.allclient
@@ -291,8 +291,8 @@ tasks {
 
         implementation("com.github.ajalt:clikt:2.7.1")
 
-        implementation("io.nats.bridge:nats-jms-bridge-message:1.0.3" + libType)
-        implementation("io.nats.bridge:nats-jms-bridge:1.0.3" + libType)
+        implementation("io.nats.bridge:nats-jms-bridge-message:1.0.4" + libType)
+        implementation("io.nats.bridge:nats-jms-bridge:1.0.4" + libType)
 
     }
 

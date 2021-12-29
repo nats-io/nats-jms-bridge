@@ -3,25 +3,25 @@
 [INFO] ----------------------< com.example:mavenBridge >-----------------------
 [INFO] Building mavenBridge 0.0.1-SNAPSHOT
 [INFO] --------------------------------[ jar ]---------------------------------
-[WARNING] The POM for io.nats.bridge:nats-jms-bridge:jar:1.0.3 is missing, no dependency information available
+[WARNING] The POM for io.nats.bridge:nats-jms-bridge:jar:1.0.4 is missing, no dependency information available
 [INFO] 
 [INFO] --- maven-dependency-plugin:3.2.0:tree (default-cli) @ mavenBridge ---
 [INFO] com.example:mavenBridge:jar:0.0.1-SNAPSHOT
-[INFO] +- org.apache.logging.log4j:log4j-api:jar:2.17.0:compile
-[INFO] +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.17.0:compile
+[INFO] +- org.apache.logging.log4j:log4j-api:jar:2.17.1:compile
+[INFO] +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.17.1:compile
 [INFO] |  \- org.slf4j:slf4j-api:jar:1.7.32:compile
-[INFO] +- io.nats.bridge:nats-jms-bridge-message:jar:1.0.3-SNAPSHOT:compile
+[INFO] +- io.nats.bridge:nats-jms-bridge-message:jar:1.0.4-SNAPSHOT:compile
 [INFO] |  +- com.ibm.mq:com.ibm.mq.allclient:jar:9.1.5.0:runtime
 [INFO] |  |  +- org.bouncycastle:bcprov-jdk15on:jar:1.64:runtime
 [INFO] |  |  +- org.bouncycastle:bcpkix-jdk15on:jar:1.64:runtime
 [INFO] |  |  +- javax.jms:javax.jms-api:jar:2.0.1:runtime
 [INFO] |  |  \- org.json:json:jar:20080701:runtime
 [INFO] |  \- com.fasterxml.jackson.core:jackson-databind:jar:2.13.0:compile
-[INFO] +- io.nats.bridge:nats-jms-bridge:jar:1.0.3-SNAPSHOT:compile
+[INFO] +- io.nats.bridge:nats-jms-bridge:jar:1.0.4-SNAPSHOT:compile
 [INFO] |  +- io.nats:jnats:jar:2.13.1:runtime
 [INFO] |  |  \- net.i2p.crypto:eddsa:jar:0.3.0:runtime
 [INFO] |  \- org.apache.activemq:artemis-jms-client-all:jar:2.11.0:runtime
-[INFO] +- io.nats.bridge:nats-jms-bridge-springboot-app:jar:1.0.3-SNAPSHOT:compile
+[INFO] +- io.nats.bridge:nats-jms-bridge-springboot-app:jar:1.0.4-SNAPSHOT:compile
 [INFO] |  +- org.jetbrains.kotlin:kotlin-stdlib:jar:1.6.0:compile
 [INFO] |  |  \- org.jetbrains:annotations:jar:13.0:compile
 [INFO] |  +- org.jetbrains.kotlin:kotlin-reflect:jar:1.6.0:compile
